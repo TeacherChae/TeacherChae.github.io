@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-cream text-forest font-sans antialiased;
+    font-feature-settings: 'kern' 1, 'palt' 1;
+  }
+}
+
+@layer components {
+  .page {
+    @apply mx-auto max-w-page min-h-screen;
+  }
+  .section {
+    @apply px-6 py-16;
+  }
+  .section-label {
+    @apply font-script text-3xl text-sage-dark;
+  }
+  .section-title {
+    @apply mt-2 text-sm tracking-widest2 uppercase text-forest/70;
+  }
+  .divider-leaf {
+    @apply mx-auto my-6 h-px w-12 bg-sage/40;
+  }
+}
