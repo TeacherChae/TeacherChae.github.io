@@ -26,6 +26,7 @@ export const wedding = {
   },
   date: {
     iso: '2026-09-05T11:00',
+    endIso: '2026-09-05T13:00', // 캘린더 추가용 종료 시각. 통상 본식 + 식사까지 ~2시간.
     dayKo: '2026년 9월 5일 토요일 11:00',
     dayEn: 'Saturday, September 5, 2026',
     short: '2026. 09. 05',
@@ -34,8 +35,11 @@ export const wedding = {
     name: '남산 한남 웨딩가든',
     address: '서울특별시 용산구 소월로 323',
     tel: '02-0000-0000',
-    naverMapUrl: 'https://map.naver.com/',
-    kakaoMapUrl: 'https://map.kakao.com/',
+    // 지도 URL은 비워두면 venue.name / lat·lng 기반 검색 URL로 자동 생성.
+    // 특정 핀(예: 네이버 플레이스 상세) 링크가 있으면 여기에 직접 채우기.
+    naverMapUrl: '',
+    kakaoMapUrl: '',
+    googleMapUrl: '',
     lat: 37.541488,
     lng: 126.997052,
   },
