@@ -1,5 +1,6 @@
 import Hero from './components/Hero.jsx';
 import Greeting from './components/Greeting.jsx';
+import Countdown from './components/Countdown.jsx';
 import Gallery from './components/Gallery.jsx';
 import Location from './components/Location.jsx';
 import Account from './components/Account.jsx';
@@ -11,6 +12,7 @@ export default function App() {
     <main className="page">
       <Hero />
       <Greeting />
+      <Countdown />
       <Gallery />
       <Location />
       <Account />
