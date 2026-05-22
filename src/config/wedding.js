@@ -3,12 +3,12 @@
 
 export const wedding = {
   groom: {
-    nameKo: '채건회',
+    nameKo: '채건희',
     nameEn: 'KeonHee Chae',
     father: '채문식',
     mother: '박미용',
     bankAccounts: [
-      { label: '신랑', bank: '○○은행', number: '000-000-000000', holder: '채건회' },
+      { label: '신랑', bank: '○○은행', number: '000-000-000000', holder: '채건희' },
       { label: '신랑 아버지', bank: '○○은행', number: '000-000-000000', holder: '채○○' },
       { label: '신랑 어머니', bank: '○○은행', number: '000-000-000000', holder: '○○○' },
     ],
