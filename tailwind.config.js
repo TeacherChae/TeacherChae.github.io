@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         cream: '#FAF7F2',
+        paper: '#FBFAF7', // 카드 배경 (modern airline 페이퍼 톤)
         forest: '#2F3F36',
         sage: {
           DEFAULT: '#8B9D7A',
@@ -22,9 +23,10 @@ export default {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
         script: ['Italianno', 'cursive'],
         serif: ['"Cormorant Garamond"', 'serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       maxWidth: {
-        page: '460px',
+        page: '520px',
       },
       letterSpacing: {
         widest2: '0.2em',

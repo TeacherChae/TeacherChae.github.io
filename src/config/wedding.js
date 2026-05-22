@@ -57,4 +57,25 @@ export const wedding = {
     description: '2026. 09. 05 · 토요일 오전 11시',
     image: '/images/share-thumb.jpg',
   },
+  // 보딩패스(ticket) 레이아웃 전용 카피. 다른 레이아웃에선 무시됨.
+  ticket: {
+    airline: 'FOREVER AIRLINES',
+    flightCode: 'WED 2609',
+    from: { code: 'YOU', label: '각자의 길' },
+    to: { code: 'WE', label: '함께의 길' },
+    class: 'GUEST',
+    boardingTime: '10:30',
+    gate: 'HANNAM',
+    issued: '2026.05',
+    // 카드 종류별 영문 라벨 (우상단 표기)
+    labels: {
+      boardingPass: 'BOARDING PASS',
+      welcome: 'WELCOME LETTER',
+      departureLog: 'DEPARTURE LOG',
+      terminalMap: 'TERMINAL MAP',
+      receipt: 'RECEIPT',
+      confirmation: 'CONFIRMATION',
+      postcard: 'POSTCARD',
+    },
+  },
 };

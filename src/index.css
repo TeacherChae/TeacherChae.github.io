@@ -16,6 +16,10 @@
   .page {
     @apply mx-auto max-w-page min-h-screen;
   }
+  .ticket-page {
+    /* 보딩패스 layout 전용. 카드 간 좁은 여백, 점선 경로로 카드 잇기 */
+    @apply mx-auto max-w-page;
+  }
   .section {
     @apply px-6 py-16;
   }
@@ -27,5 +31,21 @@
   }
   .divider-leaf {
     @apply mx-auto my-6 h-px w-12 bg-sage/40;
+  }
+
+  /* 보딩패스 카드 — 양쪽 가운데 반원 노치로 잘려나간 모양.
+     --notch-y 로 노치 위치를 카드 높이의 % 로 지정.
+     --notch-size 로 노치 반지름 픽셀 지정. */
+  .ticket-card {
+    --notch-y: 62%;
+    --notch-size: 14px;
+    mask-image:
+      radial-gradient(circle at 0 var(--notch-y), transparent var(--notch-size), black calc(var(--notch-size) + 1px)),
+      radial-gradient(circle at 100% var(--notch-y), transparent var(--notch-size), black calc(var(--notch-size) + 1px));
+    -webkit-mask-image:
+      radial-gradient(circle at 0 var(--notch-y), transparent var(--notch-size), black calc(var(--notch-size) + 1px)),
+      radial-gradient(circle at 100% var(--notch-y), transparent var(--notch-size), black calc(var(--notch-size) + 1px));
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
   }
 }
