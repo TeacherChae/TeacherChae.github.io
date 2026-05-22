@@ -14,8 +14,7 @@ create table if not exists public.rsvp (
   attending   boolean not null,                                        -- 참석(true)/불참(false)
   party_size  int     not null default 1 check (party_size between 0 and 30), -- 본인 포함 총 인원
   meal        text             check (meal in ('yes','no','maybe')),   -- 식사 예정/안함/미정
-  companions  text             check (char_length(companions) <= 100), -- 동반자 이름
-  message     text             check (char_length(message) <= 500)     -- 전하고 싶은 말
+  companions  text             check (char_length(companions) <= 100)  -- 동반자 이름
 );
 
 alter table public.rsvp enable row level security;

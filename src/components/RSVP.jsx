@@ -24,7 +24,6 @@ export default function RSVP() {
     partySize: 1,
     meal: 'yes', // yes | no | maybe
     companions: '',
-    message: '',
   });
   const [status, setStatus] = useState('idle'); // idle | submitting | success | error
   const [error, setError] = useState('');
@@ -48,7 +47,6 @@ export default function RSVP() {
       party_size: attending ? Number(form.partySize) || 1 : 0,
       meal: attending ? form.meal : null,
       companions: attending ? form.companions.trim() || null : null,
-      message: form.message.trim() || null,
     });
 
     if (insertError) {
@@ -84,6 +82,9 @@ export default function RSVP() {
           참석 여부를 전해주셔서 감사합니다. 🌿
           <br />
           소중히 준비하겠습니다.
+        </p>
+        <p className="mt-4 text-xs text-forest/50">
+          축하 메시지는 아래 방명록에 남겨주세요.
         </p>
       </section>
     );
@@ -173,18 +174,6 @@ export default function RSVP() {
             </div>
           </>
         )}
-
-        {/* 전하고 싶은 말 */}
-        <div>
-          <label className="text-xs text-forest/60">전하고 싶은 말 (선택)</label>
-          <textarea
-            rows={3}
-            className={`mt-1 resize-none ${inputClass}`}
-            value={form.message}
-            onChange={(e) => update('message', e.target.value)}
-            maxLength={500}
-          />
-        </div>
 
         {error && <p className="text-xs text-terracotta-dark">{error}</p>}
 
