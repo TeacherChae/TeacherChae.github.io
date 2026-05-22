@@ -94,9 +94,10 @@ npm ci → npm run build → dist/
 actions/deploy-pages → https://teacherchae.github.io
 ```
 
-- **수동 트리거 가능**: Actions 탭에서 `Deploy to GitHub Pages` → `Run workflow`
+- **수동 트리거 가능**: Actions 탭에서 `Deploy to GitHub Pages` → `Run workflow` (또는 `gh workflow run deploy.yml`)
 - **PAT 불필요**: 같은 리포 안에서 배포하므로 기본 `GITHUB_TOKEN` 사용
-- **선행 조건 1회**: 리포 Settings → Pages → Source를 **GitHub Actions**로 설정해둬야 함
+- **선행 조건 (✅ 완료)**: Settings → Pages → Source = **GitHub Actions** — 이미 설정됨
+- **리포는 public 이어야 함**: 무료 플랜에서 private 리포는 Pages 불가(`422`). 그래서 public으로 전환함
 
 배포 상태: https://github.com/teacherchae/teacherchae.github.io/actions
 
@@ -106,20 +107,25 @@ actions/deploy-pages → https://teacherchae.github.io
 |---|---|---|
 | 1 | 디자인 톤 결정 (내추럴 로맨틱) | ✅ |
 | 2 | Vite + React + Tailwind 셋업 | ✅ |
-| 3 | 7개 섹션 컴포넌트 스캐폴드 (placeholder 콘텐츠) | 🟡 진행 중 |
-| 4 | GitHub Actions 자동 배포 워크플로 | 🟡 진행 중 (push 대기) |
-| 5 | 첫 배포 + 모바일 실기기 확인 | ⬜ |
+| 3 | 7개 섹션 컴포넌트 스캐폴드 (placeholder 콘텐츠) | ✅ (콘텐츠 채우기는 별도) |
+| 4 | GitHub Actions 자동 배포 워크플로 | ✅ 배포 성공 |
+| 5 | 첫 배포 + 모바일 실기기 확인 | 🟡 배포 ✅ · 실기기 확인 대기 |
 | 6 | Supabase 프로젝트 생성 + 스키마 설계 | ⬜ |
 | 7 | RSVP / 방명록 Supabase 연동 | ⬜ |
 | 8 | 카카오톡 공유 + 메타태그 + 마무리 | ⬜ |
 
+🌐 **라이브: https://teacherchae.github.io** (2026-05-22 배포·HTTP 200 확인)
+
 ## 다음에 이어서 할 일
 
-### 즉시 (push만 하면 됨)
-1. `gh auth login` — teacherchae 계정 로그인
-2. `git push -u origin main --force` — 옛 사이트 덮어쓰기 (확인 후 실행)
-3. Settings → Pages → Source를 **GitHub Actions**로 변경
-4. https://teacherchae.github.io 에서 라이브 확인
+### 배포 (✅ 완료 — 2026-05-22)
+- 코드 push 완료 → 리포 **public** 전환 → Pages 소스 **GitHub Actions** 활성화 → 워크플로 배포 성공.
+- 라이브 확인: https://teacherchae.github.io (HTTP 200, JS 번들 200, HTTPS 강제).
+- ⏳ 남은 1건: **실제 휴대폰**에서 폰트(Pretendard/Italianno)·레이아웃·계좌 복사 버튼 확인.
+
+> gh 계정 메모: 이 머신엔 `Keon2Chae`(기본)와 `TeacherChae`(리포 소유) 두 계정이 로그인돼 있음.
+> 리포에 `gh api`/`gh run`/`gh workflow` 쓰려면 `gh auth switch`로 **TeacherChae** 활성화 필요.
+> `git push`는 SSH alias(`github-teacherchae`)라 계정과 무관하게 동작.
 
 ### 콘텐츠 채우기
 `src/config/wedding.js`의 placeholder(`○○`, `TBD`)를 실제 데이터로:
