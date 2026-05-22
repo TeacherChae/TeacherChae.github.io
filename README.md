@@ -110,8 +110,8 @@ actions/deploy-pages → https://teacherchae.github.io
 | 3 | 7개 섹션 컴포넌트 스캐폴드 (placeholder 콘텐츠) | ✅ (콘텐츠 채우기는 별도) |
 | 4 | GitHub Actions 자동 배포 워크플로 | ✅ 배포 성공 |
 | 5 | 첫 배포 + 모바일 실기기 확인 | 🟡 배포 ✅ · 실기기 확인 대기 |
-| 6 | Supabase 프로젝트 생성 + 스키마 설계 | ⬜ |
-| 7 | RSVP / 방명록 Supabase 연동 | ⬜ |
+| 6 | Supabase 프로젝트 생성 + 스키마 설계 | 🟡 스키마 ✅(`supabase/schema.sql`) · 프로젝트 생성 대기 |
+| 7 | RSVP / 방명록 Supabase 연동 | 🟡 코드 ✅ · 키 연결 대기 |
 | 8 | 카카오톡 공유 + 메타태그 + 마무리 | ⬜ |
 
 🌐 **라이브: https://teacherchae.github.io** (2026-05-22 배포·HTTP 200 확인)
@@ -147,18 +147,19 @@ gallery: [
 ```
 
 ### Supabase 연동 (RSVP + 방명록)
+
+**코드는 완료** — `@supabase/supabase-js` 설치, `src/lib/supabase.js` 클라이언트, `RSVP.jsx`/`Guestbook.jsx` 폼 구현됨. 키가 없으면 자동으로 "준비 중" 상태로 표시되고, 키를 넣으면 폼이 동작한다.
+
+남은 건 **프로젝트 생성 + 키 연결**뿐:
 1. https://supabase.com 가입, 새 프로젝트 생성
-2. 테이블 2개 — `rsvp`, `guestbook`
-3. Row Level Security 정책 설정 (anon에게 insert만 허용)
-4. `.env.local` 에 URL/key 저장:
-   ```
-   VITE_SUPABASE_URL=...
-   VITE_SUPABASE_ANON_KEY=...
-   ```
-5. `npm i @supabase/supabase-js`
-6. `src/lib/supabase.js` 클라이언트 생성
-7. RSVP, Guestbook 컴포넌트 폼 구현
-8. GitHub repo Settings → Secrets에도 같은 env 추가 (Actions가 빌드 시 사용)
+2. SQL Editor 에 `supabase/schema.sql` 통째로 붙여넣고 Run (테이블 `rsvp`/`guestbook` + RLS 정책 생성)
+3. Project Settings → API 에서 **Project URL** 과 **anon public key** 복사
+4. 로컬: `cp .env.example .env.local` 후 두 값 채우기 → `npm run dev` 로 폼 확인
+5. 배포용: GitHub repo Settings → Secrets and variables → Actions 에 같은 두 값 등록
+   (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) — CI 빌드가 사용
+6. `.github/workflows/deploy.yml` 의 build 스텝에 env 주입 필요 (아래 가이드 참고)
+
+> RLS 요약: `rsvp`는 anon **insert만**(응답 비공개, 부부는 대시보드에서 조회). `guestbook`은 anon **insert + select**(공개 표시).
 
 ### 마무리
 - Kakao SDK로 친구톡 공유 카드 (Kakao Developers에서 JS Key 발급)
