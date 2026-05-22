@@ -1,9 +1,15 @@
 name: Deploy to GitHub Pages
+run-name: "Deploy ${{ github.ref_name }}${{ inputs.note && format(' — {0}', inputs.note) || '' }}"
 
+# 자동 배포 OFF. 항상 Actions 탭에서 "Run workflow" 로 브랜치를 골라 수동 실행.
+# (이전의 push 트리거는 의도적으로 제거함.)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      note:
+        description: '메모 (예: layout/ticket 시안 검토). 비워둬도 됨.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
