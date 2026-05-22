@@ -4,9 +4,9 @@
 export const wedding = {
   groom: {
     nameKo: '채건회',
-    nameEn: 'Brian Chae',
-    father: '채○○',
-    mother: '○○○',
+    nameEn: 'KeonHee Chae',
+    father: '채문식',
+    mother: '박미용',
     bankAccounts: [
       { label: '신랑', bank: '○○은행', number: '000-000-000000', holder: '채건회' },
       { label: '신랑 아버지', bank: '○○은행', number: '000-000-000000', holder: '채○○' },
@@ -14,10 +14,10 @@ export const wedding = {
     ],
   },
   bride: {
-    nameKo: '○○○',
-    nameEn: 'TBD',
-    father: '○○○',
-    mother: '○○○',
+    nameKo: '이주경',
+    nameEn: 'JuKyeong Lee',
+    father: '이병연',
+    mother: '문숙희',
     bankAccounts: [
       { label: '신부', bank: '○○은행', number: '000-000-000000', holder: '○○○' },
       { label: '신부 아버지', bank: '○○은행', number: '000-000-000000', holder: '○○○' },
@@ -25,20 +25,19 @@ export const wedding = {
     ],
   },
   date: {
-    iso: '2026-06-14T13:00',
-    dayKo: '2026년 6월 14일 일요일 오후 1시',
-    dayEn: 'Sunday, June 14, 2026',
-    short: '2026. 06. 14',
+    iso: '2026-09-05T11:00',
+    dayKo: '2026년 9월 5일 토요일 11:00',
+    dayEn: 'Saturday, September 5, 2026',
+    short: '2026. 09. 05',
   },
   venue: {
-    name: '○○컨벤션 그랜드홀',
-    address: '서울특별시 ○○구 ○○로 000',
-    hall: '5층 그랜드볼룸',
+    name: '남산 한남 웨딩가든',
+    address: '서울특별시 용산구 소월로 323',
     tel: '02-0000-0000',
     naverMapUrl: 'https://map.naver.com/',
     kakaoMapUrl: 'https://map.kakao.com/',
-    lat: 37.5665,
-    lng: 126.978,
+    lat: 37.541488,
+    lng: 126.997052,
   },
   greeting: [
     '서로 다른 길을 걸어온 두 사람이',
@@ -50,8 +49,8 @@ export const wedding = {
     // { src: '/images/01.jpg', alt: '본식 사진 1' },
   ],
   share: {
-    title: 'Brian & ___ 결혼합니다',
-    description: '2026. 06. 14 · 일요일 오후 1시',
+    title: '채건희 & 이주경 결혼합니다',
+    description: '2026. 09. 05 · 토요일 오전 11시',
     image: '/images/share-thumb.jpg',
   },
 };
