@@ -10,7 +10,6 @@ export default function Location() {
 
       <div className="mt-6 space-y-1 text-[15px]">
         <p className="text-lg font-medium">{venue.name}</p>
-        <p className="text-forest/70">{venue.hall}</p>
         <p className="mt-3 text-sm text-forest/80">{venue.address}</p>
         <p className="text-sm text-forest/60">{venue.tel}</p>
       </div>
