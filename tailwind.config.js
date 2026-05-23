@@ -16,12 +16,17 @@ export default {
           light: '#E0A48C',
           dark: '#A35E45',
         },
-        ink: '#1F2A24',
+        ink: '#2A2A2A',
+        // Moonjar palette
+        bone: '#FAF8F4',
+        whisper: '#E8E4DC',
+        clay: '#B89C7D',
       },
       fontFamily: {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
         script: ['Italianno', 'cursive'],
         serif: ['"Cormorant Garamond"', 'serif'],
+        'serif-ko': ['"Noto Serif KR"', 'serif'],
       },
       maxWidth: {
         page: '460px',

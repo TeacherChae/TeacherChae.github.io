@@ -1,25 +1,14 @@
-import Hero from './components/Hero.jsx';
-import Greeting from './components/Greeting.jsx';
-import Countdown from './components/Countdown.jsx';
-import Gallery from './components/Gallery.jsx';
-import Location from './components/Location.jsx';
-import Account from './components/Account.jsx';
-import RSVP from './components/RSVP.jsx';
-import Guestbook from './components/Guestbook.jsx';
+import MoonjarHero from './components/moonjar/MoonjarHero.jsx';
+import { DateObject, VenueObject } from './components/moonjar/Sections.jsx';
 
 export default function App() {
   return (
-    <main className="page">
-      <Hero />
-      <Greeting />
-      <Countdown />
-      <Gallery />
-      <Location />
-      <Account />
-      <RSVP />
-      <Guestbook />
-      <footer className="px-6 py-10 text-center text-xs text-forest/40">
-        with love · 2026
+    <main className="bg-bone min-h-screen">
+      <MoonjarHero />
+      <DateObject />
+      <VenueObject />
+      <footer className="py-10 text-center text-[10px] tracking-[0.2em] uppercase text-ink/25 font-sans bg-bone">
+        채건희 &amp; 이주경 · 2026
       </footer>
     </main>
   );
