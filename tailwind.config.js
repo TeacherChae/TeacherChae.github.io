@@ -17,11 +17,16 @@ export default {
           dark: '#A35E45',
         },
         ink: '#1F2A24',
+        'museum-cream': '#F7F2E8',
+        'museum-ink': '#2B2B2B',
+        'museum-accent': '#9C2B2E',
       },
       fontFamily: {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
         script: ['Italianno', 'cursive'],
         serif: ['"Cormorant Garamond"', 'serif'],
+        'display-serif': ['"Libre Caslon Display"', '"Playfair Display"', 'serif'],
+        'museum-sans': ['Inter', 'system-ui', 'sans-serif'],
       },
       maxWidth: {
         page: '460px',

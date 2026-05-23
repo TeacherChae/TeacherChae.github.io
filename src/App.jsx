@@ -1,25 +1,20 @@
-import Hero from './components/Hero.jsx';
-import Greeting from './components/Greeting.jsx';
-import Countdown from './components/Countdown.jsx';
-import Gallery from './components/Gallery.jsx';
-import Location from './components/Location.jsx';
-import Account from './components/Account.jsx';
-import RSVP from './components/RSVP.jsx';
-import Guestbook from './components/Guestbook.jsx';
+import ExhibitionCover from './components/museum/ExhibitionCover.jsx';
+import CuratorNote from './components/museum/CuratorNote.jsx';
+import FloorPlan from './components/museum/FloorPlan.jsx';
 
 export default function App() {
   return (
-    <main className="page">
-      <Hero />
-      <Greeting />
-      <Countdown />
-      <Gallery />
-      <Location />
-      <Account />
-      <RSVP />
-      <Guestbook />
-      <footer className="px-6 py-10 text-center text-xs text-forest/40">
-        with love · 2026
+    <main className="bg-museum-cream" style={{ maxWidth: '460px', margin: '0 auto' }}>
+      <ExhibitionCover />
+      <CuratorNote />
+      <FloorPlan />
+      <footer
+        className="bg-museum-cream px-8 py-8 text-center"
+        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+      >
+        <p className="text-[10px] uppercase tracking-[0.25em] text-museum-ink/35">
+          &copy; Gallery Forever &middot; MMXXVI
+        </p>
       </footer>
     </main>
   );
