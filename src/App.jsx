@@ -1,25 +1,15 @@
-import Hero from './components/Hero.jsx';
-import Greeting from './components/Greeting.jsx';
-import Countdown from './components/Countdown.jsx';
-import Gallery from './components/Gallery.jsx';
-import Location from './components/Location.jsx';
-import Account from './components/Account.jsx';
-import RSVP from './components/RSVP.jsx';
-import Guestbook from './components/Guestbook.jsx';
+import TrainTicket from './components/train/TrainTicket.jsx';
+import Itinerary from './components/train/Itinerary.jsx';
+import TransitGuide from './components/train/TransitGuide.jsx';
 
 export default function App() {
   return (
     <main className="page">
-      <Hero />
-      <Greeting />
-      <Countdown />
-      <Gallery />
-      <Location />
-      <Account />
-      <RSVP />
-      <Guestbook />
-      <footer className="px-6 py-10 text-center text-xs text-forest/40">
-        with love · 2026
+      <TrainTicket />
+      <Itinerary />
+      <TransitGuide />
+      <footer className="bg-ktx-navy px-6 py-8 text-center text-xs text-korail-turquoise/50 font-mono tracking-widest uppercase">
+        KORAIL FOREVER · ALL ABOARD · 2026
       </footer>
     </main>
   );

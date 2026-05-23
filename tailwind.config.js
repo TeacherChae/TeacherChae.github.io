@@ -17,11 +17,17 @@ export default {
           dark: '#A35E45',
         },
         ink: '#1F2A24',
+        'korail-turquoise': '#00C4B3',
+        'ktx-navy': '#1F3A8A',
+        'train-paper': '#F4EFDC',
+        'stamp-purple': '#5E2D8A',
+        'platform-yellow': '#F5C518',
       },
       fontFamily: {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
         script: ['Italianno', 'cursive'],
         serif: ['"Cormorant Garamond"', 'serif'],
+        'serif-myeongjo': ['"Nanum Myeongjo"', 'serif'],
       },
       maxWidth: {
         page: '460px',
