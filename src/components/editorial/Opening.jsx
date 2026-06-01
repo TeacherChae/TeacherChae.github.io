@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-const OPENING_DURATION_MS = 8550;
+const OPENING_DURATION_MS = 3000;
 
 export default function Opening({ onComplete }) {
   const [visible, setVisible] = useState(true);
