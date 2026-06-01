@@ -1,31 +1,35 @@
-import BoardingPass from './components/cards/BoardingPass.jsx';
-import WelcomeLetter from './components/cards/WelcomeLetter.jsx';
-import DepartureLog from './components/cards/DepartureLog.jsx';
-import TerminalMap from './components/cards/TerminalMap.jsx';
-import Receipt from './components/cards/Receipt.jsx';
-import Confirmation from './components/cards/Confirmation.jsx';
-import Postcard from './components/cards/Postcard.jsx';
-import { JourneyMarker } from './components/cards/_shared.jsx';
+import { useState } from 'react';
+import Opening from './components/editorial/Opening.jsx';
+import Hero from './components/editorial/Hero.jsx';
+import DateVenue from './components/editorial/DateVenue.jsx';
+import Invitation from './components/editorial/Invitation.jsx';
+import Gallery from './components/editorial/Gallery.jsx';
+import Location from './components/editorial/Location.jsx';
+import RSVP from './components/editorial/RSVP.jsx';
+import Account from './components/editorial/Account.jsx';
+import Guestbook from './components/editorial/Guestbook.jsx';
+import Footer from './components/editorial/Footer.jsx';
 
 export default function App() {
+  const [openingDone, setOpeningDone] = useState(false);
+
   return (
-    <main className="ticket-page">
-      <BoardingPass />
-      <JourneyMarker withPlane />
-      <WelcomeLetter />
-      <JourneyMarker />
-      <DepartureLog />
-      <JourneyMarker withPlane />
-      <TerminalMap />
-      <JourneyMarker />
-      <Receipt />
-      <JourneyMarker />
-      <Confirmation />
-      <JourneyMarker withPlane />
-      <Postcard />
-      <footer className="px-6 py-10 text-center font-mono text-[10px] tracking-[0.25em] text-forest/40 uppercase">
-        ✈ Forever Airlines · with love · 2026
-      </footer>
+    <main className="page">
+      {!openingDone ? (
+        <Opening onComplete={() => setOpeningDone(true)} />
+      ) : (
+        <>
+          <Hero />
+          <DateVenue />
+          <Invitation />
+          <Gallery />
+          <Location />
+          <RSVP />
+          <Account />
+          <Guestbook />
+          <Footer />
+        </>
+      )}
     </main>
   );
 }

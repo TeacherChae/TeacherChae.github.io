@@ -5,7 +5,9 @@ export default {
     extend: {
       colors: {
         cream: '#FAF7F2',
-        paper: '#FBFAF7', // 카드 배경 (modern airline 페이퍼 톤)
+        paper: '#FBFAF7',
+        ink: '#111111',
+        muted: '#77716A',
         forest: '#2F3F36',
         sage: {
           DEFAULT: '#8B9D7A',
@@ -17,12 +19,12 @@ export default {
           light: '#E0A48C',
           dark: '#A35E45',
         },
-        ink: '#1F2A24',
       },
       fontFamily: {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
-        script: ['Italianno', 'cursive'],
+        display: ['"Bodoni Moda"', '"Cormorant Garamond"', 'serif'],
         serif: ['"Cormorant Garamond"', 'serif'],
+        script: ['Italianno', 'cursive'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       maxWidth: {
@@ -30,6 +32,7 @@ export default {
       },
       letterSpacing: {
         widest2: '0.2em',
+        editorial: '0.32em',
       },
     },
   },

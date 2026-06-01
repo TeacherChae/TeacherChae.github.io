@@ -37,6 +37,36 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_GROOM_NAME_KO: ${{ vars.VITE_GROOM_NAME_KO }}
+          VITE_GROOM_NAME_EN: ${{ vars.VITE_GROOM_NAME_EN }}
+          VITE_GROOM_FULL_NAME_EN: ${{ vars.VITE_GROOM_FULL_NAME_EN }}
+          VITE_GROOM_FATHER: ${{ vars.VITE_GROOM_FATHER }}
+          VITE_GROOM_MOTHER: ${{ vars.VITE_GROOM_MOTHER }}
+          VITE_BRIDE_NAME_KO: ${{ vars.VITE_BRIDE_NAME_KO }}
+          VITE_BRIDE_NAME_EN: ${{ vars.VITE_BRIDE_NAME_EN }}
+          VITE_BRIDE_FULL_NAME_EN: ${{ vars.VITE_BRIDE_FULL_NAME_EN }}
+          VITE_BRIDE_FATHER: ${{ vars.VITE_BRIDE_FATHER }}
+          VITE_BRIDE_MOTHER: ${{ vars.VITE_BRIDE_MOTHER }}
+          VITE_WEDDING_DATE_ISO: ${{ vars.VITE_WEDDING_DATE_ISO }}
+          VITE_WEDDING_END_ISO: ${{ vars.VITE_WEDDING_END_ISO }}
+          VITE_WEDDING_DAY_KO: ${{ vars.VITE_WEDDING_DAY_KO }}
+          VITE_WEDDING_DAY_EN: ${{ vars.VITE_WEDDING_DAY_EN }}
+          VITE_WEDDING_DATE_SHORT: ${{ vars.VITE_WEDDING_DATE_SHORT }}
+          VITE_WEDDING_TIME: ${{ vars.VITE_WEDDING_TIME }}
+          VITE_VENUE_NAME: ${{ vars.VITE_VENUE_NAME }}
+          VITE_VENUE_ADDRESS: ${{ vars.VITE_VENUE_ADDRESS }}
+          VITE_VENUE_TEL: ${{ vars.VITE_VENUE_TEL }}
+          VITE_VENUE_LAT: ${{ vars.VITE_VENUE_LAT }}
+          VITE_VENUE_LNG: ${{ vars.VITE_VENUE_LNG }}
+          VITE_NAVER_MAP_URL: ${{ vars.VITE_NAVER_MAP_URL }}
+          VITE_KAKAO_MAP_URL: ${{ vars.VITE_KAKAO_MAP_URL }}
+          VITE_GOOGLE_MAP_URL: ${{ vars.VITE_GOOGLE_MAP_URL }}
+          VITE_GROOM_BANK: ${{ vars.VITE_GROOM_BANK }}
+          VITE_GROOM_ACCOUNT_NUMBER: ${{ vars.VITE_GROOM_ACCOUNT_NUMBER }}
+          VITE_GROOM_ACCOUNT_HOLDER: ${{ vars.VITE_GROOM_ACCOUNT_HOLDER }}
+          VITE_BRIDE_BANK: ${{ vars.VITE_BRIDE_BANK }}
+          VITE_BRIDE_ACCOUNT_NUMBER: ${{ vars.VITE_BRIDE_ACCOUNT_NUMBER }}
+          VITE_BRIDE_ACCOUNT_HOLDER: ${{ vars.VITE_BRIDE_ACCOUNT_HOLDER }}
 
       - uses: actions/configure-pages@v5
 
