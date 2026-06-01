@@ -11,11 +11,6 @@ function buildMapLinks(venue) {
   };
 }
 
-// 전화번호의 숫자만 추출 — tel: 스킴에는 하이픈/공백이 안전하긴 하지만 깔끔하게.
-function telHref(tel) {
-  return `tel:${tel.replace(/[^0-9+]/g, '')}`;
-}
-
 const mapBtnClass =
   'rounded-sm border border-sage/40 bg-white/60 py-3 text-xs text-forest hover:bg-sage/10 transition text-center';
 
@@ -31,14 +26,7 @@ export default function Location() {
 
       <div className="mt-6 space-y-1 text-[15px]">
         <p className="text-lg font-medium">{venue.name}</p>
-        <p className="mt-3 text-sm text-forest/80">{venue.address}</p>
-        <a
-          href={telHref(venue.tel)}
-          className="inline-block text-sm text-forest/60 underline decoration-sage/40 underline-offset-4 hover:text-sage-dark"
-        >
-          {venue.tel}
-        </a>
-      </div>
+        <p className="mt-3 text-sm text-forest/80">{venue.address}</p>      </div>
 
       <p className="mt-6 text-sm tracking-wide text-sage-dark">{date.dayKo}</p>
 

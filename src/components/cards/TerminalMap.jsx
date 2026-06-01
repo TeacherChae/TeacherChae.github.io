@@ -10,7 +10,6 @@ function buildMapLinks(venue) {
     google: venue.googleMapUrl || `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`,
   };
 }
-const telHref = (tel) => `tel:${tel.replace(/[^0-9+]/g, '')}`;
 const mapBtnClass =
   'rounded-sm border border-sage/40 bg-paper py-2.5 text-xs font-mono tracking-wider text-forest hover:bg-sage/10 transition text-center';
 
@@ -31,11 +30,7 @@ export default function TerminalMap() {
         <div className="mt-5">
           <FieldLabel en="Venue" ko="식장" />
           <p className="mt-1 text-lg text-forest font-medium">{venue.name}</p>
-          <p className="mt-1 text-sm text-forest/80">{venue.address}</p>
-          <a href={telHref(venue.tel)} className="mt-1 inline-block text-sm font-mono text-forest underline decoration-sage/40 underline-offset-4">
-            {venue.tel}
-          </a>
-        </div>
+          <p className="mt-1 text-sm text-forest/80">{venue.address}</p>        </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>
