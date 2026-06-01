@@ -1,45 +1,40 @@
-// 청첩장 데이터의 single source of truth.
-// 개인정보/표시 정보는 VITE_* 환경변수에서 읽는다.
-// 주의: Vite 클라이언트 env는 브라우저 번들에 포함되므로 비밀값 저장용이 아니라
-// git 소스에 개인정보를 하드코딩하지 않기 위한 용도다.
+// 청첩장에 표시되는 공개 콘텐츠의 single source of truth.
+// Vite 클라이언트 번들에 포함되는 값이므로 비밀 정보는 넣지 않는다.
+// 배포 환경별 설정이 필요한 Supabase URL/key만 .env.local에서 관리한다.
 
-const env = import.meta.env;
-const value = (key, fallback = '') => env[key] || fallback;
-const number = (key, fallback) => Number(env[key] ?? fallback);
-
-const groomNameKo = value('VITE_GROOM_NAME_KO', '신랑');
-const groomNameEn = value('VITE_GROOM_NAME_EN', 'Groom');
-const groomFullNameEn = value('VITE_GROOM_FULL_NAME_EN', groomNameEn);
-const groomFather = value('VITE_GROOM_FATHER', '신랑 아버님');
-const groomMother = value('VITE_GROOM_MOTHER', '신랑 어머님');
+const groomNameKo = '채건희';
+const groomNameEn = 'KeonHee';
+const groomFullNameEn = 'KeonHee Chae';
+const groomFather = '채문식';
+const groomMother = '박미용';
 const groomBankAccount = {
   label: '신랑 측',
-  bank: value('VITE_GROOM_BANK', '은행명'),
-  number: value('VITE_GROOM_ACCOUNT_NUMBER', '000000000000'),
-  holder: value('VITE_GROOM_ACCOUNT_HOLDER', groomNameKo),
+  bank: '은행명',
+  number: '000000000000',
+  holder: groomNameKo,
 };
 
-const brideNameKo = value('VITE_BRIDE_NAME_KO', '신부');
-const brideNameEn = value('VITE_BRIDE_NAME_EN', 'Bride');
-const brideFullNameEn = value('VITE_BRIDE_FULL_NAME_EN', brideNameEn);
-const brideFather = value('VITE_BRIDE_FATHER', '신부 아버님');
-const brideMother = value('VITE_BRIDE_MOTHER', '신부 어머님');
+const brideNameKo = '이주경';
+const brideNameEn = 'JuGyeong';
+const brideFullNameEn = 'JuGyeong Lee';
+const brideFather = '이병연';
+const brideMother = '문숙희';
 const brideBankAccount = {
   label: '신부 측',
-  bank: value('VITE_BRIDE_BANK', '은행명'),
-  number: value('VITE_BRIDE_ACCOUNT_NUMBER', '000000000000'),
-  holder: value('VITE_BRIDE_ACCOUNT_HOLDER', brideNameKo),
+  bank: '은행명',
+  number: '000000000000',
+  holder: brideNameKo,
 };
 
-const weddingDateIso = value('VITE_WEDDING_DATE_ISO', '2026-09-05T11:00');
-const weddingEndIso = value('VITE_WEDDING_END_ISO', '2026-09-05T13:00');
-const weddingDayKo = value('VITE_WEDDING_DAY_KO', '2026년 9월 5일 토요일 오전 11시');
-const weddingDayEn = value('VITE_WEDDING_DAY_EN', 'Saturday, September 5, 2026');
-const weddingShort = value('VITE_WEDDING_DATE_SHORT', '2026.09.05');
-const weddingTime = value('VITE_WEDDING_TIME', '11:00 AM');
+const weddingDateIso = '2026-09-05T11:00';
+const weddingEndIso = '2026-09-05T13:00';
+const weddingDayKo = '2026년 9월 5일 토요일 오전 11시';
+const weddingDayEn = 'Saturday, September 5, 2026';
+const weddingShort = '2026.09.05';
+const weddingTime = '11:00 AM';
 
-const venueName = value('VITE_VENUE_NAME', '예식장');
-const venueAddress = value('VITE_VENUE_ADDRESS', '예식장 주소');
+const venueName = '남산 한남 웨딩가든';
+const venueAddress = '서울 용산구 소월로 323';
 
 export const wedding = {
   groom: {
@@ -71,12 +66,11 @@ export const wedding = {
   venue: {
     name: venueName,
     address: venueAddress,
-    tel: value('VITE_VENUE_TEL', '02-0000-0000'),
-    naverMapUrl: value('VITE_NAVER_MAP_URL'),
-    kakaoMapUrl: value('VITE_KAKAO_MAP_URL'),
-    googleMapUrl: value('VITE_GOOGLE_MAP_URL'),
-    lat: number('VITE_VENUE_LAT', 37.541488),
-    lng: number('VITE_VENUE_LNG', 126.997052),
+    naverMapUrl: 'https://naver.me/FAPXf05C',
+    kakaoMapUrl: 'https://place.map.kakao.com/1728121058',
+    googleMapUrl: 'https://maps.app.goo.gl/Bwii6TsPW3YResi97',
+    lat: 37.541488,
+    lng: 126.997052,
   },
   scripture: {
     ref: 'MARK 10:7-9',

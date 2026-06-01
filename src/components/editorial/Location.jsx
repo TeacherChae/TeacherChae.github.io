@@ -1,5 +1,5 @@
-import { AddToCalendarButton } from 'add-to-calendar-button-react';
 import { wedding } from '../../config/wedding.js';
+import CalendarAdd from '../CalendarAdd.jsx';
 import { SecondaryButton, Section } from './_shared.jsx';
 
 function buildMapLinks(venue) {
@@ -11,21 +11,13 @@ function buildMapLinks(venue) {
   };
 }
 
-function splitIso(iso) {
-  const [date, time] = iso.split('T');
-  return { date, time };
-}
-
 function telHref(tel) {
   return `tel:${tel.replace(/[^0-9+]/g, '')}`;
 }
 
 export default function Location() {
-  const { venue, date, groom, bride, share } = wedding;
+  const { venue } = wedding;
   const maps = buildMapLinks(venue);
-  const start = splitIso(date.iso);
-  const end = splitIso(date.endIso);
-
   return (
     <Section title="LOCATION">
       <div className="mx-auto max-w-[390px] text-center">
@@ -43,32 +35,7 @@ export default function Location() {
 
         <div className="mt-12">
           <p className="eyebrow mb-4">CALENDAR</p>
-          <AddToCalendarButton
-            name={share.title}
-            description={`${bride.nameKo} & ${groom.nameKo} 결혼식`}
-            startDate={start.date}
-            startTime={start.time}
-            endDate={end.date}
-            endTime={end.time}
-            timeZone="Asia/Seoul"
-            location={`${venue.name}, ${venue.address}`}
-            options={['Apple', 'Google', 'iCal', 'Outlook.com']}
-            buttonStyle="default"
-            label="ADD TO CALENDAR"
-            language="ko"
-            lightMode="light"
-            hideBackground
-            hideCheckmark
-            styleLight="
-              --btn-background: transparent;
-              --btn-text: #111111;
-              --btn-border: #111111;
-              --btn-border-radius: 0;
-              --btn-shadow: none;
-              --btn-font-weight: 500;
-              --font: IBM Plex Mono, ui-monospace, monospace;
-            "
-          />
+          <CalendarAdd label="ADD TO CALENDAR" variant="editorial" />
         </div>
       </div>
     </Section>

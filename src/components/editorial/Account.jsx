@@ -37,10 +37,16 @@ function AccountRow({ title, account }) {
 export default function Account() {
   const { groom, bride } = wedding;
   return (
-    <Section title="ACCOUNT">
+    <Section title={
+      <>
+        Send Your
+        <br />
+        Warm Wishes
+        </>
+    }>
       <div className="mx-auto max-w-[390px]">
         <p className="mb-8 text-center text-[13px] leading-relaxed text-ink/55">
-          참석이 어려운 분들을 위해 계좌번호를 안내드립니다.
+          마음 전하실 곳
         </p>
         <AccountRow title="GROOM" account={groom.bankAccount} />
         <AccountRow title="BRIDE" account={bride.bankAccount} />
