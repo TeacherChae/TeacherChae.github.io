@@ -117,6 +117,6 @@ export const wedding = {
     image: '/images/share-thumb.jpg',
   },
   motif: {
-    footer: ['Arise My Love,', 'My Fair One,', 'and Come Away'],
+    footer: ['Arise My Love, My Fair One', 'and Come Away'],
   },
 };
