@@ -13,7 +13,7 @@
   const channels = (c) => `${round(c.r)} ${round(c.g)} ${round(c.b)}`;
 
   // Figma 컬렉션 이름 → tokens.json 버킷
-  const bucketMap = { Color: 'color', Spacing: 'spacing', Type: 'fontSize' };
+  const bucketMap = { Color: 'color', Spacing: 'spacing', Type: 'fontSize', Font: 'fontFamily' };
 
   const out = {
     _source: 'Figma local variables — exported by 주경 토큰 내보내기 플러그인',
@@ -21,6 +21,7 @@
     color: {},
     spacing: {},
     fontSize: {},
+    fontFamily: {},
   };
 
   for (const v of vars) {

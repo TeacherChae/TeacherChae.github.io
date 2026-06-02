@@ -37,19 +37,19 @@
   }
 
   .editorial-section {
-    @apply px-6 py-20;
+    @apply px-gutter py-20;
   }
 
   .section-kicker {
-    @apply font-display text-[34px] leading-none tracking-[0.16em] text-ink uppercase;
+    @apply font-display text-kicker leading-none tracking-[0.16em] text-ink uppercase;
   }
 
   .eyebrow {
-    @apply font-mono text-[10px] tracking-editorial text-ink/45 uppercase;
+    @apply font-mono text-label tracking-editorial text-ink/45 uppercase;
   }
 
   .hairline {
-    @apply mx-auto my-8 h-px w-12 bg-ink/20;
+    @apply mx-auto my-8 h-px w-hairline-width bg-ink/20;
   }
 
   .editorial-input {

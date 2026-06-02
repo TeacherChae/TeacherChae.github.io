@@ -18,4 +18,8 @@
   --font-size-name: 48px;
   --font-size-kicker: 34px;
   --font-size-label: 10px;
+  /* font-family */
+  --font-display: "Bodoni Moda", serif;
+  --font-sans: "Pretendard", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }

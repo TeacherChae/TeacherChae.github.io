@@ -37,12 +37,17 @@ Figma 변수  ──(내보내기)──►  src/design/tokens.json  ──(빌�
 ---
 
 ## 어떤 토큰이 있나
-| 컬렉션 | 토큰 | 코드에서 |
+| 컬렉션(Figma) | 토큰 | 코드에서 |
 |---|---|---|
 | Color | `paper`, `ink` | `bg-paper`, `text-ink`, `text-ink/55`, `bg-ink/20` … (투명도 자동) |
 | Color | `ink-70`~`ink-20` | 참고용. 코드는 `ink`에 투명도를 곱해 씀 |
-| Spacing | `gutter`(24), `control-height`(44), `hairline-width`(48) | CSS 변수 `--spacing-*` (현재 참고용) |
-| Type | `hero`(69), `name`(48), `kicker`(34), `label`(10) | CSS 변수 `--font-size-*` (현재 참고용) |
+| Font | `display`, `sans`, `mono` | `font-display`, `font-sans`, `font-mono` |
+| Type | `hero`, `name`, `kicker`, `label` | `text-hero`, `text-name`, `text-kicker`, `text-label` |
+| Spacing | `gutter`(24), `control-height`(44), `hairline-width`(48) | `px-gutter`, `h-control-height`, `w-hairline-width` |
 
-> 참고: 지금은 **색(paper/ink)** 만 Tailwind에 직접 연결돼 있습니다. spacing/font-size는 CSS 변수로
-> 생성은 되지만 컴포넌트가 아직 `text-[34px]` 같은 고정값을 쓰고 있어요. 이걸 변수로 바꾸길 원하면 알려주세요.
+연결된 곳(공용 클래스): `.section-kicker`(text-kicker), `.eyebrow`(text-label), `.editorial-section`(px-gutter), `.hairline`(w-hairline-width), 그리고 body 전체 글꼴(font-sans).
+
+> ⚠️ **글꼴 종류 주의**: 토큰은 *이미 로드된 글꼴들 사이의 교체*만 가능합니다. Figma에서 `font/display`를
+> 완전히 새로운 글꼴로 바꾸면, 그 글꼴을 `index.html`에 추가(로딩)하지 않는 한 화면엔 안 보입니다.
+>
+> 참고: 개별 컴포넌트의 `text-[48px]` 같은 일부 고정값은 아직 토큰화 안 됨(원하면 더 연결 가능).

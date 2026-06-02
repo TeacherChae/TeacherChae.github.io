@@ -10,9 +10,23 @@ export default {
         ink: 'rgb(var(--color-ink) / <alpha-value>)',
       },
       fontFamily: {
-        sans: ['Pretendard', 'system-ui', 'sans-serif'],
-        display: ['"Bodoni Moda"', 'serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        // Figma 글꼴 토큰(--font-*)을 참조. 폴백 스택은 tokens.css 안에 포함됨.
+        sans: ['var(--font-sans)'],
+        display: ['var(--font-display)'],
+        mono: ['var(--font-mono)'],
+      },
+      fontSize: {
+        // 이름 있는 글자크기 토큰 → `text-kicker`, `text-label` 등으로 사용.
+        hero: 'var(--font-size-hero)',
+        name: 'var(--font-size-name)',
+        kicker: 'var(--font-size-kicker)',
+        label: 'var(--font-size-label)',
+      },
+      spacing: {
+        // 간격 토큰 → `px-gutter`, `w-hairline-width`, `h-control-height` 등으로 사용.
+        gutter: 'var(--spacing-gutter)',
+        'control-height': 'var(--spacing-control-height)',
+        'hairline-width': 'var(--spacing-hairline-width)',
       },
       maxWidth: {
         page: '520px',

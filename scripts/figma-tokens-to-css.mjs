@@ -39,6 +39,18 @@ for (const [name, v] of Object.entries(t.fontSize || {})) {
   lines.push(`  --font-size-${name}: ${v}px;`);
 }
 
+// 글꼴 패밀리: Figma 는 기본 이름만 저장 → 여기서 폴백 스택을 붙인다.
+const FONT_FALLBACK = {
+  display: 'serif',
+  sans: 'system-ui, sans-serif',
+  mono: 'ui-monospace, monospace',
+};
+lines.push('  /* font-family */');
+for (const [name, v] of Object.entries(t.fontFamily || {})) {
+  const fallback = FONT_FALLBACK[name] || 'sans-serif';
+  lines.push(`  --font-${name}: "${v}", ${fallback};`);
+}
+
 lines.push('}');
 lines.push('');
 
