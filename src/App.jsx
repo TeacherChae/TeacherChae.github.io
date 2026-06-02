@@ -15,6 +15,7 @@ export default function App() {
 
   return (
     <main className="page">
+      <div className="grain" aria-hidden="true" />
       {!openingDone ? (
         <Opening onComplete={() => setOpeningDone(true)} />
       ) : (

@@ -1,6 +1,7 @@
 import { wedding } from '../../config/wedding.js';
 import CalendarAdd from '../CalendarAdd.jsx';
 import { SecondaryButton, Section } from './_shared.jsx';
+import { Reveal } from './motion.jsx';
 
 function buildMapLinks(venue) {
   const q = encodeURIComponent(`${venue.name} ${venue.address}`);
@@ -16,7 +17,7 @@ export default function Location() {
   const maps = buildMapLinks(venue);
   return (
     <Section title="LOCATION">
-      <div className="mx-auto max-w-[390px] text-center">
+      <Reveal className="mx-auto max-w-[390px] text-center">
         <p className="font-display text-[44px] leading-none tracking-[-0.035em] text-ink">{venue.name}</p>
         <p className="mt-6 text-[14px] leading-relaxed text-ink/65">{venue.address}</p>
         <div className="mt-10 grid grid-cols-1 gap-3">
@@ -29,7 +30,7 @@ export default function Location() {
           <p className="eyebrow mb-4">CALENDAR</p>
           <CalendarAdd label="ADD TO CALENDAR" variant="editorial" />
         </div>
-      </div>
+      </Reveal>
     </Section>
   );
 }

@@ -1,11 +1,13 @@
+import { Reveal } from './motion.jsx';
+
 export function Section({ id, title, children, className = '' }) {
   return (
     <section id={id} className={`editorial-section ${className}`}>
       {title && (
-        <div className="text-center">
+        <Reveal className="text-center">
           <p className="section-kicker">{title}</p>
           <div className="hairline" />
-        </div>
+        </Reveal>
       )}
       {children}
     </section>

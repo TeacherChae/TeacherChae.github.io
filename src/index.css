@@ -24,6 +24,18 @@
     @apply mx-auto max-w-page min-h-screen bg-paper;
   }
 
+  /* 인쇄물 질감의 미세한 페이퍼 그레인 오버레이 (정적, 클릭 통과). */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.04;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+  }
+
   .editorial-section {
     @apply px-6 py-20;
   }

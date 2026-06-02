@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { wedding } from '../../config/wedding.js';
 import { SecondaryButton, Section } from './_shared.jsx';
+import { Reveal } from './motion.jsx';
 
 function AccountRow({ title, account }) {
   const [copied, setCopied] = useState(false);
@@ -44,13 +45,13 @@ export default function Account() {
         Warm Wishes
         </>
     }>
-      <div className="mx-auto max-w-[390px]">
+      <Reveal className="mx-auto max-w-[390px]">
         <p className="mb-8 text-center text-[13px] leading-relaxed text-ink/55">
           마음 전하실 곳
         </p>
         <AccountRow title="GROOM" account={groom.bankAccount} />
         <AccountRow title="BRIDE" account={bride.bankAccount} />
-      </div>
+      </Reveal>
     </Section>
   );
 }
