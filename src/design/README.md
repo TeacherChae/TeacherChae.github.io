@@ -39,13 +39,15 @@ Figma 변수  ──(내보내기)──►  src/design/tokens.json  ──(빌�
 ## 어떤 토큰이 있나
 | 컬렉션(Figma) | 토큰 | 코드에서 |
 |---|---|---|
-| Color | `paper`, `ink` | `bg-paper`, `text-ink`, `text-ink/55`, `bg-ink/20` … (투명도 자동) |
-| Color | `ink-70`~`ink-20` | 참고용. 코드는 `ink`에 투명도를 곱해 씀 |
+| Color | `paper`, `ink` | `bg-paper`, `text-ink`, `text-ink/55`, `bg-ink/20` … |
 | Font | `display`, `sans`, `mono` | `font-display`, `font-sans`, `font-mono` |
 | Type | `hero`, `name`, `kicker`, `label` | `text-hero`, `text-name`, `text-kicker`, `text-label` |
 | Spacing | `gutter`(24), `control-height`(44), `hairline-width`(48) | `px-gutter`, `h-control-height`, `w-hairline-width` |
 
 연결된 곳(공용 클래스): `.section-kicker`(text-kicker), `.eyebrow`(text-label), `.editorial-section`(px-gutter), `.hairline`(w-hairline-width), 그리고 body 전체 글꼴(font-sans).
+
+**투명도 원칙**: 색은 `paper`/`ink` **단일 토큰**만 둔다. 반투명이 필요하면 토큰을 더 만들지 말고
+사용처에서 alpha 를 조절한다 — 코드는 `text-ink/55`, Figma는 `ink`에 연결 후 레이어 opacity 조절.
 
 > ⚠️ **글꼴 종류 주의**: 토큰은 *이미 로드된 글꼴들 사이의 교체*만 가능합니다. Figma에서 `font/display`를
 > 완전히 새로운 글꼴로 바꾸면, 그 글꼴을 `index.html`에 추가(로딩)하지 않는 한 화면엔 안 보입니다.
