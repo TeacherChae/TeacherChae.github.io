@@ -1,0 +1,21 @@
+/* AUTO-GENERATED — Figma 변수에서 생성됨. 직접 수정하지 말 것. */
+/* 갱신: Figma에서 변수 변경 → 동기화 → `npm run tokens:build` */
+:root {
+  /* color */
+  --color-paper: 251 250 247;
+  --color-ink: 17 17 17;
+  --color-ink-70: rgba(17, 17, 17, 0.7);
+  --color-ink-55: rgba(17, 17, 17, 0.55);
+  --color-ink-45: rgba(17, 17, 17, 0.45);
+  --color-ink-35: rgba(17, 17, 17, 0.35);
+  --color-ink-20: rgba(17, 17, 17, 0.2);
+  /* spacing */
+  --spacing-gutter: 24px;
+  --spacing-control-height: 44px;
+  --spacing-hairline-width: 48px;
+  /* font-size */
+  --font-size-hero: 69px;
+  --font-size-name: 48px;
+  --font-size-kicker: 34px;
+  --font-size-label: 10px;
+}

@@ -4,8 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: '#FBFAF7',
-        ink: '#111111',
+        // Figma 변수에서 생성된 CSS 변수(src/styles/tokens.css)를 참조.
+        // 채널(R G B) 형식이라 `text-ink/55` 같은 투명도 문법이 그대로 동작한다.
+        paper: 'rgb(var(--color-paper) / <alpha-value>)',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Pretendard', 'system-ui', 'sans-serif'],
