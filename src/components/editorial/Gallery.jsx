@@ -1,11 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
 import { SecondaryButton, Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
+import SmartImage from './SmartImage.jsx';
 
 export default function Gallery() {
   const { gallery } = wedding;
+  const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const total = gallery.length;
   const current = gallery[index];
@@ -13,9 +17,10 @@ export default function Gallery() {
   const padded = useMemo(() => String(index + 1).padStart(2, '0'), [index]);
   const totalPadded = useMemo(() => String(total).padStart(2, '0'), [total]);
 
-  function move(delta) {
-    setIndex((i) => (i + delta + total) % total);
-  }
+  const move = useCallback(
+    (delta) => setIndex((i) => (i + delta + total) % total),
+    [total],
+  );
 
   function handleTouchEnd(e) {
     if (touchStart == null) return;
@@ -23,6 +28,23 @@ export default function Gallery() {
     if (Math.abs(diff) > 42) move(diff > 0 ? 1 : -1);
     setTouchStart(null);
   }
+
+  // 라이트박스 열림 동안: 바디 스크롤 잠금 + 키보드(←/→/Esc) 조작.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+      else if (e.key === 'ArrowRight') move(1);
+      else if (e.key === 'ArrowLeft') move(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, move]);
 
   if (!current) return null;
 
@@ -34,24 +56,86 @@ export default function Gallery() {
           <span>/</span>
           <span>{totalPadded}</span>
         </div>
-        <div
-          className="aspect-[4/5] overflow-hidden bg-ink/5"
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="사진 크게 보기"
+          className="block aspect-[4/5] w-full overflow-hidden bg-ink/5"
           onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
           onTouchEnd={handleTouchEnd}
         >
-          <img
+          <SmartImage
             key={current.src}
             src={current.src}
             alt={current.alt}
             className="h-full w-full object-cover"
-            loading={index === 0 ? 'eager' : 'lazy'}
+            eager={index === 0}
           />
-        </div>
+        </button>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <SecondaryButton onClick={() => move(-1)}>PREV</SecondaryButton>
           <SecondaryButton onClick={() => move(1)}>NEXT</SecondaryButton>
         </div>
       </Reveal>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-[120] flex flex-col bg-ink/95"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduce ? undefined : { opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setOpen(false)}
+            onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="flex items-center justify-between px-6 py-5 font-mono text-[10px] tracking-[0.28em] text-paper/70">
+              <span>
+                {padded} / {totalPadded}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                }}
+                aria-label="닫기"
+                className="px-2 py-1 tracking-[0.28em]"
+              >
+                CLOSE
+              </button>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center px-4 pb-4">
+              <SmartImage
+                key={current.src}
+                src={current.src}
+                alt={current.alt}
+                className="max-h-full max-w-full object-contain"
+                eager
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 px-6 pb-8" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => move(-1)}
+                className="border border-paper/40 py-3 font-mono text-[10px] uppercase tracking-[0.22em] text-paper transition hover:bg-paper hover:text-ink"
+              >
+                PREV
+              </button>
+              <button
+                type="button"
+                onClick={() => move(1)}
+                className="border border-paper/40 py-3 font-mono text-[10px] uppercase tracking-[0.22em] text-paper transition hover:bg-paper hover:text-ink"
+              >
+                NEXT
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Section>
   );
 }
