@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Inter', -apple-system, sans-serif;
+        margin: 0;
+        padding: 16px;
+        color: #111;
+        font-size: 12px;
+      }
+      h3 { margin: 0 0 6px; font-size: 13px; }
+      p { margin: 0 0 10px; color: #555; line-height: 1.5; }
+      code { background: #f2f1ee; padding: 1px 4px; border-radius: 3px; }
+      textarea {
+        width: 100%;
+        height: 280px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        resize: none;
+      }
+      .row { display: flex; gap: 8px; margin-top: 10px; }
+      button {
+        flex: 1;
+        padding: 9px;
+        border: 1px solid #111;
+        border-radius: 6px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      button.primary { background: #111; color: #fff; }
+      .ok { color: #2f7d4f; margin-top: 8px; min-height: 16px; }
+    </style>
+  </head>
+  <body>
+    <h3>디자인 토큰 내보내기</h3>
+    <p>
+      아래 JSON을 <code>src/design/tokens.json</code> 에 저장하세요. (복사하거나 다운로드 후 그 위치로 이동)
+      그다음 터미널에서 <code>npm run tokens:build</code> 를 실행하면 사이트에 반영됩니다.
+    </p>
+    <textarea id="out" readonly></textarea>
+    <div class="row">
+      <button id="copy">클립보드에 복사</button>
+      <button id="download" class="primary">tokens.json 다운로드</button>
+    </div>
+    <div class="ok" id="status"></div>
+
+    <script>
+      let jsonText = '';
+      const status = document.getElementById('status');
+
+      onmessage = (e) => {
+        const msg = e.data.pluginMessage;
+        if (!msg) return;
+        jsonText = JSON.stringify(msg, null, 2);
+        document.getElementById('out').value = jsonText;
+      };
+
+      document.getElementById('copy').onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(jsonText);
+          status.textContent = '✓ 복사됨 — src/design/tokens.json 에 붙여넣기';
+        } catch {
+          document.getElementById('out').select();
+          status.textContent = '직접 선택해서 복사하세요 (Ctrl/Cmd+C)';
+        }
+      };
+
+      document.getElementById('download').onclick = () => {
+        const blob = new Blob([jsonText], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'tokens.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        status.textContent = '✓ 다운로드됨 — src/design/tokens.json 으로 옮기세요';
+      };
+    </script>
+  </body>
+</html>

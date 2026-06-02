@@ -20,7 +20,7 @@ lines.push('/* 갱신: Figma에서 변수 변경 → 동기화 → `npm run toke
 lines.push(':root {');
 
 lines.push('  /* color */');
-for (const [name, c] of Object.entries(t.color)) {
+for (const [name, c] of Object.entries(t.color || {})) {
   if (c.alpha === 1) {
     lines.push(`  --color-${name}: ${c.channels};`);
   } else {
@@ -30,12 +30,12 @@ for (const [name, c] of Object.entries(t.color)) {
 }
 
 lines.push('  /* spacing */');
-for (const [name, v] of Object.entries(t.spacing)) {
+for (const [name, v] of Object.entries(t.spacing || {})) {
   lines.push(`  --spacing-${name}: ${v}px;`);
 }
 
 lines.push('  /* font-size */');
-for (const [name, v] of Object.entries(t.fontSize)) {
+for (const [name, v] of Object.entries(t.fontSize || {})) {
   lines.push(`  --font-size-${name}: ${v}px;`);
 }
 
