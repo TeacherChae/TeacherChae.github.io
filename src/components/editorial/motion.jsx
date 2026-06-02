@@ -8,8 +8,8 @@ import { motion, useReducedMotion } from 'framer-motion';
 const EASE = [0.22, 1, 0.36, 1];
 const VIEWPORT = { once: true, margin: '0px 0px -12% 0px' };
 
-// 단일 블록을 아래에서 살짝 떠오르며 페이드인.
-export function Reveal({ children, className = '', delay = 0, y = 16, as = 'div' }) {
+// 단일 블록을 아래에서 떠오르며 블러가 풀리듯 페이드인.
+export function Reveal({ children, className = '', delay = 0, y = 36, as = 'div' }) {
   const reduce = useReducedMotion();
   const MotionTag = motion[as] ?? motion.div;
 
@@ -21,10 +21,10 @@ export function Reveal({ children, className = '', delay = 0, y = 16, as = 'div'
   return (
     <MotionTag
       className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       viewport={VIEWPORT}
-      transition={{ duration: 0.7, ease: EASE, delay }}
+      transition={{ duration: 1.15, ease: EASE, delay }}
     >
       {children}
     </MotionTag>
@@ -33,12 +33,12 @@ export function Reveal({ children, className = '', delay = 0, y = 16, as = 'div'
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.16, delayChildren: 0.12 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+  hidden: { opacity: 0, y: 28, filter: 'blur(5px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.95, ease: EASE } },
 };
 
 // 자식 요소들을 한 줄씩 순차로 등장시키는 컨테이너.
