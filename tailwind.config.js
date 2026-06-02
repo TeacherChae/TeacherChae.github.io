@@ -17,9 +17,13 @@ export default {
       },
       fontSize: {
         // 이름 있는 글자크기 토큰 → `text-kicker`, `text-label` 등으로 사용.
+        opening: 'var(--font-size-opening)',
         hero: 'var(--font-size-hero)',
+        day: 'var(--font-size-day)',
         name: 'var(--font-size-name)',
+        venue: 'var(--font-size-venue)',
         kicker: 'var(--font-size-kicker)',
+        quote: 'var(--font-size-quote)',
         label: 'var(--font-size-label)',
       },
       spacing: {

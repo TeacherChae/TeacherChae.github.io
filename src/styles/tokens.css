@@ -9,9 +9,13 @@
   --spacing-control-height: 44px;
   --spacing-hairline-width: 48px;
   /* font-size */
+  --font-size-opening: 76px;
   --font-size-hero: 69px;
+  --font-size-day: 60px;
   --font-size-name: 48px;
+  --font-size-venue: 44px;
   --font-size-kicker: 34px;
+  --font-size-quote: 24px;
   --font-size-label: 10px;
   /* font-family */
   --font-display: "Bodoni Moda", serif;
