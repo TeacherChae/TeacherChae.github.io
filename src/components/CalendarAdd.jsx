@@ -85,26 +85,18 @@ function makeDownloadUrl(ics) {
 }
 
 const baseButtonClass =
-  'inline-flex min-w-[11.6em] items-center justify-center border px-4 py-3 text-center text-[14px] transition';
+  'inline-flex min-w-[11.6em] items-center justify-center border px-4 py-3 text-center text-body transition';
 
-const variants = {
-  soft: {
-    wrapper: 'mt-4 flex justify-center',
-    button:
-      `${baseButtonClass} rounded-md border-[#C97D60] bg-white/60 font-sans font-semibold text-[#2F3F36] shadow-sm hover:bg-white`,
-    menu: 'border-[#C97D60]/50 bg-white/95 text-[#2F3F36] shadow-lg',
-    item: 'hover:bg-[#C97D60]/10',
-  },
-  editorial: {
-    wrapper: 'mt-0 flex justify-center',
-    button:
-      `${baseButtonClass} rounded-none border-ink bg-transparent font-mono text-[10px] font-medium uppercase tracking-[0.22em] text-ink hover:bg-ink hover:text-paper`,
-    menu: 'border-ink/40 bg-paper/95 font-mono text-[10px] uppercase tracking-[0.18em] text-ink shadow-lg',
-    item: 'hover:bg-ink hover:text-paper',
-  },
+// 청첩장은 모노톤 에디토리얼 단일 스타일. (이전 'soft' 변형은 팔레트 밖 색이라 제거됨)
+const styles = {
+  wrapper: 'mt-0 flex justify-center',
+  button:
+    `${baseButtonClass} rounded-none border-ink bg-transparent font-mono text-label font-medium uppercase tracking-widest text-ink hover:bg-ink hover:text-paper`,
+  menu: 'border-ink/40 bg-paper/95 font-mono text-label uppercase tracking-widest text-ink shadow-lg',
+  item: 'hover:bg-ink hover:text-paper',
 };
 
-export default function CalendarAdd({ label = '내 캘린더에 추가', variant = 'soft' }) {
+export default function CalendarAdd({ label = '내 캘린더에 추가' }) {
   const [open, setOpen] = useState(false);
   const event = useMemo(() => makeCalendarEvent(), []);
   const links = useMemo(() => {
@@ -116,7 +108,6 @@ export default function CalendarAdd({ label = '내 캘린더에 추가', variant
       outlook: buildOutlookUrl(event),
     };
   }, [event]);
-  const styles = variants[variant] || variants.soft;
 
   return (
     <div className={styles.wrapper}>

@@ -6,19 +6,19 @@ export default function DateVenue() {
   return (
     <Stagger as="section" className="px-6 py-16 text-center">
       <StaggerItem as="p" className="eyebrow">THE WEDDING OF</StaggerItem>
-      <StaggerItem as="h2" className="mt-5 font-display text-[48px] leading-none tracking-[-0.03em] text-ink">
+      <StaggerItem as="h2" className="mt-5 type-title text-ink">
         {bride.nameKo} & {groom.nameKo}
       </StaggerItem>
       <StaggerItem className="hairline" />
-      <StaggerItem className="space-y-2 text-[15px] leading-relaxed text-ink/78">
+      <StaggerItem className="space-y-2 type-body text-ink/78">
         <p>{date.dayKo}</p>
         <p>{venue.name}</p>
-        <p className="text-[13px] text-ink/50">{venue.address}</p>
+        <p className="text-small text-ink/50">{venue.address}</p>
       </StaggerItem>
-      <StaggerItem as="p" className="mt-10 font-display text-[60px] leading-none tracking-[-0.05em] text-ink">
+      <StaggerItem as="p" className="mt-10 type-headline text-ink">
         SATURDAY
       </StaggerItem>
-      <StaggerItem as="p" className="mt-3 font-mono text-[11px] tracking-editorial text-ink/55">{date.time}</StaggerItem>
+      <StaggerItem as="p" className="mt-3 type-meta text-ink/55">{date.time}</StaggerItem>
     </Stagger>
   );
 }

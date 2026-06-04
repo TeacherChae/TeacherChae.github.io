@@ -50,8 +50,8 @@ export default function Gallery() {
 
   return (
     <Section title="GALLERY">
-      <Reveal className="mx-auto max-w-[390px]">
-        <div className="mb-5 flex items-center justify-between font-mono text-[10px] tracking-[0.28em] text-ink/50">
+      <Reveal className="mx-auto max-w-content">
+        <div className="mb-5 flex items-center justify-between font-mono text-label tracking-ultra text-ink/50">
           <span>{padded}</span>
           <span>/</span>
           <span>{totalPadded}</span>
@@ -90,7 +90,7 @@ export default function Gallery() {
             onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="flex items-center justify-between px-6 py-5 font-mono text-[10px] tracking-[0.28em] text-paper/70">
+            <div className="flex items-center justify-between px-6 py-5 font-mono text-label tracking-ultra text-paper/70">
               <span>
                 {padded} / {totalPadded}
               </span>
@@ -101,7 +101,7 @@ export default function Gallery() {
                   setOpen(false);
                 }}
                 aria-label="닫기"
-                className="px-2 py-1 tracking-[0.28em]"
+                className="px-2 py-1 tracking-ultra"
               >
                 CLOSE
               </button>
@@ -121,14 +121,14 @@ export default function Gallery() {
               <button
                 type="button"
                 onClick={() => move(-1)}
-                className="border border-paper/40 py-3 font-mono text-[10px] uppercase tracking-[0.22em] text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-mono text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
               >
                 PREV
               </button>
               <button
                 type="button"
                 onClick={() => move(1)}
-                className="border border-paper/40 py-3 font-mono text-[10px] uppercase tracking-[0.22em] text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-mono text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
               >
                 NEXT
               </button>

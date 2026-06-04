@@ -21,9 +21,9 @@ function AccountRow({ title, account }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 text-left">
           <p className="eyebrow text-ink/55">{title}</p>
-          <p className="mt-3 text-[15px] leading-relaxed text-ink/82">
+          <p className="mt-3 type-body text-ink/82">
             {account.bank}<br />
-            <span className="font-mono text-[13px] tracking-[0.08em]">{account.number}</span><br />
+            <span className="type-data">{account.number}</span><br />
             예금주 {account.holder}
           </p>
         </div>
@@ -45,8 +45,8 @@ export default function Account() {
         Warm Wishes
         </>
     }>
-      <Reveal className="mx-auto max-w-[390px]">
-        <p className="mb-8 text-center text-[13px] leading-relaxed text-ink/55">
+      <Reveal className="mx-auto max-w-content">
+        <p className="mb-8 text-center type-caption text-ink/55">
           마음 전하실 곳
         </p>
         <AccountRow title="GROOM" account={groom.bankAccount} />

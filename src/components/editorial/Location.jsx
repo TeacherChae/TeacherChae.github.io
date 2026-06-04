@@ -26,9 +26,9 @@ export default function Location() {
   const maps = buildMapLinks(venue);
   return (
     <Section title="LOCATION">
-      <Reveal className="mx-auto max-w-[390px] text-center">
-        <p className="font-display text-[44px] leading-none tracking-[-0.035em] text-ink">{venue.name}</p>
-        <p className="mt-6 text-[14px] leading-relaxed text-ink/65">{venue.address}</p>
+      <Reveal className="mx-auto max-w-content text-center">
+        <p className="type-subtitle text-ink">{venue.name}</p>
+        <p className="mt-6 type-body text-ink/65">{venue.address}</p>
 
         {/* 모노톤 톤에 맞춰 그레이스케일 처리한 지도 미리보기 */}
         <div className="mt-8 aspect-[3/2] w-full overflow-hidden border border-ink/15 grayscale">
@@ -49,7 +49,7 @@ export default function Location() {
 
         <div className="mt-12">
           <p className="eyebrow mb-4">CALENDAR</p>
-          <CalendarAdd label="ADD TO CALENDAR" variant="editorial" />
+          <CalendarAdd label="ADD TO CALENDAR" />
         </div>
       </Reveal>
     </Section>

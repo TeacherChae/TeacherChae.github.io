@@ -56,4 +56,31 @@ lines.push('');
 
 await mkdir(path.dirname(OUT), { recursive: true });
 await writeFile(OUT, lines.join('\n'));
-console.log(`tokens.css 생성: ${path.relative(ROOT, OUT)} (${Object.keys(t.color).length} colors, ${Object.keys(t.spacing).length} spacing, ${Object.keys(t.fontSize).length} font-size)`);
+
+// ── 복합 타입 토큰(type styles) → src/styles/type-styles.css ──────────────
+// 코드 소유. 한 토큰이 폰트·크기·행간·자간·케이스를 묶는다(색 제외).
+// size/font 는 Figma 토큰(--font-*)을, leading/tracking 은 코드 스케일을 참조.
+// 나중에 Figma Text Styles 내보내기로 type-styles.json 을 채우면 그대로 승급된다.
+const TYPES_SRC = path.join(ROOT, 'src/design/type-styles.json');
+const TYPES_OUT = path.join(ROOT, 'src/styles/type-styles.css');
+const styles = JSON.parse(await readFile(TYPES_SRC, 'utf8'));
+
+const tlines = [];
+tlines.push('/* AUTO-GENERATED — src/design/type-styles.json 에서 생성됨. 직접 수정하지 말 것. */');
+tlines.push('/* 갱신: type-styles.json 수정 → `npm run tokens:build` */');
+tlines.push('/* @layer 래퍼 없이 bare 규칙으로 둔다(파일별 PostCSS 처리 — @tailwind 미포함). @apply 는 정상 동작. */');
+let styleCount = 0;
+for (const [name, s] of Object.entries(styles)) {
+  if (name.startsWith('_')) continue;
+  const cls = [`font-${s.font}`, `text-${s.size}`, `leading-${s.leading}`, `tracking-${s.tracking}`];
+  if (s.case === 'upper') cls.push('uppercase');
+  tlines.push(`.type-${name} { @apply ${cls.join(' ')}; }`);
+  styleCount += 1;
+}
+tlines.push('');
+await writeFile(TYPES_OUT, tlines.join('\n'));
+
+console.log(
+  `생성: tokens.css (${Object.keys(t.color).length} colors, ${Object.keys(t.spacing).length} spacing, ` +
+  `${Object.keys(t.fontSize).length} font-size) · type-styles.css (${styleCount} type styles)`,
+);

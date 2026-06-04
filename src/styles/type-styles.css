@@ -1,0 +1,17 @@
+/* AUTO-GENERATED — src/design/type-styles.json 에서 생성됨. 직접 수정하지 말 것. */
+/* 갱신: type-styles.json 수정 → `npm run tokens:build` */
+/* @layer 래퍼 없이 bare 규칙으로 둔다(파일별 PostCSS 처리 — @tailwind 미포함). @apply 는 정상 동작. */
+.type-opening { @apply font-display text-opening leading-flush tracking-tighter; }
+.type-display { @apply font-display text-hero leading-flush tracking-tighter; }
+.type-headline { @apply font-display text-day leading-none tracking-tighter; }
+.type-title { @apply font-display text-name leading-none tracking-tight; }
+.type-subtitle { @apply font-display text-venue leading-none tracking-tight; }
+.type-kicker { @apply font-display text-kicker leading-none tracking-wider uppercase; }
+.type-quote { @apply font-display text-quote leading-cozy tracking-tight; }
+.type-body { @apply font-sans text-body leading-relaxed tracking-normal; }
+.type-verse { @apply font-sans text-body leading-verse tracking-normal; }
+.type-scripture { @apply font-sans text-small leading-loose tracking-normal; }
+.type-caption { @apply font-sans text-small leading-relaxed tracking-normal; }
+.type-overline { @apply font-mono text-label leading-none tracking-editorial uppercase; }
+.type-meta { @apply font-mono text-micro leading-none tracking-editorial; }
+.type-data { @apply font-mono text-small leading-normal tracking-wide; }

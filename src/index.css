@@ -14,8 +14,8 @@
   }
 
   ::selection {
-    background: #111111;
-    color: #FBFAF7;
+    background: rgb(var(--color-ink));
+    color: rgb(var(--color-paper));
   }
 }
 
@@ -41,7 +41,7 @@
   }
 
   .section-kicker {
-    @apply font-display text-kicker leading-none tracking-[0.16em] text-ink uppercase;
+    @apply font-display text-kicker leading-none tracking-wider text-ink uppercase;
   }
 
   .eyebrow {
@@ -53,14 +53,14 @@
   }
 
   .editorial-input {
-    @apply w-full rounded-none border-0 border-b border-ink/35 bg-transparent px-0 py-3 text-[15px] text-ink placeholder-ink/30 outline-none transition focus:border-ink;
+    @apply w-full rounded-none border-0 border-b border-ink/35 bg-transparent px-0 py-3 text-body text-ink placeholder-ink/30 outline-none transition focus:border-ink;
   }
 
   .editorial-button-primary {
-    @apply inline-flex items-center justify-center border border-ink bg-ink px-5 py-3 font-mono text-[10px] uppercase tracking-editorial text-paper transition disabled:opacity-40;
+    @apply inline-flex items-center justify-center border border-ink bg-ink px-5 py-3 font-mono text-label uppercase tracking-editorial text-paper transition disabled:opacity-40;
   }
 
   .editorial-button-secondary {
-    @apply inline-flex items-center justify-center border border-ink/70 bg-transparent px-4 py-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink transition hover:bg-ink hover:text-paper disabled:opacity-40;
+    @apply inline-flex items-center justify-center border border-ink/70 bg-transparent px-4 py-3 font-mono text-label uppercase tracking-widest text-ink transition hover:bg-ink hover:text-paper disabled:opacity-40;
   }
 }

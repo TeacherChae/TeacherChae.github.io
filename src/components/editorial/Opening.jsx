@@ -28,7 +28,7 @@ export default function Opening({ onComplete }) {
           aria-label="You are invited"
         >
           <motion.div
-            className="text-center font-display text-[clamp(4.4rem,18vw,8rem)] leading-[0.82] tracking-[-0.045em]"
+            className="text-center type-opening"
             initial="hidden"
             animate="show"
             exit="hide"

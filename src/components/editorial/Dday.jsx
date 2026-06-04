@@ -21,8 +21,8 @@ export default function Dday() {
   return (
     <Reveal as="section" className="px-6 pb-10 text-center">
       <p className="eyebrow">COUNTDOWN</p>
-      <p className="mt-4 font-display text-[64px] leading-none tracking-[-0.04em] text-ink">{label}</p>
-      <p className="mt-4 font-mono text-[11px] tracking-editorial text-ink/55">
+      <p className="mt-4 type-headline text-ink">{label}</p>
+      <p className="mt-4 type-meta text-ink/55">
         {date.short} · {weekday}요일
       </p>
     </Reveal>

@@ -4,7 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "predev": "npm run tokens:build",
     "dev": "vite",
+    "prebuild": "npm run tokens:build",
     "build": "vite build",
     "preview": "vite preview",
     "optimize:images": "node scripts/optimize-images.mjs",

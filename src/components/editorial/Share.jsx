@@ -16,8 +16,8 @@ export default function Share() {
 
   return (
     <Section title="SHARE">
-      <Reveal className="mx-auto max-w-[390px]">
-        <p className="mb-8 text-center text-[14px] leading-relaxed text-ink/60">
+      <Reveal className="mx-auto max-w-content">
+        <p className="mb-8 text-center text-body leading-relaxed text-ink/60">
           소중한 분들에게 청첩장을 전해주세요.
         </p>
         <div className="grid grid-cols-1 gap-3">
