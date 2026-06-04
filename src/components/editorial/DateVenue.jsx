@@ -15,7 +15,7 @@ export default function DateVenue() {
         <p>{venue.name}</p>
         <p className="text-small text-ink/50">{venue.address}</p>
       </StaggerItem>
-      <StaggerItem as="p" className="mt-10 type-headline text-ink">
+      <StaggerItem as="p" className="mt-10 type-title text-ink">
         SATURDAY
       </StaggerItem>
       <StaggerItem as="p" className="mt-3 type-meta text-ink/55">{date.time}</StaggerItem>
