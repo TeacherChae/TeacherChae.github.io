@@ -26,14 +26,14 @@ export default function App() {
           <ScrollProgress />
           <Hero />
           <DateVenue />
-          <Dday />
           <Invitation />
           <Gallery />
           <Location />
           <RSVP />
-          <Account />
           <Guestbook />
+          <Account />
           <Share />
+          <Dday />
           <Footer />
         </>
       )}
