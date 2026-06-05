@@ -9,7 +9,7 @@ export default function Invitation() {
       <div className="mx-auto max-w-content text-center">
         <Reveal delay={0.1}>
           <p className="eyebrow">{scripture.ref}</p>
-          <div className="mt-5 space-y-2 type-scripture text-ink/55">
+          <div className="mt-5 space-y-2 type-scripture text-ink/70">
             {scripture.lines.map((line) => <p key={line}>{line}</p>)}
           </div>
         </Reveal>

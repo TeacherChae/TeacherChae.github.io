@@ -28,7 +28,7 @@ export default function Location() {
     <Section title="LOCATION">
       <Reveal className="mx-auto max-w-content text-center">
         <p className="type-quote text-ink">{venue.name}</p>
-        <p className="mt-6 type-body text-ink/65">{venue.address}</p>
+        <p className="mt-6 type-body text-ink/70">{venue.address}</p>
 
         {/* 모노톤 톤에 맞춰 그레이스케일 처리한 지도 미리보기 */}
         <div className="mt-8 aspect-[3/2] w-full overflow-hidden border border-ink/15 grayscale">
