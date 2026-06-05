@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
-import { SecondaryButton, Section } from './_shared.jsx';
+import { Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
 import SmartImage from './SmartImage.jsx';
 
@@ -10,7 +10,8 @@ export default function Gallery() {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
+  const [touchStart, setTouchStart] = useState(null); // 라이트박스 스와이프용
+  const scrollerRef = useRef(null);
   const total = gallery.length;
   const current = gallery[index];
 
@@ -28,6 +29,22 @@ export default function Gallery() {
     if (Math.abs(diff) > 42) move(diff > 0 ? 1 : -1);
     setTouchStart(null);
   }
+
+  // 섹션 캐러셀: 스냅 스크롤 위치 → 인덱스. (손가락을 따라 앞뒤 사진이 이어져 넘어간다)
+  function handleScroll() {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const i = Math.round(el.scrollLeft / el.clientWidth);
+    if (i !== index && i >= 0 && i < total) setIndex(i);
+  }
+
+  // 라이트박스(키보드/스와이프/버튼)에서 이동하면 뒤의 캐러셀도 같은 사진으로 맞춘다.
+  // 닫혀 있을 때는 스크롤이 인덱스의 단일 출처이므로 건드리지 않는다(드래그와 충돌 방지).
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollerRef.current;
+    if (el) el.scrollTo({ left: index * el.clientWidth, behavior: 'auto' });
+  }, [open, index]);
 
   // 라이트박스 열림 동안: 바디 스크롤 잠금 + 키보드(←/→/Esc) 조작.
   useEffect(() => {
@@ -56,25 +73,31 @@ export default function Gallery() {
           <span>/</span>
           <span>{totalPadded}</span>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="사진 크게 보기"
-          className="block aspect-[4/5] w-full overflow-hidden bg-ink/5"
-          onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
-          onTouchEnd={handleTouchEnd}
+        <div
+          ref={scrollerRef}
+          onScroll={handleScroll}
+          className="no-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-ink/5"
+          aria-label="갤러리 사진 슬라이드"
         >
-          <SmartImage
-            key={current.src}
-            src={current.src}
-            alt={current.alt}
-            className="h-full w-full object-cover"
-            eager={index === 0}
-          />
-        </button>
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <SecondaryButton onClick={() => move(-1)}>PREV</SecondaryButton>
-          <SecondaryButton onClick={() => move(1)}>NEXT</SecondaryButton>
+          {gallery.map((item, i) => (
+            <button
+              key={item.src}
+              type="button"
+              onClick={() => {
+                setIndex(i);
+                setOpen(true);
+              }}
+              aria-label={`사진 크게 보기 (${i + 1}/${total})`}
+              className="h-full w-full shrink-0 snap-center overflow-hidden"
+            >
+              <SmartImage
+                src={item.src}
+                alt={item.alt}
+                className="h-full w-full object-cover"
+                eager={i === 0}
+              />
+            </button>
+          ))}
         </div>
       </Reveal>
 
