@@ -16,7 +16,8 @@ export default {
       fontFamily: {
         sans: ['var(--font-sans)'],
         display: ['var(--font-display)'],
-        mono: ['var(--font-mono)'],
+        titleKo: ['var(--font-titleKo)'],
+        scripture: ['var(--font-scripture)'],
       },
       fontSize: {
         // 반응형 디스플레이: 뷰포트로 스케일하되 상한은 Figma 토큰이 정한다.
@@ -57,6 +58,7 @@ export default {
         flush: '0.86',
         cozy: '0.92',
         verse: '2.05',
+        'footer-quote': '2',
       },
       dropShadow: {
         'hero-title': '0 2px 16px rgba(0, 0, 0, 0.35)',

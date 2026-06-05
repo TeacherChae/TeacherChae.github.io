@@ -49,10 +49,10 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.65, duration: 0.9, ease: 'easeOut' }}
       >
-        <h1 className="type-display text-paper drop-shadow-hero-title">
-          <span className="block">{bride.nameEn}</span>
+        <h1 className="type-display font-extralight text-paper drop-shadow-hero-title">
+          <span className="block">{bride.nameKo}</span>
           <span className="block text-[0.68em] leading-cozy">&</span>
-          <span className="block">{groom.nameEn}</span>
+          <span className="block">{groom.nameKo}</span>
         </h1>
         <p className="mt-7 type-meta text-paper/82 drop-shadow-hero-sub">
           {date.short}

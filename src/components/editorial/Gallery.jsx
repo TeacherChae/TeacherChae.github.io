@@ -66,9 +66,9 @@ export default function Gallery() {
   if (!current) return null;
 
   return (
-    <Section title="GALLERY">
+    <Section title="사진첩">
       <Reveal className="mx-auto max-w-content">
-        <div className="mb-5 flex items-center justify-between font-mono text-label tracking-ultra text-ink/50">
+        <div className="mb-5 flex items-center justify-between font-titleKo text-label tracking-ultra text-ink/50">
           <span>{padded}</span>
           <span>/</span>
           <span>{totalPadded}</span>
@@ -113,7 +113,7 @@ export default function Gallery() {
             onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="flex items-center justify-between px-6 py-5 font-mono text-label tracking-ultra text-paper/70">
+            <div className="flex items-center justify-between px-6 py-5 font-titleKo text-label tracking-ultra text-paper/70">
               <span>
                 {padded} / {totalPadded}
               </span>
@@ -144,14 +144,14 @@ export default function Gallery() {
               <button
                 type="button"
                 onClick={() => move(-1)}
-                className="border border-paper/40 py-3 font-mono text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
               >
                 PREV
               </button>
               <button
                 type="button"
                 onClick={() => move(1)}
-                className="border border-paper/40 py-3 font-mono text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
               >
                 NEXT
               </button>

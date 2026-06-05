@@ -5,13 +5,13 @@ import { Reveal, Stagger, StaggerItem } from './motion.jsx';
 export default function Invitation() {
   const { scripture, greeting } = wedding;
   return (
-    <Section title="INVITATION">
+    <Section title="모시는 글">
       <div className="mx-auto max-w-content text-center">
         <Reveal delay={0.1}>
           <p className="eyebrow">{scripture.ref}</p>
-          <div className="mt-5 space-y-2 type-scripture text-ink/70">
-            {scripture.lines.map((line) => <p key={line}>{line}</p>)}
-          </div>
+          <p className="mt-5 type-scripture text-ink/70">
+            {scripture.lines.map((line) => <span key={line} className="block">{line}</span>)}
+          </p>
         </Reveal>
         <div className="my-12 h-px bg-ink/10" />
         <Stagger className="space-y-2.5 type-verse text-ink/82">

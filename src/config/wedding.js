@@ -34,7 +34,7 @@ const weddingShort = '2026.09.05';
 const weddingTime = '11:00 AM';
 
 const venueName = '남산 한남 웨딩가든';
-const venueAddress = '서울 용산구 소월로 323';
+const venueAddress = '서울특별시 용산구 소월로 323';
 
 export const wedding = {
   groom: {
@@ -111,6 +111,6 @@ export const wedding = {
     image: '/images/share-thumb.jpg',
   },
   motif: {
-    footer: ['Arise My Love, My Fair One', 'and Come Away'],
+    footer: ['Arise My Love,', 'My Fair One,', 'and Come Away'],
   },
 };

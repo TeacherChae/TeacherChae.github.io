@@ -38,17 +38,8 @@ function AccountRow({ title, account }) {
 export default function Account() {
   const { groom, bride } = wedding;
   return (
-    <Section title={
-      <>
-        Send Your
-        <br />
-        Warm Wishes
-        </>
-    }>
+    <Section title="마음 전하실 곳">
       <Reveal className="mx-auto max-w-content">
-        <p className="mb-8 text-center type-caption text-ink/55">
-          마음 전하실 곳
-        </p>
         <AccountRow title="GROOM" account={groom.bankAccount} />
         <AccountRow title="BRIDE" account={bride.bankAccount} />
       </Reveal>

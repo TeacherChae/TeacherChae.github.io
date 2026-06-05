@@ -70,14 +70,14 @@ export default function Dday() {
       <div
         role="timer"
         aria-label={`예식까지 ${parts.d}일 ${parts.h}시간 ${parts.mi}분 ${parts.s}초`}
-        className="mt-4 flex items-center justify-center font-mono text-quote tracking-wide text-ink"
+        className="mt-4 flex items-center justify-center font-titleKo text-quote tracking-wide text-ink"
       >
         {segs.map(({ value, unit }) => (
           <span key={unit} className="flex items-center">
             {value.split('').map((ch, i) => (
               <FlipDigit key={i} ch={ch} />
             ))}
-            <span className="ml-0.5 mr-1.5 font-sans text-small text-ink/45" aria-hidden="true">
+            <span className="ml-0.5 mr-1.5 font-titleKo text-small text-ink/45" aria-hidden="true">
               {unit}
             </span>
           </span>

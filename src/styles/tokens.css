@@ -12,7 +12,7 @@
   --font-size-opening: 74px;
   --font-size-hero: 64px;
   --font-size-day: 60px;
-  --font-size-name: 48px;
+  --font-size-name: 32px;
   --font-size-venue: 44px;
   --font-size-kicker: 34px;
   --font-size-quote: 20px;
@@ -21,7 +21,8 @@
   --font-size-micro: 11px;
   --font-size-label: 10px;
   /* font-family */
-  --font-display: "Bodoni Moda", serif;
+  --font-display: "Bodoni Moda", Pretendard, serif;
+  --font-titleKo: "MaruBuri", serif;
   --font-sans: "Pretendard", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-scripture: "Hahmlet", serif;
 }

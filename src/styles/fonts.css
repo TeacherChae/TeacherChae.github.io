@@ -1,0 +1,36 @@
+/* 직접 호스팅 폰트(@font-face) — public/fonts/ 의 woff2 를 등록.
+   MaruBuri = 한국어 디스플레이(Hero 이름·섹션 제목). 본문/라벨 한글은 Pretendard(CDN). */
+
+/* MaruBuri — Figma type/display(ExtraLight)·type/title(Light)·type/kicker(Regular) 와 일치. */
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('/fonts/MaruBuri-ExtraLight.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/MaruBuri-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MaruBuri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/MaruBuri-Regular.woff2') format('woff2');
+}
+
+/* Hahmlet — 성경구절·인사말 등 literary 세리프(Figma type/scripture·type/verse 와 일치). */
+@font-face {
+  font-family: 'Hahmlet';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Hahmlet-Regular.woff2') format('woff2');
+}

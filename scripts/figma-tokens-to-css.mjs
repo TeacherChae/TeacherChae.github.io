@@ -41,9 +41,10 @@ for (const [name, v] of Object.entries(t.fontSize || {})) {
 
 // 글꼴 패밀리: Figma 는 기본 이름만 저장 → 여기서 폴백 스택을 붙인다.
 const FONT_FALLBACK = {
-  display: 'serif',
+  display: 'Pretendard, serif',
+  titleKo: 'serif',
   sans: 'system-ui, sans-serif',
-  mono: 'ui-monospace, monospace',
+  scripture: 'serif',
 };
 lines.push('  /* font-family */');
 for (const [name, v] of Object.entries(t.fontFamily || {})) {

@@ -91,8 +91,8 @@ const baseButtonClass =
 const styles = {
   wrapper: 'mt-0 flex justify-center',
   button:
-    `${baseButtonClass} rounded-none border-ink bg-transparent font-mono text-label font-medium uppercase tracking-widest text-ink hover:bg-ink hover:text-paper`,
-  menu: 'border-ink/40 bg-paper/95 font-mono text-label uppercase tracking-widest text-ink shadow-lg',
+    `${baseButtonClass} rounded-none border-ink bg-transparent font-titleKo text-label uppercase tracking-widest text-ink hover:bg-ink hover:text-paper`,
+  menu: 'border-ink/40 bg-paper/95 font-titleKo text-label uppercase tracking-widest text-ink shadow-lg',
   item: 'hover:bg-ink hover:text-paper',
 };
 

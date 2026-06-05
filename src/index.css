@@ -41,11 +41,11 @@
   }
 
   .section-kicker {
-    @apply font-display text-kicker leading-none tracking-wider text-ink uppercase;
+    @apply font-titleKo text-kicker leading-none tracking-wider text-ink uppercase;
   }
 
   .eyebrow {
-    @apply font-mono text-label tracking-editorial text-ink/45 uppercase;
+    @apply font-titleKo text-label tracking-editorial text-ink/45 uppercase;
   }
 
   .hairline {
@@ -57,11 +57,11 @@
   }
 
   .editorial-button-primary {
-    @apply inline-flex items-center justify-center border border-ink bg-ink px-5 py-3 font-mono text-label uppercase tracking-editorial text-paper transition disabled:opacity-40;
+    @apply inline-flex items-center justify-center border border-ink bg-ink px-5 py-3 font-titleKo text-label uppercase tracking-editorial text-paper transition disabled:opacity-40;
   }
 
   .editorial-button-secondary {
-    @apply inline-flex items-center justify-center border border-ink/70 bg-transparent px-4 py-3 font-mono text-label uppercase tracking-widest text-ink transition hover:bg-ink hover:text-paper disabled:opacity-40;
+    @apply inline-flex items-center justify-center border border-ink/70 bg-transparent px-4 py-3 font-titleKo text-label uppercase tracking-widest text-ink transition hover:bg-ink hover:text-paper disabled:opacity-40;
   }
 }
 

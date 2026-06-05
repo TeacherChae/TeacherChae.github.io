@@ -25,7 +25,7 @@ export default function Location() {
   const { venue } = wedding;
   const maps = buildMapLinks(venue);
   return (
-    <Section title="LOCATION">
+    <Section title="오시는 길">
       <Reveal className="mx-auto max-w-content text-center">
         <p className="type-quote text-ink">{venue.name}</p>
         <p className="mt-6 type-body text-ink/70">{venue.address}</p>

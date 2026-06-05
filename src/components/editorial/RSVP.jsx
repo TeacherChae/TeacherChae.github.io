@@ -18,7 +18,7 @@ function ChoiceButton({ active, children, ...props }) {
   return (
     <button
       type="button"
-      className={`border py-3 font-mono text-small tracking-widest transition ${
+      className={`border py-3 font-sans text-small tracking-widest transition ${
         active ? 'border-ink bg-ink text-paper' : 'border-ink/35 bg-transparent text-ink hover:border-ink'
       }`}
       {...props}
@@ -64,7 +64,7 @@ function PhoneInput({ value, onChange }) {
         <div key={index} className="contents">
           <input
             ref={refs[index]}
-            className="w-full rounded-none border border-ink/35 bg-transparent px-3 py-3 text-center font-mono text-body tracking-wider text-ink outline-none transition focus:border-ink"
+            className="w-full rounded-none border border-ink/35 bg-transparent px-3 py-3 text-center font-sans text-body tracking-wider text-ink outline-none transition focus:border-ink"
             type="tel"
             inputMode="numeric"
             autoComplete={index === 0 ? 'tel' : undefined}
@@ -76,7 +76,7 @@ function PhoneInput({ value, onChange }) {
             onPaste={(e) => handlePaste(e, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
           />
-          {index < 2 && <span className="font-mono text-ink/35">-</span>}
+          {index < 2 && <span className="font-sans text-ink/35">-</span>}
         </div>
       ))}
     </div>
@@ -87,7 +87,7 @@ function CompanionStepper({ value, onChange }) {
   return (
     <div className="mt-2 grid grid-cols-[1fr_1fr_1fr] border border-ink/35 text-center">
       <button type="button" className="py-3 text-xl" onClick={() => onChange(Math.max(1, value - 1))} aria-label="동행 인원 줄이기">−</button>
-      <div className="border-x border-ink/20 py-3 font-mono text-small tracking-widest">{value}</div>
+      <div className="border-x border-ink/20 py-3 font-sans text-small tracking-widest">{value}</div>
       <button type="button" className="py-3 text-xl" onClick={() => onChange(Math.min(30, value + 1))} aria-label="동행 인원 늘리기">+</button>
     </div>
   );
@@ -214,7 +214,7 @@ export default function RSVP() {
 
   if (!isSupabaseConfigured) {
     return (
-      <Section title="RSVP">
+      <Section title="참석 여부">
         <div className="mx-auto max-w-content border border-dashed border-ink/25 px-5 py-10 text-center text-small text-ink/45">
           RSVP 준비 중
         </div>
@@ -224,7 +224,7 @@ export default function RSVP() {
 
   if (status === 'success') {
     return (
-      <Section title="RSVP">
+      <Section title="참석 여부">
         <div className="mx-auto max-w-content py-8 text-center text-body leading-loose text-ink/75">
           소중한 응답 감사합니다.
         </div>
@@ -233,7 +233,7 @@ export default function RSVP() {
   }
 
   return (
-    <Section title="RSVP">
+    <Section title="참석 여부">
       <form onSubmit={handleSubmit} className="mx-auto max-w-content space-y-8 text-left">
         <div>
           <FieldLabel>성함</FieldLabel>

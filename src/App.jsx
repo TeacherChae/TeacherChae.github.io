@@ -9,7 +9,6 @@ import Location from './components/editorial/Location.jsx';
 import RSVP from './components/editorial/RSVP.jsx';
 import Account from './components/editorial/Account.jsx';
 import Guestbook from './components/editorial/Guestbook.jsx';
-import Share from './components/editorial/Share.jsx';
 import Footer from './components/editorial/Footer.jsx';
 import ScrollProgress from './components/editorial/ScrollProgress.jsx';
 
@@ -32,7 +31,6 @@ export default function App() {
           <RSVP />
           <Guestbook />
           <Account />
-          <Share />
           <Dday />
           <Footer />
         </>

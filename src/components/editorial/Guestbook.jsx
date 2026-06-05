@@ -80,7 +80,7 @@ export default function Guestbook() {
 
   if (!isSupabaseConfigured) {
     return (
-      <Section title="GUESTBOOK">
+      <Section title="방명록">
         <div className="mx-auto max-w-content border border-dashed border-ink/25 px-5 py-10 text-center text-small text-ink/45">
           GUESTBOOK 준비 중
         </div>
@@ -89,7 +89,7 @@ export default function Guestbook() {
   }
 
   return (
-    <Section title="GUESTBOOK">
+    <Section title="방명록">
       <div className="mx-auto max-w-content">
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <div>
@@ -130,7 +130,7 @@ export default function Guestbook() {
                 <article key={entry.id} className="border-t border-ink/12 py-5 last:border-b">
                   <div className="flex items-baseline justify-between gap-4">
                     <p className="text-body font-medium text-ink">{entry.name}</p>
-                    <p className="font-mono text-label text-ink/35">{formatDate(entry.created_at)}</p>
+                    <p className="font-titleKo text-label text-ink/35">{formatDate(entry.created_at)}</p>
                   </div>
                   <p className="mt-3 whitespace-pre-wrap type-body text-ink/72">{entry.message}</p>
                 </article>
@@ -140,7 +140,7 @@ export default function Guestbook() {
                   {loadingMore ? 'LOADING' : 'MORE'}
                 </SecondaryButton>
               ) : (
-                <p className="pt-2 text-center font-mono text-label tracking-widest text-ink/30">END</p>
+                <p className="pt-2 text-center font-titleKo text-label tracking-widest text-ink/30">END</p>
               )}
             </>
           )}

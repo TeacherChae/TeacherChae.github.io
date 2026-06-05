@@ -3,19 +3,19 @@
   "_fields": "font: display|sans|mono · size: opening|hero|day|name|venue|kicker|quote|body|small|micro|label · leading: flush|cozy|verse|none|relaxed|loose|normal · tracking: tighter|tight|wide|wider|widest|ultra|editorial|normal · case: none|upper",
 
   "opening":   { "font": "display", "size": "opening", "leading": "flush",   "tracking": "tighter",   "case": "none" },
-  "display":   { "font": "display", "size": "hero",    "leading": "flush",   "tracking": "tighter",   "case": "none" },
+  "display":   { "font": "titleKo", "size": "hero",    "leading": "none",    "tracking": "tighter",   "case": "none" },
   "headline":  { "font": "display", "size": "day",     "leading": "none",    "tracking": "tighter",   "case": "none" },
-  "title":     { "font": "display", "size": "name",    "leading": "none",    "tracking": "tight",     "case": "none" },
+  "title":     { "font": "titleKo", "size": "name",    "leading": "none",    "tracking": "tight",     "case": "none" },
   "subtitle":  { "font": "display", "size": "venue",   "leading": "none",    "tracking": "tight",     "case": "none" },
-  "kicker":    { "font": "display", "size": "kicker",  "leading": "none",    "tracking": "wider",     "case": "upper" },
-  "quote":     { "font": "display", "size": "quote",   "leading": "cozy",    "tracking": "tight",     "case": "none" },
+  "kicker":    { "font": "titleKo", "size": "kicker",  "leading": "none",    "tracking": "wider",     "case": "upper" },
+  "quote":     { "font": "sans",    "size": "quote",   "leading": "cozy",    "tracking": "tight",     "case": "none" },
 
   "body":      { "font": "sans",    "size": "body",    "leading": "relaxed", "tracking": "normal",    "case": "none" },
-  "verse":     { "font": "sans",    "size": "body",    "leading": "verse",   "tracking": "normal",    "case": "none" },
-  "scripture": { "font": "sans",    "size": "small",   "leading": "loose",   "tracking": "normal",    "case": "none" },
+  "verse":     { "font": "scripture", "size": "body",  "leading": "verse",   "tracking": "normal",    "case": "none" },
+  "scripture": { "font": "scripture", "size": "small", "leading": "loose",   "tracking": "normal",    "case": "none" },
   "caption":   { "font": "sans",    "size": "small",   "leading": "relaxed", "tracking": "normal",    "case": "none" },
 
-  "overline":  { "font": "mono",    "size": "label",   "leading": "none",    "tracking": "editorial", "case": "upper" },
-  "meta":      { "font": "mono",    "size": "micro",   "leading": "none",    "tracking": "editorial", "case": "none" },
-  "data":      { "font": "mono",    "size": "small",   "leading": "normal",  "tracking": "wide",      "case": "none" }
+  "overline":  { "font": "titleKo", "size": "label",   "leading": "none",    "tracking": "editorial", "case": "upper" },
+  "meta":      { "font": "titleKo", "size": "micro",   "leading": "none",    "tracking": "editorial", "case": "none" },
+  "data":      { "font": "sans",    "size": "small",   "leading": "normal",  "tracking": "wide",      "case": "none" }
 }
