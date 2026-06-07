@@ -11,6 +11,13 @@ import Account from './components/editorial/Account.jsx';
 import Guestbook from './components/editorial/Guestbook.jsx';
 import Footer from './components/editorial/Footer.jsx';
 import ScrollProgress from './components/editorial/ScrollProgress.jsx';
+import Bgm from './components/editorial/Bgm.jsx';
+
+// BGM 음원은 Supabase Storage('assets' 공개 버킷)에 둔다. ref 하드코딩 없이 env 에서 조립.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const bgmSrc = supabaseUrl
+  ? `${supabaseUrl}/storage/v1/object/public/assets/bgm.mp3`
+  : '/audio/bgm.mp3';
 
 export default function App() {
   const [openingDone, setOpeningDone] = useState(false);
@@ -18,6 +25,7 @@ export default function App() {
   return (
     <main className="page">
       <div className="grain" aria-hidden="true" />
+      <Bgm src={bgmSrc} />
       {!openingDone ? (
         <Opening onComplete={() => setOpeningDone(true)} />
       ) : (
