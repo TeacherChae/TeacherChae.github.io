@@ -3,7 +3,7 @@ import { wedding } from '../../config/wedding.js';
 import { SecondaryButton, Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
 
-function AccountRow({ title, account }) {
+function AccountRow({ account }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -17,11 +17,13 @@ function AccountRow({ title, account }) {
   }
 
   return (
-    <div className="border-t border-ink/15 py-6 last:border-b">
+    <div className="border-t border-ink/12 py-5 first:border-t-0">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 text-left">
-          <p className="eyebrow text-ink/55">{title}</p>
-          <p className="mt-3 type-body text-ink/82">
+          {account.role && (
+            <p className="font-titleKo text-label tracking-editorial text-ink/45">{account.role}</p>
+          )}
+          <p className="mt-2 type-body text-ink/82">
             {account.bank}<br />
             <span className="type-data">{account.number}</span><br />
             예금주 {account.holder}
@@ -35,13 +37,26 @@ function AccountRow({ title, account }) {
   );
 }
 
+function AccountGroup({ title, accounts }) {
+  return (
+    <div className="mb-10 last:mb-0">
+      <p className="eyebrow text-ink/55">{title}</p>
+      <div className="mt-3 border-t border-ink/15">
+        {accounts.map((account, i) => (
+          <AccountRow key={i} account={account} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Account() {
   const { groom, bride } = wedding;
   return (
     <Section title="마음 전하실 곳">
       <Reveal className="mx-auto max-w-content">
-        <AccountRow title="신랑 측" account={groom.bankAccount} />
-        <AccountRow title="신부 측" account={bride.bankAccount} />
+        <AccountGroup title="신랑 측" accounts={groom.bankAccounts} />
+        <AccountGroup title="신부 측" accounts={bride.bankAccounts} />
       </Reveal>
     </Section>
   );

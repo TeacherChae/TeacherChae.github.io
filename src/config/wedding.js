@@ -7,24 +7,23 @@ const groomNameEn = 'KeonHee';
 const groomFullNameEn = 'KeonHee Chae';
 const groomFather = '채문식';
 const groomMother = '박미용';
-const groomBankAccount = {
-  label: '신랑 측',
-  bank: '은행명',
-  number: '000000000000',
-  holder: groomNameKo,
-};
+// 한 측에 여러 계좌 — role(신랑/혼주 등)로 구분. 실제 은행/번호/예금주는 여기서 채운다.
+const groomBankAccounts = [
+  { role: '혼주', bank: '은행명', number: '000000000000', holder: groomFather },
+  { role: '혼주', bank: '은행명', number: '000000000000', holder: groomMother },
+  // { role: '신랑', bank: '은행명', number: '000000000000', holder: groomNameKo },
+];
 
 const brideNameKo = '이주경';
 const brideNameEn = 'JuGyeong';
 const brideFullNameEn = 'JuGyeong Lee';
 const brideFather = '이병연';
 const brideMother = '문숙희';
-const brideBankAccount = {
-  label: '신부 측',
-  bank: '은행명',
-  number: '000000000000',
-  holder: brideNameKo,
-};
+const brideBankAccounts = [
+  { role: '혼주', bank: '은행명', number: '000000000000', holder: brideFather },
+  { role: '혼주', bank: '은행명', number: '000000000000', holder: brideMother },
+  // { role: '신부', bank: '은행명', number: '000000000000', holder: brideNameKo },
+];
 
 const weddingDateIso = '2026-09-05T11:00';
 const weddingEndIso = '2026-09-05T13:00';
@@ -43,8 +42,7 @@ export const wedding = {
     fullNameEn: groomFullNameEn,
     father: groomFather,
     mother: groomMother,
-    bankAccount: groomBankAccount,
-    bankAccounts: [groomBankAccount],
+    bankAccounts: groomBankAccounts,
   },
   bride: {
     nameKo: brideNameKo,
@@ -52,8 +50,7 @@ export const wedding = {
     fullNameEn: brideFullNameEn,
     father: brideFather,
     mother: brideMother,
-    bankAccount: brideBankAccount,
-    bankAccounts: [brideBankAccount],
+    bankAccounts: brideBankAccounts,
   },
   date: {
     iso: weddingDateIso,
