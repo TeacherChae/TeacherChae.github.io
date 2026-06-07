@@ -11,7 +11,7 @@
   "quote":     { "font": "sans",    "size": "quote",   "leading": "cozy",    "tracking": "tight",     "case": "none" },
 
   "body":      { "font": "sans",    "size": "body",    "leading": "relaxed", "tracking": "normal",    "case": "none" },
-  "verse":     { "font": "scripture", "size": "body",  "leading": "verse",   "tracking": "normal",    "case": "none" },
+  "verse":     { "font": "sans",    "size": "body",    "leading": "verse",   "tracking": "normal",    "case": "none" },
   "scripture": { "font": "scripture", "size": "small", "leading": "loose",   "tracking": "normal",    "case": "none" },
   "caption":   { "font": "sans",    "size": "small",   "leading": "relaxed", "tracking": "normal",    "case": "none" },
 

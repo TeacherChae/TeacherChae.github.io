@@ -40,8 +40,8 @@ export default function Account() {
   return (
     <Section title="마음 전하실 곳">
       <Reveal className="mx-auto max-w-content">
-        <AccountRow title="GROOM" account={groom.bankAccount} />
-        <AccountRow title="BRIDE" account={bride.bankAccount} />
+        <AccountRow title="신랑 측" account={groom.bankAccount} />
+        <AccountRow title="신부 측" account={bride.bankAccount} />
       </Reveal>
     </Section>
   );

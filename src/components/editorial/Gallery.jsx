@@ -73,32 +73,36 @@ export default function Gallery() {
           <span>/</span>
           <span>{totalPadded}</span>
         </div>
-        <div
-          ref={scrollerRef}
-          onScroll={handleScroll}
-          className="no-scrollbar flex aspect-[4/5] w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-ink/5"
-          aria-label="갤러리 사진 슬라이드"
-        >
-          {gallery.map((item, i) => (
-            <button
-              key={item.src}
-              type="button"
-              onClick={() => {
-                setIndex(i);
-                setOpen(true);
-              }}
-              aria-label={`사진 크게 보기 (${i + 1}/${total})`}
-              className="h-full w-full shrink-0 snap-center overflow-hidden"
-            >
-              <SmartImage
-                src={item.src}
-                alt={item.alt}
-                className="h-full w-full object-cover"
-                eager={i === 0}
-              />
-            </button>
-          ))}
-        </div>
+      </Reveal>
+      {/* 사진 캐러셀은 섹션 거터를 상쇄해 페이지를 가득(엣지 투 엣지) 채운다. */}
+      <div
+        ref={scrollerRef}
+        onScroll={handleScroll}
+        className="no-scrollbar -mx-gutter flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overscroll-x-contain bg-ink/5"
+        aria-label="갤러리 사진 슬라이드"
+      >
+        {gallery.map((item, i) => (
+          <button
+            key={item.src}
+            type="button"
+            onClick={() => {
+              setIndex(i);
+              setOpen(true);
+            }}
+            aria-label={`사진 크게 보기 (${i + 1}/${total})`}
+            className="h-full w-full shrink-0 snap-center overflow-hidden"
+          >
+            <SmartImage
+              src={item.src}
+              alt={item.alt}
+              className="h-full w-full object-cover"
+              eager={i === 0}
+            />
+          </button>
+        ))}
+      </div>
+      <Reveal className="mx-auto mt-5 max-w-content">
+        <p className="text-center font-titleKo text-micro tracking-editorial text-ink/40">← SWIPE →</p>
       </Reveal>
 
       <AnimatePresence>

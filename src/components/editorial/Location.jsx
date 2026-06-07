@@ -2,6 +2,7 @@ import { wedding } from '../../config/wedding.js';
 import CalendarAdd from '../CalendarAdd.jsx';
 import { SecondaryButton, Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
+import VenueMap from './VenueMap.jsx';
 
 function buildMapLinks(venue) {
   const q = encodeURIComponent(`${venue.name} ${venue.address}`);
@@ -10,15 +11,6 @@ function buildMapLinks(venue) {
     kakao: venue.kakaoMapUrl || `https://map.kakao.com/?q=${q}`,
     google: venue.googleMapUrl || `https://www.google.com/maps/search/?api=1&query=${venue.lat},${venue.lng}`,
   };
-}
-
-function mapEmbedUrl(venue) {
-  // 키 없이 동작하는 OpenStreetMap 임베드(시각적 위치 앵커용).
-  // 실제 길찾기는 아래 네이버/카카오/구글 버튼으로 연결한다.
-  const dx = 0.004;
-  const dy = 0.0024;
-  const bbox = `${venue.lng - dx},${venue.lat - dy},${venue.lng + dx},${venue.lat + dy}`;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${venue.lat},${venue.lng}`;
 }
 
 export default function Location() {
@@ -30,15 +22,9 @@ export default function Location() {
         <p className="type-quote text-ink">{venue.name}</p>
         <p className="mt-6 type-body text-ink/70">{venue.address}</p>
 
-        {/* 모노톤 톤에 맞춰 그레이스케일 처리한 지도 미리보기 */}
-        <div className="mt-8 aspect-[3/2] w-full overflow-hidden border border-ink/15 grayscale">
-          <iframe
-            title={`${venue.name} 위치 지도`}
-            src={mapEmbedUrl(venue)}
-            className="h-full w-full"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+        {/* CARTO Voyager 타일 기반 Leaflet 지도(키 불필요). 길찾기는 아래 버튼이 담당. */}
+        <div className="mt-8 aspect-[3/2] w-full overflow-hidden border border-ink/15">
+          <VenueMap lat={venue.lat} lng={venue.lng} name={venue.name} />
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-3">

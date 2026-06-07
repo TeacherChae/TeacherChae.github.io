@@ -9,7 +9,7 @@
 .type-kicker { @apply font-titleKo text-kicker leading-none tracking-wider uppercase; }
 .type-quote { @apply font-sans text-quote leading-cozy tracking-tight; }
 .type-body { @apply font-sans text-body leading-relaxed tracking-normal; }
-.type-verse { @apply font-scripture text-body leading-verse tracking-normal; }
+.type-verse { @apply font-sans text-body leading-verse tracking-normal; }
 .type-scripture { @apply font-scripture text-small leading-loose tracking-normal; }
 .type-caption { @apply font-sans text-small leading-relaxed tracking-normal; }
 .type-overline { @apply font-titleKo text-label leading-none tracking-editorial uppercase; }
