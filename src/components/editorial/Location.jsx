@@ -3,6 +3,7 @@ import CalendarAdd from '../CalendarAdd.jsx';
 import { SecondaryButton, Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
 import VenueMap from './VenueMap.jsx';
+import { NaverIcon, KakaoIcon, GoogleMapIcon } from './MapIcons.jsx';
 
 function buildMapLinks(venue) {
   const q = encodeURIComponent(`${venue.name} ${venue.address}`);
@@ -28,9 +29,15 @@ export default function Location() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-3">
-          <SecondaryButton as="a" href={maps.naver} target="_blank" rel="noreferrer">NAVER MAP</SecondaryButton>
-          <SecondaryButton as="a" href={maps.kakao} target="_blank" rel="noreferrer">KAKAO MAP</SecondaryButton>
-          <SecondaryButton as="a" href={maps.google} target="_blank" rel="noreferrer">GOOGLE MAP</SecondaryButton>
+          <SecondaryButton as="a" href={maps.naver} target="_blank" rel="noreferrer" className="gap-2.5">
+            <NaverIcon className="h-[18px] w-[18px] shrink-0" /><span>NAVER MAP</span>
+          </SecondaryButton>
+          <SecondaryButton as="a" href={maps.kakao} target="_blank" rel="noreferrer" className="gap-2.5">
+            <KakaoIcon className="h-[18px] w-[18px] shrink-0" /><span>KAKAO MAP</span>
+          </SecondaryButton>
+          <SecondaryButton as="a" href={maps.google} target="_blank" rel="noreferrer" className="gap-2.5">
+            <GoogleMapIcon className="h-[18px] w-[13px] shrink-0" /><span>GOOGLE MAP</span>
+          </SecondaryButton>
         </div>
 
         <div className="mt-12">
