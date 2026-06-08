@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>한글 손글씨 획순 드로잉 — 수작업 방법론 가이드</title>
+<style>
+  :root{
+    --paper:#f6f1e7; --paper2:#fbf8f1; --ink:#2c2a26; --ink2:#6b6458;
+    --line:#e0d8c8; --accent:#b9874f; --accent2:#7a8b6f; --human:#b9874f; --claude:#5d7a9c;
+    --shadow:0 10px 30px -16px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.75; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px 120px}
+  header.hero{
+    text-align:center; padding:72px 22px 48px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,var(--paper2),var(--paper));
+  }
+  header.hero .eyebrow{letter-spacing:.34em; text-transform:uppercase; font-size:.72rem; color:var(--accent); margin:0 0 14px}
+  header.hero h1{font-size:clamp(1.8rem,4.5vw,2.7rem); margin:0 0 12px; font-weight:800; letter-spacing:-.01em}
+  header.hero p{max-width:620px; margin:0 auto; color:var(--ink2); font-size:1.02rem}
+  .toc{
+    max-width:920px; margin:34px auto 0; padding:18px 22px; display:flex; flex-wrap:wrap; gap:8px 18px;
+    justify-content:center; border:1px solid var(--line); border-radius:14px; background:var(--paper2);
+  }
+  .toc a{color:var(--ink2); text-decoration:none; font-size:.9rem; padding:3px 6px; border-radius:6px}
+  .toc a:hover{color:var(--ink); background:#eee7d7}
+  section{margin-top:56px}
+  h2{font-size:1.5rem; margin:0 0 6px; display:flex; align-items:center; gap:12px; letter-spacing:-.01em}
+  h2 .n{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--ink); color:var(--paper);
+    display:grid; place-items:center; font-size:.95rem; font-weight:700;
+  }
+  h3{font-size:1.08rem; margin:26px 0 6px}
+  p{margin:.5em 0}
+  .lead{color:var(--ink2)}
+  .card{
+    background:var(--paper2); border:1px solid var(--line); border-radius:16px; padding:22px 24px;
+    margin:18px 0; box-shadow:var(--shadow);
+  }
+  .fig{
+    background:#fffdf8; border:1px solid var(--line); border-radius:16px; padding:20px; margin:20px 0;
+  }
+  .fig figcaption{margin-top:12px; font-size:.88rem; color:var(--ink2); text-align:center}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media (max-width:680px){.two{grid-template-columns:1fr}}
+  .tag{display:inline-block; font-size:.74rem; padding:2px 9px; border-radius:999px; font-weight:700; letter-spacing:.02em}
+  .tag.human{background:#f3e3cf; color:#8a5e23}
+  .tag.claude{background:#dde7f1; color:#3c5a82}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.95rem}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+  th{background:#efe7d6}
+  .han{font-size:1.15rem; font-weight:700}
+  svg{display:block; max-width:100%; height:auto; margin:0 auto}
+  .demo-controls{display:flex; gap:10px; justify-content:center; align-items:center; margin-top:14px; flex-wrap:wrap}
+  button{
+    font:inherit; font-size:.92rem; padding:9px 18px; border-radius:999px; border:1px solid var(--ink);
+    background:var(--ink); color:var(--paper); cursor:pointer; transition:.18s;
+  }
+  button:hover{transform:translateY(-1px)}
+  button.ghost{background:transparent; color:var(--ink)}
+  .slider{display:flex; align-items:center; gap:8px; color:var(--ink2); font-size:.85rem}
+  .stroke{fill:none; stroke:var(--ink); stroke-width:5; stroke-linecap:round; stroke-linejoin:round}
+  .guide{fill:none; stroke:var(--line); stroke-width:1.2}
+  .num{font-size:11px; font-weight:700; fill:var(--accent)}
+  .numbg{fill:#fffdf8; stroke:var(--accent); stroke-width:1.4}
+  .lbl{font-size:13px; fill:var(--ink2)}
+  .pipe{fill:#fffdf8; stroke:var(--line); stroke-width:1.5; rx:10}
+  .callout{border-left:4px solid var(--accent); background:#fbf3e6; padding:12px 16px; border-radius:0 12px 12px 0; margin:16px 0}
+  .callout.warn{border-color:#c08a3e; background:#fbeeda}
+  .callout.note{border-color:var(--claude); background:#eaf1f8}
+  code{background:#efe7d6; padding:1px 6px; border-radius:5px; font-size:.88em}
+  ol li,ul li{margin:.3em 0}
+  .footer{margin-top:70px; padding-top:24px; border-top:1px solid var(--line); color:var(--ink2); font-size:.85rem; text-align:center}
+  .pen{fill:var(--accent)}
+  .arrowdir{stroke:var(--accent); stroke-width:2; fill:none}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">Hangul Handwriting · Stroke-Order Drawing</p>
+  <h1>한글 이름 손글씨 획순 드로잉<br/>수작업 방법론</h1>
+  <p>폰트 외곽선이 아니라 <b>펜이 지나가는 중심선(centerline)</b>을 한 획씩 그리고,
+     <b>획순대로 순서를 매겨</b> 한 글자가 손으로 써지듯 애니메이션하는 방법 — 처음부터 끝까지.</p>
+</header>
+
+<nav class="toc">
+  <a href="#why">왜 중심선인가</a>
+  <a href="#unit">한 획 = 하나의 path</a>
+  <a href="#order">획순 분해</a>
+  <a href="#demo">▶ 라이브 데모</a>
+  <a href="#brush">붓 두께 기법</a>
+  <a href="#anim">애니메이션 원리</a>
+  <a href="#flow">전체 워크플로우</a>
+  <a href="#ae">C · 영상(AE Write-on)</a>
+  <a href="#checklist">체크리스트</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- 1 -->
+  <section id="why">
+    <h2><span class="n">1</span> 왜 "중심선"을 그려야 하나</h2>
+    <p class="lead">영문 필기체는 글자가 이어져서 외곽선만 따라 그려도 쓰는 느낌이 납니다.
+      하지만 한글은 획이 많고 닫힌 외곽이라, <b>폰트 외곽선을 그리면 글자 테두리를 도는</b> 느낌이 됩니다.
+      펜으로 쓰는 느낌을 내려면 획의 <b>중심선</b>이 필요해요.</p>
+
+    <div class="two">
+      <figure class="fig">
+        <svg viewBox="0 0 220 180" role="img" aria-label="외곽선 방식">
+          <!-- ㅇ as donut outline -->
+          <circle cx="70" cy="90" r="34" fill="#e9e0cd"/>
+          <circle cx="70" cy="90" r="34" fill="none" stroke="#c9532f" stroke-width="2" stroke-dasharray="5 4"/>
+          <circle cx="70" cy="90" r="18" fill="#fffdf8"/>
+          <circle cx="70" cy="90" r="18" fill="none" stroke="#c9532f" stroke-width="2" stroke-dasharray="5 4"/>
+          <!-- ㅣ as filled bar outline -->
+          <rect x="140" y="40" width="22" height="100" rx="8" fill="#e9e0cd"/>
+          <rect x="140" y="40" width="22" height="100" rx="8" fill="none" stroke="#c9532f" stroke-width="2" stroke-dasharray="5 4"/>
+          <text x="110" y="168" text-anchor="middle" class="lbl">테두리(perimeter)를 따라감</text>
+        </svg>
+        <figcaption>❌ <b>외곽선(폰트 글리프)</b> — 펜이 글자 둘레를 돈다 → 윤곽선 따는 느낌, 한글은 지저분</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <svg viewBox="0 0 220 180" role="img" aria-label="중심선 방식">
+          <!-- ㅇ centerline -->
+          <circle cx="70" cy="90" r="26" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+          <!-- ㅣ centerline -->
+          <line x1="151" y1="45" x2="151" y2="135" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+          <!-- pen dot on centerline -->
+          <circle cx="70" cy="64" r="4" class="pen"/>
+          <circle cx="151" cy="45" r="4" class="pen"/>
+          <text x="110" y="168" text-anchor="middle" class="lbl">획의 한가운데를 지나감</text>
+        </svg>
+        <figcaption>✅ <b>중심선(수작업)</b> — 펜이 획 중심을 지난다 → 진짜 손으로 쓰는 느낌</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="unit">
+    <h2><span class="n">2</span> "한 획 = 하나의 path", 그리고 진행 방향</h2>
+    <p class="lead">펜을 떼지 않고 긋는 선 하나가 곧 하나의 <code>&lt;path&gt;</code>입니다.
+      <b>점을 찍는 순서가 펜 진행 방향</b>이고, 그 방향이 애니메이션에서 그려지는 방향이 됩니다.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 640 150" role="img" aria-label="획의 시작점과 방향">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <!-- stroke with start dot, direction arrow, end -->
+        <path d="M60,40 C160,10 260,120 360,70 C440,35 520,60 580,52" class="stroke" marker-end="url(#ah)"/>
+        <circle cx="60" cy="40" r="7" class="pen"/>
+        <text x="60" y="26" text-anchor="middle" class="num">시작</text>
+        <text x="585" y="40" class="num">끝</text>
+        <text x="320" y="135" text-anchor="middle" class="lbl">path의 점 순서 = 펜 방향 = 그려지는 방향 (반대로 찍으면 거꾸로 그려짐)</text>
+      </svg>
+    </figure>
+    <div class="callout">한 글자 안에서 여러 획을 그렸다면, <b>레이어/배열 순서를 획순대로</b> 정렬해 두세요.
+      이 순서가 그대로 "1번 획 → 2번 획 → …" 애니메이션 순서가 됩니다.</div>
+  </section>
+
+  <!-- 3 -->
+  <section id="order">
+    <h2><span class="n">3</span> 획순 분해 (이름 6글자)</h2>
+    <p class="lead">각 음절을 자모로 쪼개고 표준 획순으로 번호를 매깁니다.
+      <b>위→아래, 왼→오, 가로 먼저, 초성→중성→받침</b>이 기본 규칙이에요.</p>
+
+    <div class="two">
+      <figure class="fig">
+        <svg viewBox="0 0 200 200" role="img" aria-label="이 획순">
+          <rect x="20" y="20" width="160" height="160" rx="10" class="guide"/>
+          <!-- ㅇ -->
+          <circle cx="72" cy="100" r="30" class="stroke"/>
+          <!-- ㅣ -->
+          <line x1="150" y1="50" x2="150" y2="150" class="stroke"/>
+          <!-- numbers -->
+          <circle cx="72" cy="64" r="11" class="numbg"/><text x="72" y="68" text-anchor="middle" class="num">1</text>
+          <circle cx="150" cy="44" r="11" class="numbg"/><text x="150" y="48" text-anchor="middle" class="num">2</text>
+        </svg>
+        <figcaption><span class="han">이</span> = ㅇ(①원) → ㅣ(②세로)</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <svg viewBox="0 0 200 200" role="img" aria-label="주 획순">
+          <rect x="20" y="20" width="160" height="160" rx="10" class="guide"/>
+          <!-- ㅈ : ① 가로, ② 좌삐침, ③ 우삐침 -->
+          <line x1="50" y1="55" x2="130" y2="55" class="stroke"/>
+          <line x1="92" y1="55" x2="55" y2="95" class="stroke"/>
+          <line x1="92" y1="55" x2="128" y2="95" class="stroke"/>
+          <!-- ㅜ : ④ 가로, ⑤ 세로 -->
+          <line x1="40" y1="120" x2="160" y2="120" class="stroke"/>
+          <line x1="100" y1="120" x2="100" y2="165" class="stroke"/>
+          <circle cx="44" cy="50" r="10" class="numbg"/><text x="44" y="54" text-anchor="middle" class="num">1</text>
+          <circle cx="62" cy="92" r="10" class="numbg"/><text x="62" y="96" text-anchor="middle" class="num">2</text>
+          <circle cx="134" cy="92" r="10" class="numbg"/><text x="134" y="96" text-anchor="middle" class="num">3</text>
+          <circle cx="34" cy="116" r="10" class="numbg"/><text x="34" y="120" text-anchor="middle" class="num">4</text>
+          <circle cx="116" cy="160" r="10" class="numbg"/><text x="116" y="164" text-anchor="middle" class="num">5</text>
+        </svg>
+        <figcaption><span class="han">주</span> = ㅈ(①가로 ②좌삐침 ③우삐침) → ㅜ(④가로 ⑤세로)</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <svg viewBox="0 0 200 200" role="img" aria-label="경 획순">
+          <rect x="20" y="20" width="160" height="160" rx="10" class="guide"/>
+          <!-- ㄱ -->
+          <path d="M45,48 L92,48 L92,86" class="stroke"/>
+          <!-- ㅕ : 세로 + 짧은가로 2 -->
+          <line x1="120" y1="44" x2="120" y2="118" class="stroke"/>
+          <line x1="120" y1="64" x2="156" y2="64" class="stroke"/>
+          <line x1="120" y1="96" x2="156" y2="96" class="stroke"/>
+          <!-- ㅇ 받침 -->
+          <circle cx="92" cy="150" r="26" class="stroke"/>
+          <circle cx="40" cy="44" r="10" class="numbg"/><text x="40" y="48" text-anchor="middle" class="num">1</text>
+          <circle cx="120" cy="36" r="10" class="numbg"/><text x="120" y="40" text-anchor="middle" class="num">2</text>
+          <circle cx="146" cy="58" r="9" class="numbg"/><text x="146" y="62" text-anchor="middle" class="num">3</text>
+          <circle cx="146" cy="90" r="9" class="numbg"/><text x="146" y="94" text-anchor="middle" class="num">4</text>
+          <circle cx="92" cy="122" r="10" class="numbg"/><text x="92" y="126" text-anchor="middle" class="num">5</text>
+        </svg>
+        <figcaption><span class="han">경</span> = ㄱ(①) → ㅕ(②세로 ③④짧은가로) → ㅇ(⑤받침)</figcaption>
+      </figure>
+
+      <figure class="fig">
+        <svg viewBox="0 0 200 200" role="img" aria-label="채 획순">
+          <rect x="20" y="20" width="160" height="160" rx="10" class="guide"/>
+          <!-- ㅊ : 점, 가로, 좌삐침, 우삐침 -->
+          <line x1="64" y1="36" x2="64" y2="48" class="stroke"/>
+          <line x1="40" y1="64" x2="100" y2="64" class="stroke"/>
+          <line x1="68" y1="64" x2="44" y2="104" class="stroke"/>
+          <line x1="68" y1="64" x2="96" y2="104" class="stroke"/>
+          <!-- ㅐ : 세로, 짧은가로, 세로 -->
+          <line x1="128" y1="44" x2="128" y2="156" class="stroke"/>
+          <line x1="128" y1="100" x2="152" y2="100" class="stroke"/>
+          <line x1="152" y1="44" x2="152" y2="156" class="stroke"/>
+          <text x="40" y="150" class="lbl">※ 점·삐침 순서는 표준표 따름</text>
+        </svg>
+        <figcaption><span class="han">채</span> = ㅊ(점→가로→삐침2) → ㅐ(세로·짧은가로·세로)</figcaption>
+      </figure>
+    </div>
+
+    <table>
+      <thead><tr><th>음절</th><th>자모 분해</th><th>획 구성 (초성 → 중성 → 받침)</th></tr></thead>
+      <tbody>
+        <tr><td class="han">이</td><td>ㅇ + ㅣ</td><td>ㅇ(원) → ㅣ(세로) — 2획</td></tr>
+        <tr><td class="han">주</td><td>ㅈ + ㅜ</td><td>ㅈ(가로·좌삐침·우삐침) → ㅜ(가로·세로) — 5획</td></tr>
+        <tr><td class="han">경</td><td>ㄱ + ㅕ + ㅇ</td><td>ㄱ → ㅕ(세로·짧은가로2) → ㅇ받침 — 5획</td></tr>
+        <tr><td class="han">채</td><td>ㅊ + ㅐ</td><td>ㅊ(점·가로·삐침2) → ㅐ(세로·짧은가로·세로) — 7획</td></tr>
+        <tr><td class="han">건</td><td>ㄱ + ㅓ + ㄴ</td><td>ㄱ → ㅓ(세로·짧은가로) → ㄴ받침 — 5획</td></tr>
+        <tr><td class="han">희</td><td>ㅎ + ㅢ</td><td>ㅎ(점·가로·원) → ㅢ(세로·가로) — 6획</td></tr>
+      </tbody>
+    </table>
+    <p class="lead">합계 대략 <b>30획 내외</b>. 붓 강약(가변폭)으로 가면 획당 면(shape)까지 그려야 해서 path 수가 더 늘어납니다.</p>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo">
+    <h2><span class="n">▶</span> 라이브 데모 — 획순대로 그려보기</h2>
+    <p class="lead">아래는 <b>중심선 + 획순 stagger</b>로 글자가 써지는 모습을 그대로 시연한 것입니다.
+      (획 모양은 개념 설명용 근사치 — 실제 작업에선 4단계 트레이싱으로 더 자연스럽게 그립니다.)</p>
+    <figure class="fig">
+      <svg id="demo" viewBox="0 0 560 220" role="img" aria-label="이주경 획순 드로잉 데모">
+        <!-- 이 -->
+        <g transform="translate(20,20)">
+          <circle class="dstroke" cx="62" cy="100" r="30"/>
+          <line class="dstroke" x1="138" y1="48" x2="138" y2="150"/>
+        </g>
+        <!-- 주 -->
+        <g transform="translate(200,20)">
+          <line class="dstroke" x1="40" y1="55" x2="120" y2="55"/>
+          <line class="dstroke" x1="82" y1="55" x2="46" y2="95"/>
+          <line class="dstroke" x1="82" y1="55" x2="118" y2="95"/>
+          <line class="dstroke" x1="30" y1="120" x2="150" y2="120"/>
+          <line class="dstroke" x1="90" y1="120" x2="90" y2="165"/>
+        </g>
+        <!-- 경 -->
+        <g transform="translate(380,20)">
+          <path class="dstroke" d="M40,48 L92,48 L92,86"/>
+          <line class="dstroke" x1="120" y1="44" x2="120" y2="118"/>
+          <line class="dstroke" x1="120" y1="64" x2="156" y2="64"/>
+          <line class="dstroke" x1="120" y1="96" x2="156" y2="96"/>
+          <circle class="dstroke" cx="86" cy="150" r="26"/>
+        </g>
+      </svg>
+      <div class="demo-controls">
+        <button id="play">▶ 다시 그리기</button>
+        <button class="ghost" id="toggleNum">번호 보기</button>
+        <label class="slider">속도
+          <input id="speed" type="range" min="0.4" max="2" step="0.1" value="1"/>
+        </label>
+      </div>
+      <figcaption>이 · 주 · 경 — 한 획씩, 획순대로 (실제 청첩장 구현도 이 <code>pathLength</code> 방식과 동일)</figcaption>
+    </figure>
+  </section>
+
+  <!-- 4 brush -->
+  <section id="brush">
+    <h2><span class="n">4</span> (선택) 붓 두께 — 마스크 기법</h2>
+    <p class="lead">균일 두께 펜은 path에 <code>stroke-width</code>만 주면 끝입니다.
+      붓처럼 굵기 강약을 주려면, <b>두꺼운 채움 면(shape)을 깔고 그 위를 중심선 마스크로 쓸어</b> 점점 드러냅니다.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 640 170" role="img" aria-label="붓 마스크 기법">
+        <!-- step 1: filled brush shape -->
+        <g transform="translate(0,0)">
+          <path d="M40,90 C70,40 120,40 150,70 C175,95 150,130 110,120 C80,112 60,120 40,118 Z" fill="#e3d8c2"/>
+          <text x="100" y="158" text-anchor="middle" class="lbl">① 굵기 있는 붓획(면)</text>
+        </g>
+        <!-- step 2: centerline mask -->
+        <g transform="translate(220,0)">
+          <path d="M40,90 C70,40 120,40 150,70 C175,95 150,130 110,120 C80,112 60,120 40,118 Z" fill="#f0e8d6"/>
+          <path d="M48,100 C78,55 120,52 142,78" fill="none" stroke="var(--accent)" stroke-width="6" stroke-dasharray="6 5"/>
+          <text x="100" y="158" text-anchor="middle" class="lbl">② 중심선 마스크(획순/방향)</text>
+        </g>
+        <!-- step 3: revealed -->
+        <g transform="translate(440,0)">
+          <clipPath id="revclip"><rect x="30" y="30" width="78" height="110"/></clipPath>
+          <path d="M40,90 C70,40 120,40 150,70 C175,95 150,130 110,120 C80,112 60,120 40,118 Z" fill="#cdb487" clip-path="url(#revclip)"/>
+          <path d="M40,90 C70,40 120,40 150,70 C175,95 150,130 110,120 C80,112 60,120 40,118 Z" fill="none" stroke="#d8ccb2" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="100" y="158" text-anchor="middle" class="lbl">③ 마스크 진행 → 붓획이 드러남</text>
+        </g>
+      </svg>
+      <figcaption>붓 두께 + 그리는 느낌을 둘 다 살리는 정석(= CSS-Tricks "irregular strokes" 마스크 기법)</figcaption>
+    </figure>
+    <div class="callout note">처음엔 <b>균일 두께(A)</b>로 시작해서 형태/획순을 확정하고,
+      만족스러우면 그때 <b>붓 마스크(B)</b>로 업그레이드하는 걸 추천합니다.</div>
+  </section>
+
+  <!-- 5 anim principle -->
+  <section id="anim">
+    <h2><span class="n">5</span> 애니메이션 원리 — <code>stroke-dashoffset</code> / <code>pathLength</code></h2>
+    <p class="lead">선 하나를 "그려지게" 하는 원리는 점선(dash) 트릭입니다.
+      획 길이만큼의 빈 점선을 만들고, 그 간격(offset)을 길이 → 0으로 줄이면 선이 왼쪽부터 채워집니다.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 640 200" role="img" aria-label="dashoffset 원리">
+        <g font-size="12" fill="var(--ink2)">
+          <text x="20" y="34">offset = 길이 (안 보임)</text>
+          <line x1="200" y1="30" x2="600" y2="30" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400"/>
+          <text x="20" y="100">offset = 길이 × 0.5</text>
+          <line x1="200" y1="96" x2="600" y2="96" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="200"/>
+          <text x="20" y="166">offset = 0 (완성)</text>
+          <line x1="200" y1="162" x2="600" y2="162" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="0"/>
+        </g>
+      </svg>
+      <figcaption>framer-motion에선 <code>initial={{pathLength:0}} → animate={{pathLength:1}}</code> 한 줄이면 위 dash 계산을 알아서 처리합니다.</figcaption>
+    </figure>
+    <div class="card">
+      <h3>실제 코드 골격 (현재 영문 구현과 동일 패턴)</h3>
+      <pre style="overflow:auto; background:#efe7d6; padding:14px; border-radius:10px; font-size:.82rem; line-height:1.5"><code>// strokes = 획순대로 정렬된 path 배열
+{strokes.map((d, i) => (
+  &lt;motion.path
+    key={i} d={d}
+    fill="none" stroke="currentColor" strokeWidth={3}
+    strokeLinecap="round" strokeLinejoin="round"
+    initial={{ pathLength: 0 }}
+    animate={{ pathLength: 1 }}
+    transition={{ delay: i * 0.18, duration: 0.4, ease: 'easeInOut' }}
+  /&gt;
+))}</code></pre>
+    </div>
+  </section>
+
+  <!-- 6 flow -->
+  <section id="flow">
+    <h2><span class="n">6</span> 전체 워크플로우 & 역할 분담</h2>
+    <p class="lead"><span class="tag human">손작업(사람·디자이너)</span> &nbsp;
+       <span class="tag claude">코드(Claude)</span></p>
+    <figure class="fig">
+      <svg viewBox="0 0 900 230" role="img" aria-label="워크플로우 파이프라인">
+        <defs>
+          <marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#b3a88f"/>
+          </marker>
+        </defs>
+        <!-- row: 6 boxes -->
+        <g font-size="13" text-anchor="middle">
+          <!-- 1 -->
+          <rect x="20"  y="40" width="120" height="64" rx="10" fill="#f3e3cf" stroke="#e3c9a3"/>
+          <text x="80" y="66" font-weight="700">1. 스펙</text><text x="80" y="86" fill="#8a5e23" font-size="11">표기·레이아웃·선스타일</text>
+          <!-- 2 -->
+          <rect x="160" y="40" width="120" height="64" rx="10" fill="#f3e3cf" stroke="#e3c9a3"/>
+          <text x="220" y="66" font-weight="700">2. 획 분해</text><text x="220" y="86" fill="#8a5e23" font-size="11">자모·획순 번호</text>
+          <!-- 3 -->
+          <rect x="300" y="40" width="120" height="64" rx="10" fill="#f3e3cf" stroke="#e3c9a3"/>
+          <text x="360" y="62" font-weight="700">3. 트레이싱</text><text x="360" y="80" fill="#8a5e23" font-size="11">중심선 펜툴</text><text x="360" y="95" fill="#8a5e23" font-size="11">(병목 ⏳)</text>
+          <!-- 4 -->
+          <rect x="440" y="40" width="120" height="64" rx="10" fill="#f3e3cf" stroke="#e3c9a3"/>
+          <text x="500" y="66" font-weight="700">4. (선택) 붓</text><text x="500" y="86" fill="#8a5e23" font-size="11">가변폭/마스크</text>
+          <!-- 5 -->
+          <rect x="580" y="40" width="120" height="64" rx="10" fill="#dde7f1" stroke="#b9cbe0"/>
+          <text x="640" y="66" font-weight="700">5. SVG 정리</text><text x="640" y="86" fill="#3c5a82" font-size="11">순서·정규화·최적화</text>
+          <!-- 6 -->
+          <rect x="720" y="40" width="120" height="64" rx="10" fill="#dde7f1" stroke="#b9cbe0"/>
+          <text x="780" y="62" font-weight="700">6. 애니메이션</text><text x="780" y="80" fill="#3c5a82" font-size="11">pathLength</text><text x="780" y="95" fill="#3c5a82" font-size="11">stagger</text>
+          <!-- 7 -->
+          <rect x="650" y="150" width="120" height="56" rx="10" fill="#dde7f1" stroke="#b9cbe0"/>
+          <text x="710" y="174" font-weight="700">7. 검수</text><text x="710" y="192" fill="#3c5a82" font-size="11">프리뷰·튜닝</text>
+          <!-- arrows -->
+          <g stroke="#b3a88f" stroke-width="2" fill="none" marker-end="url(#fa)">
+            <line x1="140" y1="72" x2="158" y2="72"/>
+            <line x1="280" y1="72" x2="298" y2="72"/>
+            <line x1="420" y1="72" x2="438" y2="72"/>
+            <line x1="560" y1="72" x2="578" y2="72"/>
+            <line x1="700" y1="72" x2="718" y2="72"/>
+            <line x1="780" y1="104" x2="730" y2="150"/>
+          </g>
+        </g>
+      </svg>
+      <figcaption>병목은 <b>3번 트레이싱</b> 한 곳. 그 SVG만 넘겨주시면 5~7은 영문에서 이미 검증된 파이프라인으로 빠르게 진행됩니다.</figcaption>
+    </figure>
+  </section>
+
+  <!-- C: After Effects Write-on -->
+  <section id="ae">
+    <h2><span class="n" style="background:var(--accent)">C</span> 대안 루트 — After Effects "Write-on" (영상으로 뽑기)</h2>
+    <p class="lead">"캘리그라피 애니메이션"의 업계 표준 방식. 원리는 <b>B(마스크 reveal)와 동일</b>하지만,
+      결과가 <b>웹 코드(SVG)가 아니라 영상</b>이라는 점이 다릅니다. 진짜 붓 손맛을 그대로 쓸 수 있어요.</p>
+
+    <figure class="fig">
+      <svg viewBox="0 0 860 200" role="img" aria-label="After Effects Write-on 파이프라인">
+        <defs>
+          <marker id="aearrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#c0a06f"/>
+          </marker>
+          <marker id="nib" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+            <circle cx="5" cy="5" r="4" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <!-- 1 캘리그라피 -->
+        <g transform="translate(10,30)">
+          <rect x="0" y="0" width="180" height="120" rx="12" fill="#fffdf8" stroke="var(--line)"/>
+          <path d="M30,80 C60,30 110,30 140,60 C160,80 140,110 100,100" fill="none" stroke="#cdb487" stroke-width="11" stroke-linecap="round"/>
+          <text x="90" y="142" text-anchor="middle" class="lbl">① 캘리그라피(이미지/텍스트)</text>
+        </g>
+        <!-- 2 마스크 패스 -->
+        <g transform="translate(250,30)">
+          <rect x="0" y="0" width="180" height="120" rx="12" fill="#fffdf8" stroke="var(--line)"/>
+          <path d="M30,80 C60,30 110,30 140,60 C160,80 140,110 100,100" fill="none" stroke="#efe6d4" stroke-width="11" stroke-linecap="round"/>
+          <path d="M30,80 C60,30 110,30 140,60 C160,80 140,110 100,100" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#nib)"/>
+          <text x="90" y="142" text-anchor="middle" class="lbl">② 획순대로 마스크 패스</text>
+        </g>
+        <!-- 3 Stroke: Reveal Original -->
+        <g transform="translate(490,30)">
+          <rect x="0" y="0" width="180" height="120" rx="12" fill="#fffdf8" stroke="var(--line)"/>
+          <clipPath id="aeclip"><rect x="0" y="0" width="105" height="120"/></clipPath>
+          <path d="M30,80 C60,30 110,30 140,60 C160,80 140,110 100,100" fill="none" stroke="#b9874f" stroke-width="11" stroke-linecap="round" clip-path="url(#aeclip)"/>
+          <circle cx="103" cy="44" r="5" fill="var(--ink)"/>
+          <text x="90" y="142" text-anchor="middle" class="lbl">③ Stroke + Reveal Original</text>
+        </g>
+        <!-- 4 영상 -->
+        <g transform="translate(730,52)">
+          <rect x="0" y="0" width="120" height="76" rx="12" fill="#efe7d6" stroke="var(--line)"/>
+          <path d="M48,24 L48,52 L74,38 Z" fill="var(--ink)"/>
+          <text x="60" y="100" text-anchor="middle" class="lbl">④ 영상(알파)</text>
+        </g>
+        <g stroke="#c0a06f" stroke-width="2" marker-end="url(#aearrow)">
+          <line x1="192" y1="90" x2="246" y2="90"/>
+          <line x1="432" y1="90" x2="486" y2="90"/>
+          <line x1="672" y1="90" x2="726" y2="90"/>
+        </g>
+      </svg>
+      <figcaption>밑 캘리그라피를 깔고, 그 위 마스크 패스를 따라 <code>Stroke</code> 효과가 진행하며 원본을 드러냄 = "써지는" 효과</figcaption>
+    </figure>
+
+    <div class="card">
+      <h3 style="margin-top:0">After Effects 단계</h3>
+      <ol>
+        <li><b>캘리그라피 준비</b> — Procreate/손글씨 이미지를 import 하거나 텍스트 레이어 생성</li>
+        <li><b>마스크 패스 그리기</b> — 글씨 위에 펜툴로 <b>획순·방향대로</b> 마스크 패스를 그림 (이게 B의 중심선 트레이싱과 같은 "노가다")</li>
+        <li><b>Stroke 효과 적용</b> — 레이어에 <code>Effect ▸ Generate ▸ Stroke</code>, <code>Path</code>를 그 마스크로 지정</li>
+        <li><b>Paint Style = "Reveal Original Image"</b> — 스트로크가 지나간 자리에 <b>원본 글씨가 드러나게</b> 설정</li>
+        <li><b>End 0% → 100% 키프레임</b> — 시간에 따라 획이 그려짐. 획별로 키프레임 나눠 속도 조절</li>
+        <li><b>(선택) 붓/펜 든 손 이미지</b>를 마스크 패스 끝점에 붙여 진짜 쓰는 것처럼</li>
+        <li><b>렌더</b> — 알파 포함으로 출력</li>
+      </ol>
+    </div>
+
+    <h3>웹에 넣을 때 (영상의 현실)</h3>
+    <div class="callout warn">
+      <b>투명 배경 영상은 브라우저별로 코덱이 갈립니다.</b><br>
+      · Chrome/Firefox/Android → <b>VP9 알파 (WebM)</b><br>
+      · Safari/iOS → <b>HEVC 알파 (MP4, hvc1)</b><br>
+      두 포맷을 <code>&lt;video&gt;</code> 의 <code>&lt;source&gt;</code> 두 개로 같이 넣어야 모든 기기에서 투명하게 재생됩니다.
+    </div>
+    <pre style="overflow:auto; background:#efe7d6; padding:14px; border-radius:10px; font-size:.82rem; line-height:1.5"><code>&lt;video autoplay muted playsinline loop&gt;
+  &lt;source src="name.webm" type="video/webm"&gt;        &lt;!-- VP9 alpha --&gt;
+  &lt;source src="name.mov"  type='video/mp4; codecs="hvc1"'&gt; &lt;!-- HEVC alpha --&gt;
+&lt;/video&gt;</code></pre>
+    <p class="lead">투명 영상이 부담되면 <b>hero 사진/단색 위에 올리는 전제</b>로 불투명 영상을 써도 됩니다(합성 이슈 회피).</p>
+
+    <h3 style="margin-top:24px">B(SVG) vs C(영상) 한눈에</h3>
+    <table>
+      <thead><tr><th></th><th>B · SVG 마스크 reveal</th><th>C · After Effects 영상</th></tr></thead>
+      <tbody>
+        <tr><th>결과물</th><td>코드(SVG) — 가벼움</td><td>영상 파일(수백 KB~MB)</td></tr>
+        <tr><th>붓 손맛</th><td>폰트/이미지 기반 (상)</td><td>실제 붓 캘리그라피 그대로 (최상)</td></tr>
+        <tr><th>반응형/테마</th><td>색·크기 자유, 선명 ◎</td><td>고정 해상도, 재색·확대 제약</td></tr>
+        <tr><th>투명/합성</th><td>네이티브 (이슈 없음)</td><td>코덱 2종 필요(Safari/Chrome)</td></tr>
+        <tr><th>노가다</th><td>중심선/마스크 트레이싱</td><td>마스크 패스 그리기(동일 수준)</td></tr>
+        <tr><th>웹 적합성</th><td>◎</td><td>△</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note"><b>정리</b> — 웹 청첩장엔 <b>B(SVG)</b> 가 가볍고 깔끔해서 유리하고,
+      <b>실제 붓 캘리그라피의 질감</b>이 무엇보다 중요하면 <b>C(영상)</b> 입니다. 원리(마스크 reveal)는 둘 다 같습니다.</div>
+  </section>
+
+  <!-- 7 checklist -->
+  <section id="checklist">
+    <h2><span class="n">7</span> 트레이싱 체크리스트 (4번 작업용)</h2>
+    <div class="card">
+      <ul>
+        <li>☐ 음절마다 동일한 <b>viewBox</b>(예: <code>0 0 100 100</code>)로 그렸는가</li>
+        <li>☐ 손글씨 폰트 밑그림 위에 트레이싱해서 <b>비율이 일관</b>적인가</li>
+        <li>☐ <b>중심선만</b> 그렸는가 (외곽선/채움 아님 — 붓은 별도)</li>
+        <li>☐ <b>한 획 = 한 path</b>, 펜을 떼는 지점마다 분리했는가</li>
+        <li>☐ 각 path의 <b>점 순서 = 펜 방향</b> (시작→끝)으로 찍었는가</li>
+        <li>☐ path들이 <b>획순대로</b> 정렬(레이어 순서)되어 있는가</li>
+        <li>☐ <code>ㅇ ㅎ</code> 동그라미는 <b>한 획</b>으로 처리했는가</li>
+        <li>☐ export 시 transform/group을 <b>flatten</b> 했는가</li>
+      </ul>
+    </div>
+    <div class="callout warn"><b>가장 흔한 실수</b><br>
+      ① 외곽선을 그림(채워진 글자를 트레이스) → 윤곽선 따는 느낌이 됨<br>
+      ② path 방향을 거꾸로 찍음 → 획이 끝에서부터 거꾸로 그려짐<br>
+      ③ 한 글자를 한 path로 그림 → 획순 stagger 불가</div>
+
+    <h3>제출 형식 (저에게 넘길 때)</h3>
+    <p class="lead">음절별 SVG 파일 6개(또는 전체 1개) — 각 <code>&lt;path&gt;</code>가 한 획, 획순대로 정렬, 중심선, 공통 viewBox.
+      넘겨주시면 정규화 → <code>heroCalligraphyKo.js</code> 데이터화 → 애니메이션 통합 → 프리뷰 검수까지 제가 처리합니다.</p>
+  </section>
+
+  <div class="footer">
+    한글 손글씨 획순 드로잉 방법론 · 본 청첩장 프로젝트용 내부 가이드 ·
+    영문 구현(<code>HeroCalligraphy.jsx</code> + <code>pathLength</code>)과 동일 원리
+  </div>
+</div>
+
+<script>
+  // ── 라이브 데모: 획순대로 그리기 ──────────────────────────────
+  const svg = document.getElementById('demo');
+  const strokes = Array.from(svg.querySelectorAll('.dstroke'));
+  let speed = 1;
+
+  // 각 획에 길이 측정 → dash 세팅
+  strokes.forEach((el) => {
+    const len = el.getTotalLength();
+    el.style.fill = 'none';
+    el.style.stroke = 'var(--ink)';
+    el.style.strokeWidth = 5;
+    el.style.strokeLinecap = 'round';
+    el.style.strokeLinejoin = 'round';
+    el.dataset.len = len;
+    el.style.strokeDasharray = len;
+    el.style.strokeDashoffset = len;
+  });
+
+  function play() {
+    strokes.forEach((el, i) => {
+      const len = Number(el.dataset.len);
+      // reset
+      el.style.transition = 'none';
+      el.style.strokeDashoffset = len;
+      // force reflow
+      void el.getBoundingClientRect();
+      const dur = (0.35 + len / 900) / speed;
+      const delay = (i * 0.28) / speed;
+      el.style.transition = `stroke-dashoffset ${dur}s ease-in-out ${delay}s`;
+      el.style.strokeDashoffset = 0;
+    });
+  }
+
+  document.getElementById('play').addEventListener('click', play);
+  document.getElementById('speed').addEventListener('input', (e) => { speed = Number(e.target.value); });
+
+  // 번호 토글 (데모 위에 획순 번호 잠깐 표시)
+  let numsOn = false;
+  const numLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(numLayer);
+  document.getElementById('toggleNum').addEventListener('click', () => {
+    numsOn = !numsOn;
+    numLayer.innerHTML = '';
+    if (!numsOn) return;
+    strokes.forEach((el, i) => {
+      const pt = el.getPointAtLength(0);
+      // g transform 보정: 부모 g의 translate 반영
+      const m = el.getCTM();
+      const x = m.a * pt.x + m.c * pt.y + m.e;
+      const y = m.b * pt.x + m.d * pt.y + m.f;
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 9);
+      c.setAttribute('fill', '#fffdf8'); c.setAttribute('stroke', '#b9874f'); c.setAttribute('stroke-width', '1.4');
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y + 4); t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('font-size', '11'); t.setAttribute('font-weight', '700'); t.setAttribute('fill', '#b9874f');
+      t.textContent = i + 1;
+      numLayer.appendChild(c); numLayer.appendChild(t);
+    });
+  });
+
+  // 첫 진입 시 한 번 그려줌
+  window.addEventListener('load', () => setTimeout(play, 400));
+</script>
+</body>
+</html>
