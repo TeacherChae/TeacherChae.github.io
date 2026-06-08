@@ -1,10 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { heroCalligraphyLines } from './heroCalligraphy.js';
 
-// 이름을 casual 손글씨(Caveat) 글리프 outline path 로 변환해 두고,
+// 이름을 얇고 우아한 script(Sacramento) 글리프 outline path 로 변환해 두고,
 // framer-motion pathLength 로 한 글자씩 펜으로 써내려가듯 그린 뒤 fill 을 채운다.
 // (Motion 권장: pathLength 0→1 = stroke draw-on)
-// 연필/휘갈긴 느낌은 feTurbulence + feDisplacementMap 필터로 stroke 가장자리를 흔들어 준다.
+// 연필 텍스처는 feTurbulence + feDisplacementMap 필터로 — 단, scale 을 낮게 둬서
+// 가장자리에 미세한 결만 주고 글자가 삐뚤빼뚤해지지 않게 한다.
 // (best practice: Camillo Visini / Codrops 의 hand-drawn SVG filter)
 const BASE = 0.45; // 첫 글자 시작 지연(초)
 const STEP = 0.15; // 글자 간 간격
@@ -27,7 +28,7 @@ export default function HeroCalligraphy({ label }) {
 
   return (
     <div
-      className="flex flex-col items-center [transform:rotate(-3.2deg)]"
+      className="flex flex-col items-center [transform:rotate(-6deg)]"
       role="img"
       aria-label={label}
     >
@@ -35,8 +36,8 @@ export default function HeroCalligraphy({ label }) {
       <svg width="0" height="0" aria-hidden="true" className="absolute">
         <defs>
           <filter id="heroPencil" x="-15%" y="-15%" width="130%" height="130%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.028" numOctaves="2" seed="7" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.022 0.03" numOctaves="2" seed="4" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
           </filter>
         </defs>
       </svg>
@@ -50,8 +51,8 @@ export default function HeroCalligraphy({ label }) {
             aria-hidden="true"
             className={
               isAmp
-                ? 'my-[-0.7rem] block w-[min(15vw,84px)] overflow-visible'
-                : 'block w-[min(84vw,460px)] overflow-visible'
+                ? 'my-[-0.6rem] block w-[min(13vw,72px)] overflow-visible'
+                : 'block w-[min(90vw,520px)] overflow-visible'
             }
             fill="currentColor"
             stroke="currentColor"
@@ -63,7 +64,7 @@ export default function HeroCalligraphy({ label }) {
                   <motion.path
                     key={g.i}
                     d={g.d}
-                    strokeWidth={1.3}
+                    strokeWidth={0.8}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     vectorEffect="non-scaling-stroke"
