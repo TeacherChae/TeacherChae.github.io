@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
+import HeroCalligraphy, { HERO_WRITE_DURATION } from './HeroCalligraphy.jsx';
 
 export default function Hero() {
   const { groom, bride, date, images } = wedding;
@@ -44,19 +45,25 @@ export default function Hero() {
 
       <div className="absolute inset-0 bg-gradient-to-b from-paper/20 via-paper/6 to-ink/10" />
       <motion.div
-        className="relative z-10 flex min-h-screen flex-col items-center px-7 pt-[13vh] text-center text-paper"
+        className="relative z-10 flex min-h-screen flex-col items-center px-7 pt-[12vh] text-center text-paper"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.65, duration: 0.9, ease: 'easeOut' }}
+        transition={{ delay: 0.4, duration: 0.9, ease: 'easeOut' }}
       >
-        <h1 className="type-display font-extralight text-paper drop-shadow-hero-title">
-          <span className="block">{bride.nameKo}</span>
-          <span className="block text-[0.68em] leading-cozy">&</span>
-          <span className="block">{groom.nameKo}</span>
+        <h1 className="sr-only">
+          {bride.nameKo} & {groom.nameKo}
         </h1>
-        <p className="mt-7 type-meta text-paper/82 drop-shadow-hero-sub">
+        <div className="text-paper drop-shadow-hero-title">
+          <HeroCalligraphy label={`${bride.fullNameEn} & ${groom.fullNameEn}`} />
+        </div>
+        <motion.p
+          className="mt-6 type-meta text-paper/82 drop-shadow-hero-sub"
+          initial={reduce ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={reduce ? { duration: 0 } : { delay: HERO_WRITE_DURATION - 0.4, duration: 0.8, ease: 'easeOut' }}
+        >
           {date.short}
-        </p>
+        </motion.p>
       </motion.div>
     </section>
   );
