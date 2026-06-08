@@ -47,7 +47,7 @@ export default function Opening({ onEnter, onComplete }) {
               hidden: { opacity: 0 },
               show: {
                 opacity: 1,
-                transition: { staggerChildren: 0.55, delayChildren: 0.75 },
+                transition: { staggerChildren: 0.38, delayChildren: 0.4 },
               },
               hide: {
                 opacity: 0,
@@ -64,7 +64,7 @@ export default function Opening({ onEnter, onComplete }) {
                     opacity: 1,
                     y: 0,
                     filter: 'blur(0px)',
-                    transition: { duration: 1.35, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
                   },
                   hide: {
                     opacity: 0,
@@ -82,8 +82,8 @@ export default function Opening({ onEnter, onComplete }) {
           <motion.span
             className="absolute bottom-[12vh] text-[0.65rem] uppercase tracking-[0.32em] text-ink/45"
             initial={{ opacity: 0 }}
-            animate={ready ? { opacity: [0.25, 0.7, 0.25] } : { opacity: 0 }}
-            transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
+            animate={ready ? { opacity: [0, 0.7, 0.4, 0.7] } : { opacity: 0 }}
+            transition={{ duration: 2.4, times: [0, 0.22, 0.6, 1], ease: 'easeInOut', repeat: Infinity }}
             aria-hidden="true"
           >
             tap to enter
