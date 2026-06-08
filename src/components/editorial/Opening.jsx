@@ -1,9 +1,25 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const WORDS = ['YOU', 'ARE', 'INVITED'];
+
+// 단어 등장 타이밍(초) — 이 컴포넌트의 단일 소스. 아래 모든 값이 여기서 파생된다.
+const WORD_DELAY = 0.75; // 첫 단어가 떠오르기 시작하는 지연
+const WORD_STAGGER = 0.55; // 단어 간 간격
+const WORD_DURATION = 1.35; // 단어 하나가 다 떠오르는 시간
+
+// 'tap to enter' 힌트 등장 시점 = 마지막 단어가 "떠오르기 시작하는" 순간.
+// (전체 완료까지 기다리지 않아 텀이 짧고, 단어 타이밍을 바꾸면 자동으로 따라온다.)
+const HINT_DELAY_MS = (WORD_DELAY + (WORDS.length - 1) * WORD_STAGGER) * 1000;
 
 export default function Opening({ onEnter, onComplete }) {
   const [visible, setVisible] = useState(true);
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReady(true), HINT_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // 탭 = 첫 사용자 제스처. 이 제스처 안에서 onEnter()로 BGM을 켜고,
   // 동시에 Opening을 닫아 hero 진입 애니메이션을 시작한다.
@@ -12,8 +28,6 @@ export default function Opening({ onEnter, onComplete }) {
     onEnter?.();
     setVisible(false);
   }
-
-  const words = ['YOU', 'ARE', 'INVITED'];
 
   return (
     <AnimatePresence onExitComplete={onComplete}>
@@ -40,14 +54,11 @@ export default function Opening({ onEnter, onComplete }) {
             initial="hidden"
             animate="show"
             exit="hide"
-            onAnimationComplete={(definition) => {
-              if (definition === 'show') setReady(true);
-            }}
             variants={{
               hidden: { opacity: 0 },
               show: {
                 opacity: 1,
-                transition: { staggerChildren: 0.38, delayChildren: 0.4 },
+                transition: { staggerChildren: WORD_STAGGER, delayChildren: WORD_DELAY },
               },
               hide: {
                 opacity: 0,
@@ -55,7 +66,7 @@ export default function Opening({ onEnter, onComplete }) {
               },
             }}
           >
-            {words.map((word) => (
+            {WORDS.map((word) => (
               <motion.p
                 key={word}
                 variants={{
@@ -64,7 +75,7 @@ export default function Opening({ onEnter, onComplete }) {
                     opacity: 1,
                     y: 0,
                     filter: 'blur(0px)',
-                    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
+                    transition: { duration: WORD_DURATION, ease: [0.22, 1, 0.36, 1] },
                   },
                   hide: {
                     opacity: 0,
