@@ -52,6 +52,16 @@
     @apply mx-auto my-8 h-px w-hairline-width bg-ink/20;
   }
 
+  /* Vivus hero: 획은 Vivus가 그리고(fill 무관), 다 그려진 줄에 .is-filled 가 붙으면
+     글자 속을 채운다. 시작은 투명이라 stroke draw-on 동안 면이 미리 보이지 않는다. */
+  .hero-vivus path {
+    fill: transparent;
+    transition: fill 0.5s ease-out;
+  }
+  .hero-vivus.is-filled path {
+    fill: currentColor;
+  }
+
   .editorial-input {
     @apply w-full rounded-none border-0 border-b border-ink/35 bg-transparent px-0 py-3 text-body text-ink placeholder-ink/30 outline-none transition focus:border-ink;
   }

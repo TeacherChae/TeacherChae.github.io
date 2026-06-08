@@ -1,7 +1,8 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
-import HeroCalligraphy, { HERO_WRITE_DURATION } from './HeroCalligraphy.jsx';
+// Vivus 프로토타입으로 교체(원본은 ./HeroCalligraphy.jsx 그대로 보존 — import 만 되돌리면 복귀).
+import HeroCalligraphy, { HERO_WRITE_DURATION } from './HeroCalligraphyVivus.jsx';
 
 export default function Hero() {
   const { groom, bride, date, images } = wedding;
