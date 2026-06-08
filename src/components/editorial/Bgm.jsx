@@ -1,29 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 // 배경 음악 — 브라우저 자동재생 차단을 첫 사용자 제스처로 우회한다.
-// 의도 기본값 = ON: 로드 시 재생 시도 → 막히면 첫 동작(스크롤/탭/클릭/키)에서 시작.
-// 우상단 음소거 토글로 끌 수 있고, 한 번 끄면 제스처로 다시 켜지지 않는다.
-export default function Bgm({ src = '/audio/bgm.mp3', volume = 0.5 }) {
+// Opening 화면의 'tap to enter' 탭이 곧 첫 제스처이므로, 그 탭에서 start()를 호출해
+// hero 진입과 동시에 재생을 시작한다(부모가 ref 로 호출).
+// 우상단 음소거 토글로 끌 수 있고, 한 번 끄면 다시 탭으로 켜지지 않는다.
+const Bgm = forwardRef(function Bgm({ src = '/audio/bgm.mp3', volume = 0.5 }, ref) {
   const audioRef = useRef(null);
   const userMutedRef = useRef(false);
   const [playing, setPlaying] = useState(false);
+
+  // 부모(App)가 Opening 탭 제스처 안에서 호출 → 자동재생 정책 통과.
+  useImperativeHandle(
+    ref,
+    () => ({
+      start() {
+        const audio = audioRef.current;
+        if (!audio || userMutedRef.current) return;
+        audio.play().catch(() => {}); // 차단되면 조용히 무시
+      },
+    }),
+    [],
+  );
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return undefined;
     audio.volume = volume;
-
-    const tryPlay = () => {
-      if (userMutedRef.current) return;
-      audio.play().catch(() => {}); // 차단되면 조용히 무시(다음 제스처에서 재시도)
-    };
-
-    tryPlay(); // 1) 즉시 시도(대개 모바일에서 차단)
-
-    // 2) 첫 사용자 제스처에서 시작
-    const events = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
-    const onFirst = () => tryPlay();
-    events.forEach((e) => window.addEventListener(e, onFirst, { once: true, passive: true }));
 
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
@@ -31,7 +33,6 @@ export default function Bgm({ src = '/audio/bgm.mp3', volume = 0.5 }) {
     audio.addEventListener('pause', onPause);
 
     return () => {
-      events.forEach((e) => window.removeEventListener(e, onFirst));
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
     };
@@ -70,4 +71,6 @@ export default function Bgm({ src = '/audio/bgm.mp3', volume = 0.5 }) {
       </button>
     </>
   );
-}
+});
+
+export default Bgm;

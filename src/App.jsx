@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Opening from './components/editorial/Opening.jsx';
 import Hero from './components/editorial/Hero.jsx';
 import DateVenue from './components/editorial/DateVenue.jsx';
@@ -21,13 +21,17 @@ const bgmSrc = supabaseUrl
 
 export default function App() {
   const [openingDone, setOpeningDone] = useState(false);
+  const bgmRef = useRef(null);
 
   return (
     <main className="page">
       <div className="grain" aria-hidden="true" />
-      <Bgm src={bgmSrc} />
+      <Bgm ref={bgmRef} src={bgmSrc} />
       {!openingDone ? (
-        <Opening onComplete={() => setOpeningDone(true)} />
+        <Opening
+          onEnter={() => bgmRef.current?.start()}
+          onComplete={() => setOpeningDone(true)}
+        />
       ) : (
         <>
           <ScrollProgress />

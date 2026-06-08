@@ -1,18 +1,17 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-const OPENING_DURATION_MS = 3000;
-
-export default function Opening({ onComplete }) {
+export default function Opening({ onEnter, onComplete }) {
   const [visible, setVisible] = useState(true);
+  const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    if (!visible) return undefined;
-    const timer = window.setTimeout(() => {
-      setVisible(false);
-    }, OPENING_DURATION_MS);
-    return () => window.clearTimeout(timer);
-  }, [visible]);
+  // 탭 = 첫 사용자 제스처. 이 제스처 안에서 onEnter()로 BGM을 켜고,
+  // 동시에 Opening을 닫아 hero 진입 애니메이션을 시작한다.
+  function enter() {
+    if (!visible) return;
+    onEnter?.();
+    setVisible(false);
+  }
 
   const words = ['YOU', 'ARE', 'INVITED'];
 
@@ -20,18 +19,30 @@ export default function Opening({ onComplete }) {
     <AnimatePresence onExitComplete={onComplete}>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-paper text-ink"
+          role="button"
+          tabIndex={0}
+          onClick={enter}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              enter();
+            }
+          }}
+          className="fixed inset-0 z-50 flex cursor-pointer flex-col items-center justify-center bg-paper text-ink"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: 'easeInOut' }}
-          aria-label="You are invited"
+          aria-label="탭하여 입장하기"
         >
           <motion.div
             className="text-center type-opening"
             initial="hidden"
             animate="show"
             exit="hide"
+            onAnimationComplete={(definition) => {
+              if (definition === 'show') setReady(true);
+            }}
             variants={{
               hidden: { opacity: 0 },
               show: {
@@ -67,6 +78,16 @@ export default function Opening({ onComplete }) {
               </motion.p>
             ))}
           </motion.div>
+
+          <motion.span
+            className="absolute bottom-[12vh] text-[0.65rem] uppercase tracking-[0.32em] text-ink/45"
+            initial={{ opacity: 0 }}
+            animate={ready ? { opacity: [0.25, 0.7, 0.25] } : { opacity: 0 }}
+            transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
+            aria-hidden="true"
+          >
+            tap to enter
+          </motion.span>
         </motion.div>
       )}
     </AnimatePresence>
