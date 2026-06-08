@@ -17,8 +17,7 @@
     "framer-motion": "^12.40.0",
     "leaflet": "^1.9.4",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "vivus": "^0.4.6"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
