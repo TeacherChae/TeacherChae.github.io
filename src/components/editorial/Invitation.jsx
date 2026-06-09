@@ -5,7 +5,7 @@ import { Reveal, Stagger, StaggerItem } from './motion.jsx';
 export default function Invitation() {
   const { scripture, greeting } = wedding;
   return (
-    <Section title="모시는 글">
+    <Section divider>
       <div className="mx-auto max-w-content text-center">
         <Reveal delay={0.1}>
           <p className="eyebrow">{scripture.ref}</p>
