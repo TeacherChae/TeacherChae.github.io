@@ -298,7 +298,7 @@ export default function RSVP() {
           <div className="w-full max-w-[360px] bg-paper px-6 py-7 text-center shadow-2xl">
             <p className="type-kicker text-ink">RSVP</p>
             <p className="mt-5 type-body text-ink/70">
-              이미 RSVP를 남겨주셨어요.<br />기존 응답을 수정하시겠어요?
+              기존 응답을 수정하시겠습니까?
             </p>
             <div className="mt-7 grid grid-cols-2 gap-3">
               <button type="button" className="editorial-button-secondary" onClick={() => setExisting(null)}>CANCEL</button>
