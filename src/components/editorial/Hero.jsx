@@ -1,13 +1,25 @@
-import { useRef } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
-import HeroCalligraphy, { HERO_WRITE_DURATION } from './HeroCalligraphy.jsx';
-import HeroLottie from './HeroLottie.jsx';
+import { useReduceMotion } from '../../lib/reduceMotion.js';
+import HandwritingMarried from '../handwriting/HandwritingMarried.jsx';
 
 export default function Hero() {
   const { groom, bride, date, images } = wedding;
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   const ref = useRef(null);
+
+  // 손글씨가 다 써지면 부제(이름·날짜)를 등장시킨다. reduced-motion 이면 바로 표시.
+  // onComplete 가 어떤 이유로 안 불려도 부제가 묻히지 않도록 안전 타이머도 둔다.
+  const [writeDone, setWriteDone] = useState(false);
+  useEffect(() => {
+    if (reduce) {
+      setWriteDone(true);
+      return;
+    }
+    const t = setTimeout(() => setWriteDone(true), 7000);
+    return () => clearTimeout(t);
+  }, [reduce]);
 
   // 섹션이 위로 스크롤되는 동안의 진행도(0→1)를 추적해 사진에 패럴럭스를 준다.
   const { scrollYProgress } = useScroll({
@@ -54,18 +66,32 @@ export default function Hero() {
         <h1 className="sr-only">
           {bride.nameKo} & {groom.nameKo}
         </h1>
-        <div className="text-paper drop-shadow-hero-title">
-          {/* Lottie 손글씨 애니메이션(public/lottie/hero.lottie|json). 파일이 없으면 기존 SVG 손글씨로 자동 fallback. */}
-          <HeroLottie
-            label={`${bride.fullNameEn} & ${groom.fullNameEn}`}
-            fallback={<HeroCalligraphy label={`${bride.fullNameEn} & ${groom.fullNameEn}`} />}
+
+        {/* "We are getting married" 손글씨 (싱글라인 SVG → pathLength 드로잉) */}
+        <div className="w-[min(86vw,440px)] text-paper drop-shadow-hero-title">
+          <HandwritingMarried
+            ink="currentColor"
+            strokeWidth={4}
+            startDelay={0.6}
+            onComplete={() => setWriteDone(true)}
           />
         </div>
+
+        {/* 신랑·신부 영문 이름 — 손글씨 완료 후 등장 */}
         <motion.p
-          className="mt-6 type-meta text-paper/82 drop-shadow-hero-sub"
+          className="mt-7 text-[0.72rem] uppercase tracking-[0.35em] text-paper/85 drop-shadow-hero-sub"
           initial={reduce ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={reduce ? { duration: 0 } : { delay: HERO_WRITE_DURATION - 0.4, duration: 0.8, ease: 'easeOut' }}
+          animate={writeDone ? { opacity: 1, y: 0 } : undefined}
+          transition={reduce ? { duration: 0 } : { duration: 0.8, ease: 'easeOut' }}
+        >
+          {bride.fullNameEn} &nbsp;&amp;&nbsp; {groom.fullNameEn}
+        </motion.p>
+
+        <motion.p
+          className="mt-3 type-meta text-paper/82 drop-shadow-hero-sub"
+          initial={reduce ? false : { opacity: 0, y: 8 }}
+          animate={writeDone ? { opacity: 1, y: 0 } : undefined}
+          transition={reduce ? { duration: 0 } : { delay: 0.25, duration: 0.8, ease: 'easeOut' }}
         >
           {date.short}
         </motion.p>

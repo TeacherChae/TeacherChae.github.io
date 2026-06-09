@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
+import { useReduceMotion } from '../../lib/reduceMotion.js';
 import { Reveal } from './motion.jsx';
 
 const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
@@ -23,7 +24,7 @@ const pad = (n) => String(n).padStart(2, '0');
 
 // 자릿수 하나 — 값이 바뀌면 플립 클록처럼 패널이 젖혀지며 넘어간다.
 function FlipDigit({ ch }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   return (
     <span
       className="relative inline-flex h-[1.35em] w-[0.72em] items-center justify-center overflow-hidden"

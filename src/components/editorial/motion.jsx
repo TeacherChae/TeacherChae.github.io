@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useReduceMotion } from '../../lib/reduceMotion.js';
 
 // 에디토리얼 톤에 맞춘 "은은한" 진입 모션 프리미티브.
 // - 스크롤로 화면에 들어올 때 한 번만 재생 (once: true)
@@ -10,7 +11,7 @@ const VIEWPORT = { once: true, margin: '0px 0px -12% 0px' };
 
 // 단일 블록을 아래에서 떠오르며 블러가 풀리듯 페이드인.
 export function Reveal({ children, className = '', delay = 0, y = 36, as = 'div' }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   const MotionTag = motion[as] ?? motion.div;
 
   if (reduce) {
@@ -43,7 +44,7 @@ const itemVariants = {
 
 // 자식 요소들을 한 줄씩 순차로 등장시키는 컨테이너.
 export function Stagger({ children, className = '', as = 'div' }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   const MotionTag = motion[as] ?? motion.div;
 
   if (reduce) {
@@ -66,7 +67,7 @@ export function Stagger({ children, className = '', as = 'div' }) {
 
 // Stagger 의 자식. 부모 타이밍에 맞춰 떠오름.
 export function StaggerItem({ children, className = '', as = 'div' }) {
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   const MotionTag = motion[as] ?? motion.div;
 
   if (reduce) {

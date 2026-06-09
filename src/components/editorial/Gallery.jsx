@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
+import { useReduceMotion } from '../../lib/reduceMotion.js';
 import { Section } from './_shared.jsx';
 import { Reveal } from './motion.jsx';
 import SmartImage from './SmartImage.jsx';
 
 export default function Gallery() {
   const { gallery } = wedding;
-  const reduce = useReducedMotion();
+  const reduce = useReduceMotion();
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [touchStart, setTouchStart] = useState(null); // 라이트박스 스와이프용
