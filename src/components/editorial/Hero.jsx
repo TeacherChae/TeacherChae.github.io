@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { wedding } from '../../config/wedding.js';
 import HeroCalligraphy, { HERO_WRITE_DURATION } from './HeroCalligraphy.jsx';
+import HeroLottie from './HeroLottie.jsx';
 
 export default function Hero() {
   const { groom, bride, date, images } = wedding;
@@ -54,7 +55,11 @@ export default function Hero() {
           {bride.nameKo} & {groom.nameKo}
         </h1>
         <div className="text-paper drop-shadow-hero-title">
-          <HeroCalligraphy label={`${bride.fullNameEn} & ${groom.fullNameEn}`} />
+          {/* Lottie 손글씨 애니메이션(public/lottie/hero.lottie|json). 파일이 없으면 기존 SVG 손글씨로 자동 fallback. */}
+          <HeroLottie
+            label={`${bride.fullNameEn} & ${groom.fullNameEn}`}
+            fallback={<HeroCalligraphy label={`${bride.fullNameEn} & ${groom.fullNameEn}`} />}
+          />
         </div>
         <motion.p
           className="mt-6 type-meta text-paper/82 drop-shadow-hero-sub"
