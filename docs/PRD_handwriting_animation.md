@@ -111,6 +111,7 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
   | `variant` | `'centerline'` | `'inked'`=가변 폭 잉크 + 마스크 reveal(§5.E) |
   | `texture` | false | inked 전용 — feTurbulence 거친 잉크 가장자리 |
   | `inkContrast` | 1 | inked 전용 — 획 안 폭 대비 단계(1·1.5·2, 사전 생성 에셋 전환) |
+  | `letterScales` | `{}` | 글자별 크기 배율 맵(예: `{W:1.3}`) — 런타임 근사, 확정값은 §8 `--sizes` 베이크 |
   | `onComplete` | — | 전체 완료 1회 콜백 |
 
 ## 5. 구현
@@ -121,7 +122,8 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 
 - `src/components/handwriting/HandwritingMarried.jsx` — 본체.
 - `src/demo/HandwritingDemo.jsx` + `handwriting-demo.html` — 튜닝 데모
-  (속도/두께/색/감속/휴지 슬라이더, variant·텍스처 토글, 리플레이, reduced-motion 진단 배너).
+  (속도/두께/색/감속/휴지·**글자별 크기** 슬라이더, variant·텍스처 토글, 리플레이,
+  reduced-motion 진단 배너).
 - `src/components/editorial/Hero.jsx` — 청첩장 통합.
 
 동작 방식과 주의점(코드에 주석으로도 기록됨):
@@ -367,6 +369,9 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 - **가변 폭(inked) 에셋**: `python3 scripts/generate_handwriting_svg.py
   [--text "..."] [--alpha 0.3] [--wmin 7 --wmax 30] [--contrast 1.5]
   [--sizes "W=1.3,d=0.9"]  ← 글자별 크기 배율(해당 글자 전 인스턴스).
+  값은 **데모의 글자별 크기 슬라이더로 먼저 고른 뒤** 여기로 베이크한다 —
+  런타임 슬라이더는 글리프 메타(data-ch/x0/adv) 기반 transform 근사라
+  잉크 폭도 같이 스케일되지만, 베이크는 골격만 스케일해 펜 폭을 유지한다.
   골격만 스케일하고 잉크 폭은 유지(같은 펜으로 쓴 느낌), 어드밴스도 함께
   스케일되어 간격이 따라온다. 스케일된 글자가 폰트 메트릭을 벗어나면
   viewBox 세로 범위가 자동 확장된다.`

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import HandwritingMarried from '../components/handwriting/HandwritingMarried.jsx';
+import HandwritingMarried, { listLetters } from '../components/handwriting/HandwritingMarried.jsx';
+
+const LETTERS = listLetters(); // 문구의 고유 글자 목록 (등장 순서)
 
 // 손글씨 애니메이션 튜닝/미리보기용 데모 페이지.
 // 최종 채택 파라미터를 눈으로 고른 뒤 청첩장 섹션에 그대로 이식한다.
@@ -14,6 +16,7 @@ export default function HandwritingDemo() {
   const [inkContrast, setInkContrast] = useState(1); // 획 안 폭 대비 단계 (1|1.5|2)
   const [variant, setVariant] = useState('centerline'); // PRD §5.E 가변 폭 잉크
   const [texture, setTexture] = useState(false); // 거친 잉크 가장자리 필터
+  const [letterScales, setLetterScales] = useState({}); // 글자별 크기 (런타임 근사)
   const [systemReduced, setSystemReduced] = useState(false);
 
   // 브라우저의 prefers-reduced-motion 실제 상태를 읽어 표시(진단용)
@@ -86,6 +89,22 @@ export default function HandwritingDemo() {
         <button style={styles.button} onClick={replay}>↻ 다시 재생</button>
       </div>
 
+      {/* 글자별 크기 — 런타임 근사로 즉시 미리보기, 확정값은 생성기 --sizes 로 베이크 */}
+      <div style={{ ...styles.controls, marginTop: -12 }}>
+        <span style={{ ...styles.fieldLabel, flexBasis: '100%' }}>
+          글자별 크기 (해당 글자의 모든 인스턴스에 적용 · 확정값은 생성기 <code>--sizes</code>로
+          베이크 권장 — 런타임 근사는 잉크 폭도 같이 스케일됨)
+        </span>
+        {LETTERS.map((ch) => (
+          <Field key={ch} label={`${ch} ×${(letterScales[ch] ?? 1).toFixed(2)}`}>
+            <input type="range" min="0.6" max="1.6" step="0.05" style={{ width: 76 }}
+              value={letterScales[ch] ?? 1}
+              onChange={(e) => setLetterScales((m) => ({ ...m, [ch]: +e.target.value }))} />
+          </Field>
+        ))}
+        <button style={styles.button} onClick={() => setLetterScales({})}>크기 초기화</button>
+      </div>
+
       {/* 진단 배너: 브라우저가 reduced-motion 이면 알려준다 */}
       <div style={{ ...styles.controls, paddingTop: 12, paddingBottom: 12, marginTop: -12 }}>
         <span style={{ fontSize: 13 }}>
@@ -110,6 +129,7 @@ export default function HandwritingDemo() {
           variant={variant}
           texture={texture}
           inkContrast={inkContrast}
+          letterScales={letterScales}
           className="hw-preview"
         />
       </section>
@@ -119,7 +139,7 @@ export default function HandwritingDemo() {
       </p>
       <div style={{ height: '90vh' }} aria-hidden />
       <section style={styles.stage}>
-        <HandwritingMarried pxPerSec={pxPerSec} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} curveDrama={curveDrama} liftDrama={liftDrama} variant={variant} texture={texture} inkContrast={inkContrast} />
+        <HandwritingMarried pxPerSec={pxPerSec} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} curveDrama={curveDrama} liftDrama={liftDrama} variant={variant} texture={texture} inkContrast={inkContrast} letterScales={letterScales} />
         <p style={styles.note}>↑ 스크롤로 처음 진입할 때 한 번만 그려진다.</p>
       </section>
     </div>

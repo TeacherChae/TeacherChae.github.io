@@ -122,7 +122,7 @@ await clickCheckbox(1); // 가변 폭 잉크 (자동 리플레이)
 await page.waitForSelector('section svg mask path');
 const counts = await page.evaluate((N) => {
   const svg = document.querySelectorAll('section svg')[0];
-  return { masks: svg.querySelectorAll('mask').length, inks: svg.querySelectorAll('g[fill] > path[mask]').length };
+  return { masks: svg.querySelectorAll('mask').length, inks: svg.querySelectorAll('g[fill] path[mask]').length };
 }, N);
 ok(`inked: 마스크 ${N} + 잉크 path ${N}`, counts.masks === N && counts.inks === N, JSON.stringify(counts));
 first = await measureRun('inked');
@@ -132,7 +132,7 @@ ok("inked: 'i' 점 먼저 + 줄기 하향", first[11] < first[12] && first[19] <
 const cross = await page.evaluate(() => {
   const svg = document.querySelectorAll('section svg')[0];
   return [8, 10].map((i) => {
-    const b = [...svg.querySelectorAll('g[fill] > path[mask]')][i].getBBox();
+    const b = [...svg.querySelectorAll('g[fill] path[mask]')][i].getBBox();
     return +b.height.toFixed(2);
   });
 });
@@ -140,10 +140,10 @@ ok("'t' 가로획 잉크가 보이는 두께", cross.every((h) => h > 1), `heigh
 await page.screenshot({ path: '/tmp/qa_inked_c1.png', clip: { x: 150, y: 420, width: 800, height: 280 } });
 
 // D. 폭 대비 ×2 전환
-const d1 = await page.evaluate(() => document.querySelector('section svg g[fill] > path').getAttribute('d'));
+const d1 = await page.evaluate(() => document.querySelector('section svg g[fill] path[mask]').getAttribute('d'));
 await setSelect('2');
 await new Promise((r) => setTimeout(r, 300));
-const d2 = await page.evaluate(() => document.querySelector('section svg g[fill] > path').getAttribute('d'));
+const d2 = await page.evaluate(() => document.querySelector('section svg g[fill] path[mask]').getAttribute('d'));
 ok('폭 대비 ×2 전환 시 잉크 폴리곤 교체', d1 !== d2, `d 길이 ${d1.length}→${d2.length}`);
 await measureRun('inked');
 await page.screenshot({ path: '/tmp/qa_inked_c2.png', clip: { x: 150, y: 420, width: 800, height: 280 } });
@@ -159,14 +159,37 @@ ok('텍스처 필터 정의+적용', tex.filter && tex.applied, JSON.stringify(t
 await measureRun('inked');
 await page.screenshot({ path: '/tmp/qa_inked_texture.png', clip: { x: 150, y: 420, width: 800, height: 280 } });
 
+// F. 글자별 크기 (런타임 근사): W ×1.3 → scale transform + 뒤 글자 재배치
+await setRange(4, 1.3); // 글자 슬라이더는 메인 컨트롤(0~3) 뒤에 옴 — 4 = 'W'
+await new Promise((r) => setTimeout(r, 300));
+const ls = await page.evaluate(() => {
+  const svg = document.querySelectorAll('section svg')[0];
+  const ts = [...svg.querySelectorAll('g[transform]')].map((g) => g.getAttribute('transform'));
+  return {
+    scaled: ts.some((t) => t.includes('scale(1.3)')),
+    shifted: ts.some((t) => /translate\(2[0-9]\./.test(t)), // (1.3-1)×adv_W ≈ 26.9
+  };
+});
+ok("글자별 크기: 'W' ×1.3 적용 + 뒤 글자 이동", ls.scaled && ls.shifted, JSON.stringify(ls));
+await measureRun('inked');
+await page.screenshot({ path: '/tmp/qa_letterscale.png', clip: { x: 150, y: 420, width: 800, height: 280 } });
+await setRange(4, 1);
+
 ok('데모 콘솔/페이지 에러 0', errors.length === 0, errors.slice(0, 3).join(' | '));
 
 // ---------- Hero(본 페이지, 진입 게이트 통과) ----------
 const errBefore = errors.length;
 await page.goto(`${BASE}/?motion=force`, { waitUntil: 'networkidle2' });
 await page.waitForSelector('[role=button]', { timeout: 15000 });
-await page.click('[role=button]');
-await page.waitForSelector('svg[aria-label="We are getting married"]', { timeout: 15000 });
+// 게이트 클릭은 리스너 부착 전에 먹지 않을 수 있다 → 성공할 때까지 재시도
+let heroReady = false;
+for (let tries = 0; tries < 5 && !heroReady; tries++) {
+  await page.click('[role=button]').catch(() => {});
+  heroReady = await page
+    .waitForSelector('svg[aria-label="We are getting married"]', { timeout: 4000 })
+    .then(() => true)
+    .catch(() => false);
+}
 await new Promise((r) => setTimeout(r, 3000)); // 손글씨가 그려지는 중간 시점
 const hero = await page.evaluate(() => {
   const svg = document.querySelector('svg[aria-label="We are getting married"]');

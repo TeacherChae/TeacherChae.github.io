@@ -260,7 +260,7 @@ def main():
             k, v = part.split("=")
             sizes[k.strip()] = float(v)
 
-    x, strokes = 0.0, []  # strokes: (tx, 리샘플된 센터라인 점들, font units)
+    x, strokes = 0.0, []  # strokes: (tx, ch, advance, 리샘플된 센터라인 점들)
     for ch in args.text:
         if ch == " ":
             x += space
@@ -273,30 +273,35 @@ def main():
             for p in flatten_commands(pen.value)
         ]
         glyph_strokes = [g for g in glyph_strokes if g]
+        adv = hmtx[cmap[ord(ch)]][0] * sc
         # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
-        strokes += [(x, g) for g in order_strokes(glyph_strokes)]
-        x += hmtx[cmap[ord(ch)]][0] * sc
+        strokes += [(x, ch, adv, g) for g in order_strokes(glyph_strokes)]
+        x += adv
 
     pad = upm * 0.12
     # 세로 범위: 기본은 폰트 메트릭, 스케일된 글자가 넘치면 실제 외곽까지 확장
-    all_y = [y for _, g in strokes for _, y in g]
+    all_y = [y for _, _, _, g in strokes for _, y in g]
     y_top, y_bot = max(asc, max(all_y)), min(desc, min(all_y))
     s = TARGET_H / (y_top - y_bot + 2 * pad)  # 폰트 단위 → 출력 단위
     fy = lambda y: (y_top + pad - y)  # y-flip + 상단 패딩 (font units)
 
     vb_w, vb_h = (x + 2 * pad) * s, TARGET_H
     inks, pens = [], []
-    for i, (tx, pts) in enumerate(strokes):
+    for i, (tx, ch, adv, pts) in enumerate(strokes):
         w = widths(pts, args.alpha, args.wmin, args.wmax)
         geom = ink_polygon(pts, w)
         assert geom.is_valid, f"stroke {i}: invalid geometry"
-        inks.append(f"<path id='ink-{i}' d='{geom_to_d(geom, tx + pad, fy, s)}'/>")
-        pens.append(f"<path id='pen-{i}' d='{pen_to_d(pts, tx + pad, fy, s)}'/>")
+        # 글리프 메타: 런타임 글자별 크기 조정(데모)이 글리프 원점/어드밴스를
+        # 기준으로 transform·재배치를 계산할 수 있게 획마다 내보낸다.
+        meta = f"data-ch='{ch}' data-x0='{(tx + pad) * s:.1f}' data-adv='{adv * s:.1f}'"
+        inks.append(f"<path id='ink-{i}' {meta} d='{geom_to_d(geom, tx + pad, fy, s)}'/>")
+        pens.append(f"<path id='pen-{i}' {meta} d='{pen_to_d(pts, tx + pad, fy, s)}'/>")
 
     mask_w = args.wmax * MASK_RATIO * s
     svg = (
         f"<svg viewBox='0 0 {vb_w:.1f} {vb_h:.1f}' xmlns='http://www.w3.org/2000/svg' "
-        f"data-mask-width='{mask_w:.2f}' data-alpha='{args.alpha}' data-sizes='{args.sizes}'>\n"
+        f"data-mask-width='{mask_w:.2f}' data-alpha='{args.alpha}' data-sizes='{args.sizes}' "
+        f"data-baseline='{fy(0) * s:.1f}'>\n"
         f"<g id='ink' fill='#2b2b2b'>\n" + "\n".join(inks) + "\n</g>\n"
         f"<g id='pen' fill='none' stroke='#2b2b2b' stroke-linecap='round' stroke-linejoin='round'>\n"
         + "\n".join(pens) + "\n</g>\n</svg>\n"

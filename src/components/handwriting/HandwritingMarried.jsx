@@ -1,14 +1,7 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReduceMotion } from '../../lib/reduceMotion.js';
-import {
-  airDistance,
-  buildTimeMap,
-  CONNECT_EPS,
-  DOT_LEN,
-  easeFromTimeMap,
-  liftPause,
-} from './strokeTiming.js';
+import { buildTimeMap, CONNECT_EPS, DOT_LEN, easeFromTimeMap, liftPause } from './strokeTiming.js';
 // 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물) — 두 variant 의
 // 단일 소스. 획 분리·필기 순서·방향(i/j 점 먼저, 줄기 위→아래 분할)이
 // 전부 생성 단계에서 확정된다. 문구/폰트 변경은 SVG 재생성으로 반영(PRD §8).
@@ -19,16 +12,32 @@ import inkedRawC20 from '../../../docs/fonts/svg/wearegettingmarried_inked_c20.s
 
 const INKED_RAWS = { 1: inkedRaw, 1.5: inkedRawC15, 2: inkedRawC20 };
 
+// letterScales 기본값 — 렌더마다 새 {} 를 만들면 memo/effect 의존성이 매번
+// 바뀌어 무한 업데이트 루프가 되므로 반드시 모듈 상수로 둔다.
+const NO_SCALES = {};
+
 // --- 2레이어 SVG 파싱: pen(센터라인, 타이밍/마스크/centerline 가시 선) + ink(가변 폭 폴리곤) --
-// 생성기가 획 분리·필기 순서 정렬을 끝낸 상태로 ink-N/pen-N 을 같은 순서로 내보낸다.
+// 생성기가 획 분리·필기 순서 정렬을 끝낸 상태로 ink-N/pen-N 을 같은 순서로 내보내며,
+// 획마다 글리프 메타(data-ch/x0/adv)가 있어 런타임 글자별 크기 조정에 쓴다.
 function parseInked(raw) {
   const doc = new DOMParser().parseFromString(raw, 'image/svg+xml');
   const svg = doc.querySelector('svg');
   const viewBox = svg.getAttribute('viewBox') || '0 0 636 150';
   const maskWidth = parseFloat(svg.getAttribute('data-mask-width')) || 6;
-  const paths = [...svg.querySelectorAll('#pen path')].map((p) => ({ d: p.getAttribute('d') }));
+  const baseline = parseFloat(svg.getAttribute('data-baseline')) || 100;
+  const paths = [...svg.querySelectorAll('#pen path')].map((p) => ({
+    d: p.getAttribute('d'),
+    ch: p.getAttribute('data-ch'),
+    x0: parseFloat(p.getAttribute('data-x0')) || 0,
+    adv: parseFloat(p.getAttribute('data-adv')) || 0,
+  }));
   const inks = [...svg.querySelectorAll('#ink path')].map((p) => p.getAttribute('d'));
-  return { viewBox, paths, inks, maskWidth };
+  return { viewBox, paths, inks, maskWidth, baseline };
+}
+
+// 데모 UI 용: 에셋에 등장하는 글자 목록(등장 순서, 중복 제거)
+export function listLetters() {
+  return [...new Set(parseInked(inkedRaw).paths.map((p) => p.ch).filter(Boolean))];
 }
 
 /**
@@ -51,6 +60,11 @@ function parseInked(raw) {
  * @param inkContrast 'inked' 전용. 획 안 굵음↔가늚 진폭(폭 대비) 단계: 1 | 1.5 | 2.
  *                   폭은 생성 단계에 폴리곤으로 구워지므로 단계별 에셋을 전환한다.
  *                   다른 값이 필요하면 생성기 --contrast 로 추가 생성.
+ * @param letterScales 글자별 크기 배율 맵, 예: { W: 1.3, d: 0.9 } — 해당 글자의
+ *                   모든 인스턴스에 적용. **런타임 근사**(베이스라인·글리프 원점
+ *                   기준 transform + 어드밴스 재배치): 잉크 폭도 함께 스케일되고
+ *                   이어쓰기 연결부가 미세하게 어긋날 수 있다. 최종 채택값은
+ *                   생성기 `--sizes` 로 베이크 권장(골격만 스케일, 폭 유지).
  */
 export default function HandwritingMarried({
   pxPerSec = 700,
@@ -63,6 +77,7 @@ export default function HandwritingMarried({
   variant = 'centerline',
   texture = false,
   inkContrast = 1,
+  letterScales = NO_SCALES,
   forceMotion = false, // true면 prefers-reduced-motion 을 무시하고 강제로 애니메이션(데모 미리보기용)
   onComplete, // 마지막 획까지 다 그려졌을 때 1회 호출(부제/이름 등장 타이밍용)
   className,
@@ -72,10 +87,23 @@ export default function HandwritingMarried({
   const inked = variant === 'inked';
   // centerline 도 같은 에셋의 pen 레이어를 가시 선으로 사용한다(단일 소스).
   // 폭 대비는 ink 폴리곤에만 의미 있으므로 centerline 은 기본 에셋 고정.
-  const { viewBox, paths, inks, maskWidth } = useMemo(
+  const { viewBox, paths, inks, maskWidth, baseline } = useMemo(
     () => parseInked(inked ? INKED_RAWS[inkContrast] || inkedRaw : inkedRaw),
     [inked, inkContrast],
   );
+
+  // 글자별 크기(런타임 근사, letterScales): 글리프 원점(x0)·베이스라인을
+  // 앵커로 scale 하고, 어드밴스 변화량을 누적 이동시켜 뒤 글자들이 따라온다.
+  const tfs = useMemo(() => {
+    let shift = 0;
+    let prev = null; // 직전 획의 글리프 (x0 로 식별 — 같은 글리프의 획들은 x0 동일)
+    return paths.map((p) => {
+      if (prev && p.x0 !== prev.x0) shift += ((letterScales[prev.ch] ?? 1) - 1) * prev.adv;
+      prev = p;
+      const s = letterScales[p.ch] ?? 1;
+      return { s, dx: shift + (1 - s) * p.x0, dy: (1 - s) * baseline };
+    });
+  }, [paths, letterScales, baseline]);
   // 마스크/필터 id — 한 페이지에 인스턴스가 여러 개여도 충돌하지 않게
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
 
@@ -92,8 +120,14 @@ export default function HandwritingMarried({
     doneRef.current = false;
     const els = pathRefs.current;
     let cursor = startDelay;
+    // 글자 크기 transform 반영 좌표 (letterScales 런타임 근사)
+    const tfPoint = (tf, pt) => ({
+      x: (tf?.dx ?? 0) + (tf?.s ?? 1) * pt.x,
+      y: (tf?.dy ?? 0) + (tf?.s ?? 1) * pt.y,
+    });
     const next = els.map((el, i) => {
-      const len = el ? el.getTotalLength() : 0;
+      const sc = tfs[i]?.s ?? 1;
+      const len = (el ? el.getTotalLength() : 0) * sc; // 화면상 실제 길이
       const duration = Math.max(0.12, len / pxPerSec);
       const map = el ? buildTimeMap(el, { power: 0.5 * curveDrama }) : null;
       const entry = { delay: cursor, duration, ease: map ? easeFromTimeMap(map) : undefined };
@@ -103,7 +137,9 @@ export default function HandwritingMarried({
         // 이어쓰기 판별: 끝점↔시작점 간격이 CONNECT_EPS 미만이면 필기체가
         // 이어지는 글자 — 휴지 없이 한 호흡으로 계속 긋는다.
         // 단 점('i' 윗점)으로 드나드는 전이는 거리와 무관하게 펜을 든다.
-        const gap = airDistance(el, els[i + 1]);
+        const a = tfPoint(tfs[i], el.getPointAtLength(el.getTotalLength()));
+        const b = tfPoint(tfs[i + 1], els[i + 1].getPointAtLength(0));
+        const gap = Math.hypot(b.x - a.x, b.y - a.y);
         const dotInvolved = len < DOT_LEN || els[i + 1].getTotalLength() < DOT_LEN;
         if (gap >= CONNECT_EPS || dotInvolved) {
           cursor += liftPause(gap, pxPerSec, liftDrama);
@@ -112,7 +148,7 @@ export default function HandwritingMarried({
       return entry;
     });
     setTimings(next);
-  }, [pxPerSec, startDelay, replayKey, curveDrama, liftDrama, paths]);
+  }, [pxPerSec, startDelay, replayKey, curveDrama, liftDrama, paths, tfs]);
 
   const shouldDraw = inView && !reduce;
 
@@ -161,6 +197,11 @@ export default function HandwritingMarried({
   };
 
   const [vbW, vbH] = viewBox.split(/\s+/).slice(2).map(Number);
+  // 글자 크기 transform (항등이면 생략)
+  const tfString = (tf) =>
+    tf && (tf.s !== 1 || tf.dx || tf.dy)
+      ? `translate(${tf.dx.toFixed(2)} ${tf.dy.toFixed(2)}) scale(${tf.s})`
+      : undefined;
 
   return (
     <div ref={containerRef} className={className}>
@@ -189,11 +230,13 @@ export default function HandwritingMarried({
                   key={i}
                   id={`${uid}m${i}`}
                   maskUnits="userSpaceOnUse"
-                  x={-maskWidth}
-                  y={-maskWidth}
-                  width={vbW + maskWidth * 2}
-                  height={vbH + maskWidth * 2}
+                  x={-maskWidth - 40}
+                  y={-maskWidth - 40}
+                  width={vbW + maskWidth * 2 + 80}
+                  height={vbH + maskWidth * 2 + 80}
                 >
+                  {/* transform 없음: userSpaceOnUse 마스크는 참조하는 요소(잉크 path,
+                      글자 크기 transform 안)의 좌표계에서 해석되므로 원좌표면 정렬된다 */}
                   {renderPen(p, i, {
                     fill: 'none',
                     stroke: '#fff',
@@ -206,14 +249,19 @@ export default function HandwritingMarried({
             </defs>
             <g fill={ink} filter={texture ? `url(#${uid}rough)` : undefined}>
               {inks.map((d, i) => (
-                <path key={i} d={d} mask={`url(#${uid}m${i})`} />
+                <g key={i} transform={tfString(tfs[i])}>
+                  <path d={d} mask={`url(#${uid}m${i})`} />
+                </g>
               ))}
             </g>
           </g>
         ) : (
           <g key={replayKey} fill="none" stroke={ink} strokeLinecap="round" strokeLinejoin="round">
             {paths.map((p, i) => (
-              <g key={i}>{renderPen(p, i, { strokeWidth })}</g>
+              // strokeWidth 를 글자 scale 로 나눠 보정 — 큰 글자도 같은 펜 굵기
+              <g key={i} transform={tfString(tfs[i])}>
+                {renderPen(p, i, { strokeWidth: strokeWidth / (tfs[i]?.s || 1) })}
+              </g>
             ))}
           </g>
         )}
