@@ -20,6 +20,7 @@
 """
 import argparse
 import math
+import re
 
 from fontTools.ttLib import TTFont
 from fontTools.pens.recordingPen import RecordingPen
@@ -260,42 +261,70 @@ def main():
             k, v = part.split("=")
             sizes[k.strip()] = float(v)
 
-    x, strokes = 0.0, []  # strokes: (tx, ch, advance, 리샘플된 센터라인 점들)
-    for ch in args.text:
-        if ch == " ":
-            x += space
-            continue
-        pen = RecordingPen()
-        gs[cmap[ord(ch)]].draw(pen)
-        sc = sizes.get(ch, 1.0)  # 베이스라인(y=0) 기준 골격 스케일 — 잉크 폭은 그대로
-        glyph_strokes = [
-            cut_retrace(resample([(px * sc, py * sc) for px, py in p], SAMPLES))
-            for p in flatten_commands(pen.value)
-        ]
-        glyph_strokes = [g for g in glyph_strokes if g]
-        adv = hmtx[cmap[ord(ch)]][0] * sc
-        # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
-        strokes += [(x, ch, adv, g) for g in order_strokes(glyph_strokes)]
-        x += adv
+    # 줄바꿈: '\n'(실제 개행 또는 백슬래시-n 두 글자) 으로 라인 분리.
+    raw_lines = re.split(r"\\n|\n", args.text)
+
+    # 1차: 각 라인을 베이스라인 0 에서 배치하고 세로 범위를 잰다.
+    line_data = []  # (라인 글리프들 [(gx, ch, adv, pts)], 라인 너비, y_top, y_bot)
+    for line in raw_lines:
+        x, gl = 0.0, []
+        for ch in line:
+            if ch == " ":
+                x += space
+                continue
+            pen = RecordingPen()
+            gs[cmap[ord(ch)]].draw(pen)
+            sc = sizes.get(ch, 1.0)  # 베이스라인 기준 골격 스케일 — 잉크 폭은 그대로
+            gstrokes = [
+                cut_retrace(resample([(px * sc, py * sc) for px, py in p], SAMPLES))
+                for p in flatten_commands(pen.value)
+            ]
+            gstrokes = [g for g in gstrokes if g]
+            adv = hmtx[cmap[ord(ch)]][0] * sc
+            # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
+            gl += [(x, ch, adv, g) for g in order_strokes(gstrokes)]
+            x += adv
+        ys = [y for _, _, _, g in gl for _, y in g] or [0.0, asc]
+        line_data.append((gl, x, max(ys), min(ys)))
+
+    max_w = max(lw for _, lw, _, _ in line_data)
+    leading = upm * 0.18  # 라인 간 여백 — cursive 의 어센더/디센더 겹침 방지
+    # 2차: 라인별 베이스라인 y(font y-up, 아래 라인일수록 작아짐) 산정.
+    baselines = [0.0]
+    for li in range(1, len(line_data)):
+        prev_bot = baselines[li - 1] + line_data[li - 1][3]
+        cur_top = line_data[li][2]
+        baselines.append(prev_bot - leading - cur_top)
+
+    # 절대 배치: 각 라인을 가운데 정렬(offset) + 라인 베이스라인(ty) 적용.
+    strokes = []  # (tx, ty, ch, adv, line_idx, pts)
+    for li, (gl, lw, _, _) in enumerate(line_data):
+        offset = (max_w - lw) / 2
+        for gx, ch, adv, pts in gl:
+            strokes.append((gx + offset, baselines[li], ch, adv, li, pts))
 
     pad = upm * 0.12
-    # 세로 범위: 기본은 폰트 메트릭, 스케일된 글자가 넘치면 실제 외곽까지 확장
-    all_y = [y for _, _, _, g in strokes for _, y in g]
-    y_top, y_bot = max(asc, max(all_y)), min(desc, min(all_y))
-    s = TARGET_H / (y_top - y_bot + 2 * pad)  # 폰트 단위 → 출력 단위
+    all_y = [y + ty for tx, ty, ch, adv, li, g in strokes for _, y in g]
+    y_top, y_bot = max(all_y), min(all_y)
+    # 글자 크기를 라인 수와 무관하게 일정하게: 1 em 높이를 기준 스케일로 고정.
+    s = TARGET_H / ((asc - desc) + 2 * pad)
     fy = lambda y: (y_top + pad - y)  # y-flip + 상단 패딩 (font units)
 
-    vb_w, vb_h = (x + 2 * pad) * s, TARGET_H
+    vb_w, vb_h = (max_w + 2 * pad) * s, (y_top - y_bot + 2 * pad) * s
     inks, pens = [], []
-    for i, (tx, ch, adv, pts) in enumerate(strokes):
-        w = widths(pts, args.alpha, args.wmin, args.wmax)
-        geom = ink_polygon(pts, w)
+    for i, (tx, ty, ch, adv, li, pts) in enumerate(strokes):
+        spts = [(px, py + ty) for px, py in pts]  # 라인 베이스라인 적용
+        w = widths(spts, args.alpha, args.wmin, args.wmax)
+        geom = ink_polygon(spts, w)
         assert geom.is_valid, f"stroke {i}: invalid geometry"
-        # 글리프 메타: 런타임 글자별 크기 조정(데모)이 글리프 원점/어드밴스를
-        # 기준으로 transform·재배치를 계산할 수 있게 획마다 내보낸다.
-        meta = f"data-ch='{ch}' data-x0='{(tx + pad) * s:.1f}' data-adv='{adv * s:.1f}'"
+        # 글리프 메타: 런타임 글자별 크기 조정(데모)이 글리프 원점/어드밴스/라인
+        # 베이스라인을 기준으로 transform·재배치를 계산할 수 있게 획마다 내보낸다.
+        meta = (
+            f"data-ch='{ch}' data-x0='{(tx + pad) * s:.1f}' data-adv='{adv * s:.1f}' "
+            f"data-line='{li}' data-by='{fy(ty) * s:.1f}'"
+        )
         inks.append(f"<path id='ink-{i}' {meta} d='{geom_to_d(geom, tx + pad, fy, s)}'/>")
-        pens.append(f"<path id='pen-{i}' {meta} d='{pen_to_d(pts, tx + pad, fy, s)}'/>")
+        pens.append(f"<path id='pen-{i}' {meta} d='{pen_to_d(spts, tx + pad, fy, s)}'/>")
 
     mask_w = args.wmax * MASK_RATIO * s
     svg = (

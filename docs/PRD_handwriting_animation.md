@@ -66,8 +66,12 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 ### SVG 구조 (2레이어 에셋)
 - `<g id="ink">` 가변 폭 잉크 폴리곤(fill) + `<g id="pen">` 센터라인(stroke),
   **펜 획 단위 `ink-N`/`pen-N` 1:1 페어**가 필기 순서대로 수록됨.
-- 좌표는 y-flip·배치·스케일이 전부 **절대좌표로 베이크**됨(transform 없음,
-  높이 150 viewBox). 루트에 `data-mask-width`(마스크 stroke 폭) 등 메타 포함.
+- 좌표는 y-flip·배치·스케일·줄바꿈이 전부 **절대좌표로 베이크**됨(transform 없음).
+  획별 메타 `data-ch`/`data-x0`/`data-adv`/`data-line`/`data-by`(라인 베이스라인),
+  루트에 `data-mask-width` 등. 라인 베이스라인은 글자별 크기 조정에 쓰인다.
+- **줄바꿈(현재 라이브: 2줄)**: 생성기가 라인별로 가운데 정렬해 세로 적층하고
+  viewBox를 키운다(현재 412×241). 한 줄당 글자 수가 줄어 같은 컨테이너 폭에서
+  글자가 커지는 효과 — "폰트 키우기 + 줄 나누기"가 한 번에 된다.
 - 획 분리('t'=줄기+가로획, 'i'=점+줄기)·필기 순서·방향·retrace 절단은
   생성기가 확정(§5.A) — 런타임은 파싱만 한다.
 
@@ -375,10 +379,13 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
   골격만 스케일하고 잉크 폭은 유지(같은 펜으로 쓴 느낌), 어드밴스도 함께
   스케일되어 간격이 따라온다. 스케일된 글자가 폰트 메트릭을 벗어나면
   viewBox 세로 범위가 자동 확장된다.`
+  - **줄바꿈**: `--text` 에 `\n`(또는 실제 개행)을 넣으면 그 지점에서 줄을
+    나눠 가운데 정렬·세로 적층한다. 예: `--text 'We are\ngetting married'`.
   (의존성: fonttools, shapely — 오프라인 전용).
   `inkContrast` 단계용으로 기본·`--contrast 1.5`·`--contrast 2.0` 세 에셋을
   모두 재생성할 것. **centerline variant도 같은 에셋의 pen 레이어를 쓰므로
   이것만 재생성하면 끝**이다.
+  현재 라이브 에셋: `--text 'We are\ngetting married' --sizes 'W=1.2,m=1.2'`.
 - QA: `node scripts/qa_handwriting.mjs` (dev 서버 + puppeteer 필요) —
   획 수/필기 순서/줄기 방향/휴지/variant 전환을 실브라우저로 검증.
 - (참고, 구형) 단일 레이어 centerline SVG가 따로 필요할 때만 아래 스크립트

@@ -30,6 +30,8 @@ function parseInked(raw) {
     ch: p.getAttribute('data-ch'),
     x0: parseFloat(p.getAttribute('data-x0')) || 0,
     adv: parseFloat(p.getAttribute('data-adv')) || 0,
+    line: parseInt(p.getAttribute('data-line'), 10) || 0,
+    by: parseFloat(p.getAttribute('data-by')) || baseline, // 이 획이 속한 라인의 베이스라인
   }));
   const inks = [...svg.querySelectorAll('#ink path')].map((p) => p.getAttribute('d'));
   return { viewBox, paths, inks, maskWidth, baseline };
@@ -87,7 +89,7 @@ export default function HandwritingMarried({
   const inked = variant === 'inked';
   // centerline 도 같은 에셋의 pen 레이어를 가시 선으로 사용한다(단일 소스).
   // 폭 대비는 ink 폴리곤에만 의미 있으므로 centerline 은 기본 에셋 고정.
-  const { viewBox, paths, inks, maskWidth, baseline } = useMemo(
+  const { viewBox, paths, inks, maskWidth } = useMemo(
     () => parseInked(inked ? INKED_RAWS[inkContrast] || inkedRaw : inkedRaw),
     [inked, inkContrast],
   );
@@ -98,12 +100,14 @@ export default function HandwritingMarried({
     let shift = 0;
     let prev = null; // 직전 획의 글리프 (x0 로 식별 — 같은 글리프의 획들은 x0 동일)
     return paths.map((p) => {
-      if (prev && p.x0 !== prev.x0) shift += ((letterScales[prev.ch] ?? 1) - 1) * prev.adv;
+      if (prev && p.line !== prev.line) shift = 0; // 라인이 바뀌면 가로 누적 리셋
+      else if (prev && p.x0 !== prev.x0) shift += ((letterScales[prev.ch] ?? 1) - 1) * prev.adv;
       prev = p;
       const s = letterScales[p.ch] ?? 1;
-      return { s, dx: shift + (1 - s) * p.x0, dy: (1 - s) * baseline };
+      // 글리프는 자기 원점(x0)·자기 라인 베이스라인(by) 기준으로 스케일한다.
+      return { s, dx: shift + (1 - s) * p.x0, dy: (1 - s) * p.by };
     });
-  }, [paths, letterScales, baseline]);
+  }, [paths, letterScales]);
   // 마스크/필터 id — 한 페이지에 인스턴스가 여러 개여도 충돌하지 않게
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
 
