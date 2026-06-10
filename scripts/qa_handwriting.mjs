@@ -165,9 +165,11 @@ await new Promise((r) => setTimeout(r, 300));
 const ls = await page.evaluate(() => {
   const svg = document.querySelectorAll('section svg')[0];
   const ts = [...svg.querySelectorAll('g[transform]')].map((g) => g.getAttribute('transform'));
+  const shifts = ts.map((t) => Math.abs(parseFloat((t.match(/translate\((-?\d+\.?\d*)/) || [])[1] || 0)));
   return {
     scaled: ts.some((t) => t.includes('scale(1.3)')),
-    shifted: ts.some((t) => /translate\(2[0-9]\./.test(t)), // (1.3-1)×adv_W ≈ 26.9
+    // 뒤 글자 이동량 = (1.3-1) × adv_W — 에셋 베이크 배율과 무관하게 15vb 이상이면 동작
+    shifted: Math.max(...shifts, 0) > 15,
   };
 });
 ok("글자별 크기: 'W' ×1.3 적용 + 뒤 글자 이동", ls.scaled && ls.shifted, JSON.stringify(ls));

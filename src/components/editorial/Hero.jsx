@@ -67,11 +67,17 @@ export default function Hero() {
           {bride.nameKo} & {groom.nameKo}
         </h1>
 
-        {/* "We are getting married" 손글씨 (싱글라인 SVG → pathLength 드로잉) */}
+        {/* "We are getting married" 손글씨 — 데모에서 확정한 값 (2026-06):
+            가변 폭 잉크 + 폭 대비 ×2, 펜 속도 550, 커브 감속 1.5, 휴지 0.7.
+            W·m ×1.2 는 에셋에 베이크됨(생성기 --sizes). */}
         <div className="w-[min(86vw,440px)] text-paper drop-shadow-hero-title">
           <HandwritingMarried
             ink="currentColor"
-            strokeWidth={4}
+            variant="inked"
+            inkContrast={2}
+            pxPerSec={550}
+            curveDrama={1.5}
+            liftDrama={0.7}
             startDelay={0.6}
             onComplete={() => setWriteDone(true)}
           />
