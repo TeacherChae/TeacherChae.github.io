@@ -67,7 +67,7 @@ export default function Gallery() {
   if (!current) return null;
 
   return (
-    <Section divider>
+    <Section divider className="pt-8 pb-16">
       <Reveal className="mx-auto max-w-content">
         <div className="mb-5 flex items-center justify-between font-titleKo text-label tracking-ultra text-ink/50">
           <span>{padded}</span>
