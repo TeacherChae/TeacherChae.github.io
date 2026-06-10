@@ -10,6 +10,8 @@ export default function HandwritingDemo() {
   const [ink, setInk] = useState('#2b2b2b');
   const [replayKey, setReplayKey] = useState(0);
   const [forceMotion, setForceMotion] = useState(true); // 데모에선 기본 강제 재생
+  const [speedModel, setSpeedModel] = useState('curvature'); // PRD §5.C 비교 토글
+  const [drama, setDrama] = useState(1.0); // 곡률 효과 과장 정도
   const [systemReduced, setSystemReduced] = useState(false);
 
   // 브라우저의 prefers-reduced-motion 실제 상태를 읽어 표시(진단용)
@@ -38,7 +40,7 @@ export default function HandwritingDemo() {
           <input type="range" min="200" max="1600" step="50" value={pxPerSec}
             onChange={(e) => setPxPerSec(+e.target.value)} />
         </Field>
-        <Field label={`글자 overlap: ${overlap.toFixed(2)}`}>
+        <Field label={`글자 overlap: ${overlap.toFixed(2)} (easeInOut 모드 전용)`}>
           <input type="range" min="0" max="0.8" step="0.05" value={overlap}
             onChange={(e) => setOverlap(+e.target.value)} />
         </Field>
@@ -54,6 +56,18 @@ export default function HandwritingDemo() {
             onChange={(e) => setForceMotion(e.target.checked)} />
           <span style={styles.fieldLabel}>감속 설정 무시하고 강제 재생</span>
         </label>
+        <label style={{ ...styles.field, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={speedModel === 'curvature'}
+            onChange={(e) => {
+              setSpeedModel(e.target.checked ? 'curvature' : 'uniform');
+              replay(); // 토글 즉시 다시 그려 차이를 비교('e'·'o' 루프에서 감속 확인)
+            }} />
+          <span style={styles.fieldLabel}>곡률 기반 속도 — 2/3 power law (끄면 easeInOut)</span>
+        </label>
+        <Field label={`곡률 과장 drama: ${drama.toFixed(1)} (커브 감속·획 간 휴지 배율)`}>
+          <input type="range" min="0.4" max="2" step="0.1" value={drama}
+            onChange={(e) => setDrama(+e.target.value)} />
+        </Field>
         <button style={styles.button} onClick={replay}>↻ 다시 재생</button>
       </div>
 
@@ -77,6 +91,8 @@ export default function HandwritingDemo() {
           ink={ink}
           replayKey={replayKey}
           forceMotion={forceMotion}
+          speedModel={speedModel}
+          drama={drama}
           className="hw-preview"
         />
       </section>
@@ -86,7 +102,7 @@ export default function HandwritingDemo() {
       </p>
       <div style={{ height: '90vh' }} aria-hidden />
       <section style={styles.stage}>
-        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} />
+        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} drama={drama} />
         <p style={styles.note}>↑ 스크롤로 처음 진입할 때 한 번만 그려진다.</p>
       </section>
     </div>

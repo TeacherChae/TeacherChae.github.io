@@ -1,5 +1,8 @@
 # PRD — 청첩장 손글씨 캘리그래피 "써지는" 애니메이션
 
+> **2026-06 갱신**: 1차 구현 완료 상태를 반영. 채택 엔진은 **React + framer-motion**
+> (사이트 기존 의존성, 추가 설치 0). GSAP 도입 여부 비교는 §5.D에 유지.
+
 ## 1. 배경 / 목적
 
 웨딩 청첩장 웹사이트(GitHub Pages 호스팅)에 **"We are getting married"** 문구가
@@ -12,8 +15,9 @@
   (영문→다른 문구 교체 불가).
 - **한글 싱글라인 폰트**: 사실상 존재하지 않음 → 문구는 **영문**으로 확정.
 
-결론적으로 **싱글라인/시그니처 폰트 → SVG path 변환 → 순수 SVG+CSS+JS 애니메이션**
-경로를 택했다. 외부 라이브러리(Lottie 등) 의존성 0.
+결론적으로 **싱글라인/시그니처 폰트 → SVG path 변환 → framer-motion `pathLength`
+드로잉** 경로를 택했다. 사이트가 이미 React + framer-motion 스택이므로
+**신규 외부 의존성 0**. (초기 "순수 vanilla JS" 원칙은 이 조건으로 대체 — §4 참고)
 
 ## 2. 핵심 개념 — 폰트 종류에 따라 애니메이션 기법이 다르다
 
@@ -21,125 +25,264 @@
 
 | 폰트 종류 | 글자 구조 | 애니메이션 기법 |
 |---|---|---|
-| **싱글라인 (centerline)** | 글자가 중심선 1개 패스. `fill:none`+`stroke` | `stroke-dashoffset` (진짜 펜 드로잉) ✅ |
+| **싱글라인 (centerline)** | 글자가 중심선 1개 패스. `fill:none`+`stroke` | `pathLength` 드로잉 (진짜 펜 드로잉) ✅ |
 | **외곽선 (filled outline)** | 글자가 윤곽선을 채운 fill 셰이프 | **마스크/클립 reveal** (왼→오 쓸어 드러내기) |
 
-> ⚠️ 외곽선 폰트에 `stroke-dashoffset`을 쓰면 글자 **테두리만** 따라 그려져
+> ⚠️ 외곽선 폰트에 stroke 드로잉을 쓰면 글자 **테두리만** 따라 그려져
 > 부자연스럽다. 반드시 위 표대로 기법을 적용할 것.
 
-### stroke-dashoffset 원리
+### pathLength(=stroke-dashoffset) 드로잉 원리
 패스의 dash 한 칸 길이를 패스 전체 길이와 같게 만들고, dashoffset을 그 길이만큼
 밀면 선이 사라진다. offset을 0으로 줄이면 시작점→끝점으로 선이 차오른다.
 센터라인 폰트라서 "펜이 지나간 길"이 곧 패스이므로 자연스럽게 써진다.
+framer-motion은 이를 `motion.path`의 `pathLength` 0→1 prop으로 추상화하며,
+SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 편차의 영향도
+받지 않는다(우리 코드는 길이를 **타이밍 계산에만** 사용).
 
 ### 마스크 reveal 원리
 완성된 fill 글자 위에, 왼쪽에서 오른쪽으로 폭이 늘어나는 사각형 마스크(clip)를
 씌워 글자를 점진적으로 드러낸다. cursive가 좌→우로 흐르므로 "써지는" 것처럼 읽힌다.
 글자별로 마스크 구간을 나누면 글자 단위 순차 reveal도 가능.
 
-## 3. 에셋 (이미 생성됨)
+## 3. 에셋
 
-문구는 모두 **"We are getting married"**, 색 `#2b2b2b`, 좌표계 변환 처리 완료.
+### 리포에 커밋된 것 (현재 사용 중)
 
-| 파일 | 폰트 | 종류 | 기법 |
-|---|---|---|---|
-| `we_are_getting_married.svg` | Astutely Single Line | **싱글라인** | `stroke-dashoffset` |
-| `HeyBeauty.svg` | Hey Beauty | 외곽선 | 마스크 reveal |
-| `BestfriendSignature.svg` | Bestfriend Signature | 외곽선 | 마스크 reveal |
-| `BakedSalmon.svg` | Baked Salmon | 외곽선 | 마스크 reveal |
-| `Antically.svg` | Antically | 외곽선 | 마스크 reveal |
+| 파일 | 용도 |
+|---|---|
+| `docs/fonts/svg/Wearegettingmarried-578431.svg` | Astutely Single Line, **싱글라인**. Hero에서 사용 중 |
+| `docs/fonts/ttf/AstutelySingleLine-VGj3l.ttf` | 원본 폰트 (문구 변경 시 §8로 재생성) |
 
-> 참고용 동작 예시: `we_are_getting_married.html` (Astutely 기반 stroke-dashoffset 완성본).
+문구 **"We are getting married"**, 색 `#2b2b2b`, 좌표계 변환 처리 완료.
+
+### 미커밋 (검토 단계 산출물)
+
+외곽선 폰트 4종 SVG(Hey Beauty, Bestfriend Signature, Baked Salmon, Antically)는
+폰트 선정 과정에서 생성했으나 Astutely 채택 후 리포에 넣지 않았다.
+비교가 다시 필요하면 §8 스크립트로 재생성한다(외곽선 모드).
 
 ### SVG 구조
-- 좌표계: 폰트는 y-up, SVG는 y-down → 최상위 `<g>`에
-  `transform="translate(0, ascent) scale(1,-1)"`로 뒤집어 둠.
-- **글자마다 개별 `<path>`**, 각 path에 `transform="translate(glyphX, 0)"`로 가로 배치.
+- **글자마다 개별 `<path>`**, 각 path에 `transform="translate(glyphX, baseline)"`로 배치.
   (글자 단위 순차 애니메이션을 위해 의도적으로 분리)
-- 싱글라인 SVG: `<g ... fill="none" stroke="#2b2b2b" stroke-width=14 stroke-linecap=round>`
-- 외곽선 SVG: `<g ... fill="#2b2b2b">` (stroke 없음)
+- 커밋된 파일은 글리프 좌표에 y-flip이 **베이크**되어 있고(베이스라인 위가 음수 y),
+  path별 `translate(x, 75)`로 배치한다. §8 스크립트는 대신 최상위 `<g>`에
+  `translate(0, ascent) scale(1,-1)` 플립을 쓰는데, **컴포넌트는 path의
+  `d`/`transform`만 읽으므로 두 구조 모두 그대로 동작**한다.
+- 일부 글리프는 서브패스 여러 개를 가진다('t'=줄기+가로획, 'i'=줄기+점) —
+  컴포넌트가 런타임에 획 단위로 분리한다(§5.A).
+- 싱글라인 SVG: `fill="none" stroke=... stroke-linecap="round"`
+- 외곽선 SVG: `fill="#2b2b2b"` (stroke 없음)
 
 ## 4. 요구사항
 
-### 기능
-1. 폰트별로 **위 표의 기법**에 맞는 "써지는" 애니메이션을 각각 구현한다.
-2. **글자 길이(또는 너비)에 비례한 타이밍** — 긴 글자는 오래, 짧은 글자는 짧게 그려져
-   손글씨 리듬이 나게 한다. (균일 속도 금지)
-3. 글자 간 **약간의 overlap**으로 이어쓰는 느낌을 준다.
-4. **IntersectionObserver**로 해당 요소가 뷰포트에 들어올 때 **1회만** 재생.
-5. 5개 폰트를 한 페이지에서 **나란히 비교**할 수 있는 데모 페이지를 제공한다
-   (어떤 폰트를 최종 채택할지 고르기 위함).
+### 기능 (✅ = 구현 완료)
+1. ✅ 싱글라인 폰트에 `pathLength` 드로잉으로 "써지는" 애니메이션.
+2. ✅ **글자 길이에 비례한 타이밍** — `getTotalLength()` 실측 → 긴 글자는 오래,
+   짧은 글자는 짧게. (균일 속도 금지)
+3. ✅ 글자 간 **약간의 overlap**으로 이어쓰는 느낌. (`overlap` prop, 기본 0.35)
+4. ✅ 뷰포트 진입 시 **1회만** 재생 (`useInView({ once: true, amount: 0.4 })`).
+5. ✅ **완료 콜백**: 마지막 획이 끝나면 `onComplete` 호출 → Hero에서 신랑·신부
+   이름과 날짜가 손글씨 완료 후 등장. 콜백 누락 대비 **7초 안전 타이머** 병행.
+6. ⬜ (보류) 여러 폰트를 나란히 비교하는 데모 — Astutely 채택으로 우선순위 하락.
+   현재 데모는 단일 폰트 + 파라미터 튜닝용.
 
 ### 비기능 / 제약
-- **외부 라이브러리 금지.** 순수 HTML + CSS + vanilla JS. (GitHub Pages 정적 호스팅)
-- **`prefers-reduced-motion: reduce`** 존중 → 애니메이션 없이 완성된 글씨를 즉시 표시.
+- **신규 외부 의존성 0.** React + framer-motion은 사이트 기존 스택이므로 허용.
+  그 외 라이브러리(GSAP 등)는 §5.D의 판단 기준을 통과할 때만 도입하고,
+  도입 시 이 조항에 예외를 명시할 것.
+- **`prefers-reduced-motion: reduce`** 존중 → 애니메이션 없이 완성 글씨 즉시 표시.
+  단, 개발/시연 편의를 위한 **오버라이드** 존재(`src/lib/reduceMotion.js`):
+  - 로컬 dev(`npm run dev`)에서는 항상 재생.
+  - URL `?motion=force` → localStorage에 저장돼 배포 사이트에서도 강제 재생,
+    `?motion=user`로 해제. (게스트 기본 동작은 OS 설정 존중)
 - 모바일 대응(반응형 폭, `viewBox` 기반 스케일).
-- 접근성: `<svg>`에 `aria-label="We are getting married"`.
-- 조절 가능한 파라미터를 코드 상단에 상수로 노출:
-  - 펜 속도 (`PX_PER_SEC` 또는 reveal duration)
-  - 글자 overlap 정도 (`OVERLAP`)
-  - 색 (`--ink` CSS 변수), 선 두께(`stroke-width`, 싱글라인만 해당)
+- 접근성: `<svg>`에 `role="img"` + `aria-label="We are getting married"`.
+- 조절 파라미터는 상수가 아닌 **컴포넌트 props**로 노출:
 
-## 5. 구현 참고 (Claude Code용)
+  | prop | 기본값 | 의미 |
+  |---|---|---|
+  | `pxPerSec` | 700 | 펜 속도 (Hero는 기본값 사용) |
+  | `overlap` | 0.35 | 글자 간 겹침 0~1 — `'uniform'` 모드 전용 (곡률 모드는 순차+휴지) |
+  | `strokeWidth` | 5 (Hero 4) | 선 두께, viewBox 단위 |
+  | `ink` | `#2b2b2b` (Hero `currentColor`) | 잉크 색 |
+  | `startDelay` | 0.2 (Hero 0.6) | 진입 후 첫 획 지연(sec) |
+  | `replayKey` | 0 | 변경 시 처음부터 재생(데모용) |
+  | `forceMotion` | false | reduced-motion 무시(데모용) |
+  | `speedModel` | `'curvature'` | `'curvature'`=2/3 power law(§5.C), `'uniform'`=easeInOut |
+  | `drama` | 1 | 곡률 효과 과장 배율(0.4~2 권장) — 커브 감속·획 간 휴지를 함께 키움 |
+  | `onComplete` | — | 전체 완료 1회 콜백 |
 
-### A. 싱글라인 (Astutely) — stroke-dashoffset
-```js
-const paths = [...svg.querySelectorAll('path')];
-const len = paths.map(p => p.getTotalLength());
-paths.forEach((p,i) => { p.style.strokeDasharray = len[i];
-                         p.style.strokeDashoffset = len[i]; });
-const PX_PER_SEC = 1100, OVERLAP = 0.2;
-let t = 0;
-paths.forEach((p,i) => {
-  const dur = len[i] / PX_PER_SEC;
-  p.style.transition = `stroke-dashoffset ${dur}s ease-in-out`;
-  p.style.transitionDelay = `${t}s`;
-  requestAnimationFrame(() => p.style.strokeDashoffset = 0);
-  t += dur * (1 - OVERLAP);
-});
-```
+## 5. 구현
 
-### B. 외곽선 (나머지 4개) — 마스크 reveal
-권장 방식: 글자별 fill path를 그대로 두고, **클립 사각형의 너비를 0→full로
-애니메이션**. 글자별 순차로 하려면 각 글자 path를 개별 클립으로 감싸고
-글자 x범위에 맞춘 사각형을 좌→우로 확장.
+### A. 싱글라인 (Astutely) — framer-motion `pathLength` ✅ 구현 완료
 
-간단 버전(전체 한 번에 좌→우 reveal):
-```html
-<svg ...>
-  <defs>
-    <clipPath id="reveal"><rect x="..." y="..." width="0" height="..."/></clipPath>
-  </defs>
-  <g clip-path="url(#reveal)" fill="#2b2b2b"> ...glyph paths... </g>
-</svg>
-```
-```js
-const rect = svg.querySelector('#reveal rect');
-const full = /* viewBox 전체 너비 */;
-rect.style.transition = `width ${DURATION}s ease-in-out`;
-requestAnimationFrame(() => rect.setAttribute('width', full)); // 또는 style.width
-```
-글자 단위 reveal은 각 `<path>`의 bbox를 `getBBox()`로 구해 글자별 clip rect를
-좌→우 확장 + delay 누적.
+핵심 파일:
 
-> reduced-motion일 때: 싱글라인은 `stroke-dashoffset:0`, 외곽선은 clip rect를
-> 처음부터 full width로 두면 완성 상태로 표시된다.
+- `src/components/handwriting/HandwritingMarried.jsx` — 본체.
+- `src/demo/HandwritingDemo.jsx` + `handwriting-demo.html` — 튜닝 데모
+  (속도/overlap/두께/색 슬라이더, 리플레이, reduced-motion 진단 배너).
+- `src/components/editorial/Hero.jsx` — 청첩장 통합.
+
+동작 방식과 주의점(코드에 주석으로도 기록됨):
+
+1. SVG를 `?raw` import → `DOMParser`로 파싱해 viewBox와 글자별 path 추출.
+   글자를 코드에 박지 않으므로 **SVG 파일만 교체하면 문구/폰트 변경 반영**.
+   글리프 안에 서브패스가 여러 개면('t'의 가로획, 'i'의 점) **'M' 경계에서
+   펜 획 단위로 분리**해 획마다 자기 duration/ease/펜 리프트 휴지를 받는다.
+   분리 시 긴 획(줄기) 먼저, 짧은 획(가로획·점) 나중 순으로 정렬해 실제
+   필기 순서를 근사한다(폰트 파일은 't' 가로획이 줄기보다 앞에 있음).
+2. `useLayoutEffect`에서 각 path의 `getTotalLength()` 실측 →
+   `duration = max(0.12, len / pxPerSec)`, delay는 `duration × (1 − overlap)` 누적.
+3. 각 글자는 `motion.path`의 `pathLength` 0→1 + `ease: 'easeInOut'`.
+4. **round line-cap 점 문제**: `stroke-linecap: round`는 pathLength 0에서도
+   시작점에 점을 찍는다 → 자기 차례 전까지 `opacity: 0`으로 숨겼다가 그릴 때 켠다.
+5. **transform 충돌**: 글자 가로 배치 `translate`를 `motion.path`에 직접 주면
+   framer-motion이 style transform으로 덮어쓴다 → 일반 `<g>` 래퍼에 둔다.
+6. 마지막 path의 `onAnimationComplete`를 전체 완료로 간주 → `onComplete` 1회 호출.
+
+### B. 외곽선 폰트 — 마스크 reveal ⬜ 미구현 (외곽선 폰트 채택 시)
+
+글자별 fill path를 그대로 두고, **클립 사각형의 너비를 0→full로 애니메이션**.
+framer-motion이면 `<clipPath>` 안의 `motion.rect`에 `width`를 애니메이션하면 된다.
+글자 단위 순차는 각 path의 `getBBox()`로 글자별 clip rect를 만들어
+좌→우 확장 + delay 누적 (A의 타이밍 로직 재사용, 길이 대신 bbox 너비 비례).
+
+> reduced-motion일 때: clip rect를 처음부터 full width로 두면 완성 상태로 표시.
+
+### C. 곡률 기반 속도 모델 — 2/3 거듭제곱 법칙 ✅ 구현 완료 (기본 채택)
+
+획 단위 `easeInOut`만으로는 획 시작/끝에서만 가감속하고, 획 **중간의 곡선
+변화는 무시**된다. 진짜 사람 손글씨처럼 보이도록 운동제어 연구의
+**two-thirds power law**를 적용했다:
+
+> **v(s) = K · κ(s)^(−1/3)**  (v=접선 속도, κ=곡률)
+> 급한 커브에서 느려지고 직선/완만한 구간에서 빨라진다. 사람 눈은 이 패턴에
+> 민감해서, 균일 속도 모션은 즉시 "기계적"으로 느껴진다.
+
+**구현**: `src/components/handwriting/strokeTiming.js`. rAF 루프 불필요 —
+framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progress`를
+받으므로, 시간 테이블을 ease 함수로 변환해 `pathLength` 트랜지션에 그대로 꽂는다.
+
+1. `getPointAtLength()`로 호길이 등간격 샘플 240개 추출.
+2. 연속 3점의 외접원으로 곡률 추정: κ = 4·삼각형면적 / (세 변 길이의 곱).
+3. 원시 속도 vᵢ = κᵢ^(−p)를 **중앙값으로 정규화**(상수 K의 역할 —
+   viewBox 스케일/폰트 크기와 무관하게 같은 리듬) 후 클램프
+   (직선에서 κ→0이면 속도가 발산하므로 상한 필수).
+   **지수 p**: 생리학적 값은 1/3이지만 화면에서는 차이가 미묘해
+   **기본 p = 0.5 × `drama`** 로 과장한다(drama 1 → p 0.5).
+   클램프 범위는 [0.18, 5.0]^(drama) — drama와 함께 지수적으로 넓혀야
+   대비 증가가 클램프에 막히지 않는다.
+4. **획 시작/끝 ramp**: 양끝 8% 구간에 추가 감속(펜이 닿고 떨어지는 순간).
+5. 누적 시간 테이블 tᵢ = Σ(Δs / vᵢ) → `easeFromTimeMap()`이 이진탐색+선형보간으로
+   ease 함수화. `pathLength`는 전체 길이 대비 비율이라 ease 출력이 곧 그려진 비율.
+   기존 `duration`(길이 비례)은 그대로 두고 ease가 **획 안에서 속도만 재분배**한다.
+6. **획 간 시간차 — 펜 리프트 휴지** (`liftPause()`): 곡률 모드에서는
+   **overlap을 적용하지 않고 순차 진행**한다 — 펜은 두 획을 동시에 못 긋고,
+   overlap이 있으면 휴지가 겹침에 상쇄되어 화면에 보이지 않기 때문.
+   대신 획이 끊길 때마다 `drama × (최소 휴지 0.05s + 공중 이동 거리 /
+   (펜 속도 × 1.5))` 를 delay에 추가한다. 가까운 글자 사이는 짧고 단어
+   사이처럼 먼 이동은 길어져, 획 내부뿐 아니라 **획과 획 사이에도** 리듬이
+   생긴다. (`overlap` prop은 `'uniform'` 모드에서만 의미 있음)
+
+`HandwritingMarried`의 `speedModel` prop으로 제어: `'curvature'`(기본 — Hero도
+이걸 사용) / `'uniform'`(easeInOut). `drama` prop(기본 1)이 커브 감속과 획 간
+휴지를 함께 키운다. 데모 페이지에 토글과 drama 슬라이더가 있어 즉시 비교 가능.
+
+- 외곽선(reveal) 트랙은 곡률 개념이 없으므로 적용 제외. reveal duration은
+  글자 bbox 너비 비례 + ease-in-out 유지.
+
+수용 기준: 데모 토글로 easeInOut vs 곡률 기반을 비교했을 때 'e'·'o' 같은
+루프 글자에서 감속이 눈에 보여야 한다.
+
+### D. 구현 엔진 — framer-motion(채택) vs GSAP
+
+| 항목 | framer-motion (현재 채택) | GSAP (+ DrawSVG, ScrollTrigger) |
+|---|---|---|
+| 의존성 | **추가 0** (사이트 전역에서 이미 사용) | core+플러그인 ~70KB (gzip ~25KB), 2024년부터 전 플러그인 무료 |
+| 드로잉 | `pathLength` prop — SVG pathLength 정규화로 `getTotalLength` 브라우저 버그 회피 | DrawSVG가 내부 처리 |
+| 글자 순차 + overlap | delay 누적 직접 계산 (구현 완료) | Timeline 상대 포지셔닝(`"-=0.15"`)으로 더 우아 |
+| 일시정지/역재생/전체 속도 | `animate()`/`useAnimate` 컨트롤로 가능하나 선언적 API와는 결이 다름 | `pause/seek/reverse/timeScale` 내장 — 가장 성숙 |
+| 곡률 기반 속도 (5.C) | **`transition.ease`에 임의 함수 → 직접 지원** | CustomEase는 베지어 곡선 기반이라 동일 표현 곤란 — 시간 테이블 + `onUpdate`로 별도 구현 필요 |
+| 스크롤 scrub (스크롤만큼 써지고 지워짐) | `useScroll`+`useTransform`→`pathLength`. Hero 패럴럭스(`Hero.jsx`)에서 이미 쓰는 패턴 | ScrollTrigger `scrub` + pin/snap 등 부가 연출이 더 풍부 |
+| React 통합 | 네이티브 (컴포넌트 모델 그대로) | `useGSAP` 훅으로 우회 — React 생명주기 밖 시스템 |
+| 질감(SVG 필터) | 동일 (엔진 무관) | 동일 (엔진 무관) |
+
+**판단 기준**: 1회 재생·완료 콜백·단순 scrub까지는 framer-motion으로 충분하며
+추가 의존성이 없다. GSAP이 이기는 지점은 **pin/snap을 동반한 고급 스크롤 연출**과
+**타임라인 전체 제어(seek/역재생/배속)** — 이런 연출을 채택하기로 결정하는 시점에만
+도입을 검토하고, 도입 시 §4 의존성 조항에 예외를 명시할 것. 5.C의 속도 모델은
+엔진과 무관하게 계산은 우리 몫이며, framer-motion에서는 ease로, GSAP에서는
+`onUpdate`로 재생부만 달라진다.
+
+### E. (확장 과제) 획 폭·텍스처 ⬜ 검토 완료, 미구현
+
+전제: **SVG stroke는 한 path 안에서 폭이 균일하다** (가변 폭 stroke는 SVG 2에서
+제안만 되고 구현 브라우저 없음). 그래서 목표별로 방법이 갈린다.
+
+| 원하는 것 | 방법 | 현재 코드와의 호환 |
+|---|---|---|
+| 폭 일괄 조절 | `strokeWidth` prop | ✅ 이미 구현 |
+| 획 안 굵기 변화 | 가변 폭 outline + centerline **마스크 reveal along path** | 타이밍 로직 재사용, 레이어 구조만 변경 |
+| 질감(거침/번짐/농담) | SVG 필터·pattern stroke·blend mode | 지금 바로 얹기 가능, 모바일 성능 확인 필요 |
+
+**가변 폭 — "마스크 reveal along path" 기법** (외곽선 폰트의 §5.B 사각형
+reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
+
+1. 보이는 레이어: 굵기 변화가 표현된 **outline(채움) 글자** — centerline을
+   법선 방향으로 오프셋해 생성하거나 디자인 툴에서 제작.
+2. 마스크 레이어: 현재의 centerline path를 글자 최대 폭보다 **굵은 흰색
+   stroke**로 `<mask>` 안에 배치.
+3. 마스크 path에 기존과 동일한 `pathLength` 드로잉(타이밍·overlap·곡률 ease·
+   `onComplete` 전부 재사용) → 펜이 지나간 경로를 따라 가변 폭 글자가 드러난다.
+
+**§5.C와의 연동(권장)**: 오프셋 폭을 속도 프로파일과 연결 — 실제 펜은 느린
+구간(급커브)에서 잉크가 더 묻어 굵어지므로 **폭 ∝ v^(−α)**. 곡률 샘플링
+인프라(`strokeTiming.js`)가 이미 있어 타이밍과 굵기를 같은 모델이 구동하면
+물리적으로 일관된 손글씨가 된다.
+
+**텍스처 — centerline stroke 유지한 채 가능**:
+
+- 거친 잉크 가장자리: `feTurbulence` + `feDisplacementMap` 필터.
+- 잉크 번짐: `feGaussianBlur` + `feComposite`로 경계를 살짝 먹임.
+- 잉크 농담/질감: `stroke="url(#...)"`로 gradient나 `<pattern>`(잉크 텍스처) 지정.
+- 종이와의 합성: 글자에 `mix-blend-mode: multiply` — Hero 사진 배경 위에서도 동작.
+
+> ⚠️ 성능: SVG 필터가 걸린 요소에서 `pathLength` 애니메이션이 돌면 매 프레임
+> 필터를 재래스터라이즈한다. 모바일 프레임 드랍 가능성 → 필터 강도를 낮게,
+> 실기기 테스트 필수. 마스크 reveal 구조는 필터를 **정적 레이어**(outline
+> 글자)에만 걸 수 있어 이 부담이 덜하다.
+
+권장 순서: 효과 대비 비용이 좋은 **텍스처(블렌드+가벼운 필터) 먼저**,
+가변 폭은 §5.C 속도-폭 연동과 묶어서.
 
 ## 6. 산출물 (deliverables)
 
-- 폰트별 애니메이션 모듈 5개 (또는 데이터 주도 1개 컴포넌트 + 설정).
-- 5개를 세로로 나열해 동시에 비교하는 `compare.html` 데모.
-- 청첩장 섹션에 그대로 이식 가능한 형태(자체 완결형 `<svg>`+`<script>` 스니펫).
+- [x] `HandwritingMarried` 컴포넌트 (SVG 파일 교체만으로 문구/폰트 변경 가능)
+- [x] 파라미터 튜닝 데모 (`handwriting-demo.html`, dev 서버에서 `/handwriting-demo.html`)
+- [x] Hero 섹션 통합 (손글씨 완료 → 이름·날짜 등장)
+- [x] 곡률 기반 속도 모듈 + 데모 토글 (§5.C, `strokeTiming.js`)
+- [ ] (보류) 외곽선 폰트 포함 다중 폰트 비교 데모
+- [ ] (확장) 획 폭·텍스처 (§5.E)
 
 ## 7. 인수 기준 (acceptance criteria)
 
-- [ ] Astutely는 펜으로 긋는 stroke 드로잉으로 자연스럽게 써진다.
-- [ ] 나머지 4개는 reveal로 좌→우로 자연스럽게 나타난다(테두리만 그려지는 현상 없음).
-- [ ] 글자 길이에 비례한 타이밍 + overlap으로 손글씨 리듬이 느껴진다.
-- [ ] 스크롤로 진입 시 1회 재생, 재진입 시 중복 재생 안 함.
-- [ ] `prefers-reduced-motion`에서 애니메이션 없이 완성 글씨 표시.
-- [ ] 외부 의존성 0, GitHub Pages에서 그대로 동작.
-- [ ] 모바일 폭에서 깨지지 않음.
+### 완료
+- [x] Astutely가 펜으로 긋는 stroke 드로잉으로 자연스럽게 써진다.
+- [x] 글자 길이에 비례한 타이밍 + overlap으로 손글씨 리듬이 느껴진다.
+- [x] 스크롤로 진입 시 1회 재생, 재진입 시 중복 재생 안 함.
+- [x] `prefers-reduced-motion`에서 애니메이션 없이 완성 글씨 표시
+      (dev/`?motion=force` 오버라이드는 §4에 명시된 의도적 예외).
+- [x] 신규 외부 의존성 0, GitHub Pages에서 그대로 동작.
+- [x] 모바일 폭에서 깨지지 않음.
+- [x] 손글씨 완료 후 부제(이름·날짜) 등장, 콜백 실패 시 7초 안전 타이머.
+- [x] easeInOut vs 곡률 기반 속도를 토글 비교하는 데모가 있고,
+      루프 글자('e','o')에서 감속이 시각적으로 확인됨 (§5.C).
+
+### 남은 항목 (채택 시)
+- [ ] (외곽선 폰트 채택 시) reveal로 좌→우로 자연스럽게 나타남(테두리만 그려지는 현상 없음).
+- [ ] (5.E 채택 시) 텍스처/가변 폭이 모바일 실기기에서 프레임 드랍 없이 동작.
+- [ ] (GSAP 채택 시) 도입 사유가 5.D 기준(pin/snap급 스크롤 연출 또는 타임라인
+      제어 필요)에 부합하고, §4의 의존성 조항에 예외가 명시됨.
 
 ## 8. 문구/폰트 변경 시 SVG 재생성 방법
 
@@ -151,7 +294,7 @@ from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 
 TEXT = "We are getting married"   # <- 변경
-FONT = "AstutelySingleLine-VGj3l.ttf"
+FONT = "docs/fonts/ttf/AstutelySingleLine-VGj3l.ttf"
 
 f = TTFont(FONT); upm = f["head"].unitsPerEm
 gs = f.getGlyphSet(); cmap = f.getBestCmap(); hmtx = f["hmtx"]
@@ -168,8 +311,11 @@ vb = f"{-pad} {-pad} {x+pad*2} {asc-desc+pad*2}"
 inner = "\n".join(f'<path d="{d}" transform="translate({gx},0)"/>' for gx,d in gp)
 # 싱글라인: fill="none" stroke="#2b2b2b"; 외곽선: fill="#2b2b2b"
 svg = f'<svg viewBox="{vb}" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0,{asc}) scale(1,-1)" fill="none" stroke="#2b2b2b" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">{inner}</g></svg>'
-open("out.svg","w").write(svg)
+open("docs/fonts/svg/Wearegettingmarried-578431.svg","w").write(svg)
 ```
+
+생성 후 별도 코드 수정은 불필요 — `HandwritingMarried.jsx`가 SVG를 raw import해
+런타임 파싱하므로 **파일만 교체하면 반영**된다(선 두께·색은 props가 덮어씀).
 
 > 싱글라인이면 `fill="none" stroke=...`, 외곽선 폰트면 `fill="#2b2b2b"`(stroke 제거)로
 > `<g>` 속성만 바꿔주면 된다. 새 폰트를 쓸 땐 'o'/'e'의 contour 개수로
