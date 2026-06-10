@@ -87,6 +87,18 @@ def arclen(poly):
     return sum(math.dist(a, b) for a, b in zip(poly, poly[1:]))
 
 
+def cut_retrace(pts):
+    """TrueType 윤곽은 닫혀 있어서 이 폰트의 획은 끝까지 갔다가 같은 선을
+    되돌아온다(전후 대칭). 대칭이면 전반부(실제 펜 선)만 남긴다 — 안 하면
+    획 후반이 아무것도 안 그리는 죽은 시간이 되고 끝점도 가짜가 된다."""
+    n = len(pts) - 1
+    L = arclen(pts)
+    if n < 8 or L == 0:
+        return pts
+    dev = sum(math.dist(pts[i], pts[n - i]) for i in range(n // 2)) / (n // 2)
+    return pts[: n // 2 + 1] if dev / L < 0.02 else pts
+
+
 def order_strokes(strokes):
     """글리프 내 필기 순서. 기본은 긴 획(줄기) 먼저.
     예외: 'i'/'j'의 점 — 줄기 꼭대기보다 완전히 위에 있는 짧은 획은 먼저 찍는다.
@@ -101,16 +113,12 @@ def order_strokes(strokes):
     dots = [s for s in strokes[1:] if min(y for _, y in s) > top - eps]
     rest = [s for s in strokes[1:] if not any(s is d for d in dots)]
     main = strokes[0]
-    # 점을 먼저 찍었으면 줄기는 위→아래로 그어야 한다. 커시브 줄기는
-    # 진입 꼬리→상승→꼭대기→하강이 한 획이라(상승·하강이 같은 선을 왕복)
-    # 방향을 통째로 뒤집어도 상승 구간이 남는다 → **꼭대기에서 둘로 쪼개**
-    # 앞 토막은 역방향(꼭대기→진입), 뒤 토막은 정방향(꼭대기→탈출)으로
-    # 두 토막 모두 위에서 아래로 긋는다.
+    # 점을 먼저 찍었으면 줄기는 위→아래로 긋는다. retrace 를 잘라낸 뒤의
+    # 줄기는 진입 꼬리→상승으로 꼭대기에서 끝나므로, 꼭대기가 경로 끝쪽이면
+    # 통째로 뒤집어 꼭대기(점 바로 아래)에서 시작해 내려긋게 한다.
     if dots:
         i_top = max(range(len(main)), key=lambda i: main[i][1])  # font y-up: 꼭대기 = max y
-        if 0.1 * len(main) < i_top < 0.9 * len(main):
-            return dots + [main[: i_top + 1][::-1], main[i_top:]] + rest
-        if i_top > len(main) // 2:  # 꼭대기가 끝쪽이면 통째로 뒤집으면 충분
+        if i_top > len(main) // 2:
             main = main[::-1]
     return dots + [main] + rest
 
@@ -253,7 +261,7 @@ def main():
             continue
         pen = RecordingPen()
         gs[cmap[ord(ch)]].draw(pen)
-        glyph_strokes = [resample(p, SAMPLES) for p in flatten_commands(pen.value)]
+        glyph_strokes = [cut_retrace(resample(p, SAMPLES)) for p in flatten_commands(pen.value)]
         glyph_strokes = [g for g in glyph_strokes if g]
         # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
         strokes += [(x, g) for g in order_strokes(glyph_strokes)]

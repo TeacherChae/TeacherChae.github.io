@@ -1,7 +1,14 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReduceMotion } from '../../lib/reduceMotion.js';
-import { buildTimeMap, easeFromTimeMap, liftPause } from './strokeTiming.js';
+import {
+  airDistance,
+  buildTimeMap,
+  CONNECT_EPS,
+  DOT_LEN,
+  easeFromTimeMap,
+  liftPause,
+} from './strokeTiming.js';
 // 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물) — 두 variant 의
 // 단일 소스. 획 분리·필기 순서·방향(i/j 점 먼저, 줄기 위→아래 분할)이
 // 전부 생성 단계에서 확정된다. 문구/폰트 변경은 SVG 재생성으로 반영(PRD §8).
@@ -103,7 +110,14 @@ export default function HandwritingMarried({
         // overlap 을 빼면 휴지가 겹침에 상쇄되어 화면에 보이지 않는다.
         cursor += duration;
         if (el && els[i + 1]) {
-          cursor += liftPause(el, els[i + 1], paths[i]?.transform, paths[i + 1]?.transform, pxPerSec, liftDrama);
+          // 이어쓰기 판별: 끝점↔시작점 간격이 CONNECT_EPS 미만이면 필기체가
+          // 이어지는 글자 — 휴지 없이 한 호흡으로 계속 긋는다.
+          // 단 점('i' 윗점)으로 드나드는 전이는 거리와 무관하게 펜을 든다.
+          const gap = airDistance(el, els[i + 1]);
+          const dotInvolved = len < DOT_LEN || els[i + 1].getTotalLength() < DOT_LEN;
+          if (gap >= CONNECT_EPS || dotInvolved) {
+            cursor += liftPause(gap, pxPerSec, liftDrama);
+          }
         }
       } else {
         cursor += duration * (1 - overlap);

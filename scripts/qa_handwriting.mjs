@@ -8,7 +8,7 @@
 //   apt-get download libasound2 && dpkg -x libasound2*.deb /tmp/locallibs
 //   LD_LIBRARY_PATH=/tmp/locallibs/usr/lib/x86_64-linux-gnu node scripts/qa_handwriting.mjs
 //
-// 검증 항목: 획 수(25)·필기 순서(i 점→줄기 토막)·줄기 위→아래 방향·
+// 검증 항목: 획 수(23)·필기 순서(i 점→줄기)·줄기 위→아래 방향·
 // liftDrama 휴지 실측·inked 마스크/폭대비/텍스처·t 가로획 가시성·Hero 통합.
 import puppeteer from 'puppeteer';
 
@@ -44,7 +44,7 @@ const clickCheckbox = (idx) =>
 const clickReplay = () =>
   page.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.textContent.includes('다시 재생')).click());
 
-const N = 25; // 19글리프 → 25획 (t=2획×2, i=3획×2)
+const N = 23; // 19글리프 → 23획 (t=줄기+가로획, i=점+줄기)
 
 async function measureRun(mode, timeoutMs = 30000) {
   await clickReplay();
@@ -96,16 +96,17 @@ let first = await measureRun('centerline');
 const idx = Object.keys(first).map(Number).sort((a, b) => a - b);
 ok(`centerline ${N}획 모두 그려짐`, idx.length === N, `${idx.length}획`);
 ok('획이 필기 순서대로 시작', idx.every((i) => i === 0 || (first[i] ?? 0) >= (first[i - 1] ?? 0)));
-ok("'i' 점(11,20) → 줄기 토막들 순서", first[11] < first[12] && first[12] <= first[13] && first[20] < first[21] && first[21] <= first[22],
-   `i1: ${first[11]}→${first[12]}→${first[13]}ms, i2: ${first[20]}→${first[21]}→${first[22]}ms`);
-ok("'i' 줄기 토막 위→아래로 긋기 (centerline)",
-   (await stemDownward('centerline', 12)) && (await stemDownward('centerline', 13)) &&
-   (await stemDownward('centerline', 21)) && (await stemDownward('centerline', 22)));
+ok("'i' 점(11,19) → 줄기 순서", first[11] < first[12] && first[19] < first[20],
+   `i1: ${first[11]}→${first[12]}ms, i2: ${first[19]}→${first[20]}ms`);
+ok("'i' 줄기 위→아래로 긋기 (centerline)",
+   (await stemDownward('centerline', 12)) && (await stemDownward('centerline', 20)));
 
 // B. 획간 휴지 liftDrama 0 vs 3
 await setRange(4, 0);
+await new Promise((r) => setTimeout(r, 400)); // React 상태/타이밍 재계산 반영 대기
 const span0 = (await measureRun('centerline'))[N - 1];
 await setRange(4, 3);
+await new Promise((r) => setTimeout(r, 400));
 const span3 = (await measureRun('centerline'))[N - 1];
 ok('liftDrama 0→3 에서 전체 시간 증가', span3 > span0 + 1000, `${span0}ms → ${span3}ms`);
 await setRange(4, 1);
@@ -120,7 +121,7 @@ const counts = await page.evaluate((N) => {
 ok(`inked: 마스크 ${N} + 잉크 path ${N}`, counts.masks === N && counts.inks === N, JSON.stringify(counts));
 first = await measureRun('inked');
 ok(`inked: ${N}획 모두 reveal`, Object.keys(first).length === N);
-ok("inked: 'i' 점 먼저 + 줄기 하향", first[11] < first[12] && first[20] < first[21] && (await stemDownward('inked', 12)));
+ok("inked: 'i' 점 먼저 + 줄기 하향", first[11] < first[12] && first[19] < first[20] && (await stemDownward('inked', 12)));
 // 't' 가로획(8, 10) 가시성: ink 폴리곤 세로 두께 > 1 viewBox unit
 const cross = await page.evaluate(() => {
   const svg = document.querySelectorAll('section svg')[0];
@@ -167,7 +168,7 @@ const hero = await page.evaluate(() => {
   const paths = [...svg.querySelectorAll('g > g > path')];
   return { paths: paths.length, drawn: paths.filter((p) => parseFloat(getComputedStyle(p).opacity) > 0.5).length };
 });
-ok('Hero: 게이트 통과 후 손글씨 25획 + 그려지는 중', !!hero && hero.paths === N && hero.drawn > 0, JSON.stringify(hero));
+ok('Hero: 게이트 통과 후 손글씨 23획 + 그려지는 중', !!hero && hero.paths === N && hero.drawn > 0, JSON.stringify(hero));
 await page.screenshot({ path: '/tmp/qa_hero.png' });
 ok('Hero 콘솔/페이지 에러 0', errors.length === errBefore, errors.slice(errBefore).slice(0, 3).join(' | '));
 

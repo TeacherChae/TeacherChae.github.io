@@ -13,6 +13,11 @@ const RAMP = 0.08; // 획 시작/끝 추가 감속 구간(호길이 비율) — 
 const RAMP_MIN = 0.3; // 획 양끝에서의 속도 배율 (구간 안에서 1로 선형 회복)
 const AIR_SPEED = 1.5; // 펜 리프트(공중 이동) 속도 = 지면 평균 속도 × 1.5
 const MIN_LIFT = 0.05; // 획이 끊길 때마다 드는 최소 휴지(sec) — 펜을 떼는 비용
+// 이어쓰기 판별: 이전 획 끝 ↔ 다음 획 시작 간격(viewBox 단위). 이 에셋에서
+// 연결 쌍은 ≤14, 펜 떼는 쌍은 ≥36 으로 갈리므로 중간값 20 을 임계로 쓴다.
+export const CONNECT_EPS = 20;
+// 이보다 짧은 획은 점('i'의 윗점) — 점으로 드나들 땐 거리가 가까워도 펜을 든다.
+export const DOT_LEN = 5;
 
 // 연속 3점의 외접원으로 곡률 추정: κ = 4·삼각형면적 / (세 변 길이의 곱)
 function curvature(p0, p1, p2) {
@@ -99,8 +104,7 @@ export function airDistance(prevEl, nextEl, prevTransform, nextTransform) {
 
 // 획과 획 사이의 펜 리프트 휴지(sec) = 최소 휴지 + 공중 이동 시간.
 // 가까운 글자는 짧게, 단어 사이처럼 먼 이동은 길게 — 획 간 시간차의 원천.
-// drama 로 전체를 스케일해 과장 정도를 조절한다.
-export function liftPause(prevEl, nextEl, prevTransform, nextTransform, pxPerSec, drama = 1) {
-  const dist = airDistance(prevEl, nextEl, prevTransform, nextTransform);
+// drama 로 전체를 스케일해 과장 정도를 조절한다. dist 는 airDistance() 값.
+export function liftPause(dist, pxPerSec, drama = 1) {
   return drama * (MIN_LIFT + dist / (pxPerSec * AIR_SPEED));
 }
