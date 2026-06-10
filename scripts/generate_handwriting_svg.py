@@ -30,8 +30,9 @@ TEXT = "We are getting married"
 FONT = "docs/fonts/ttf/AstutelySingleLine-VGj3l.ttf"
 OUT = "docs/fonts/svg/wearegettingmarried_inked.svg"
 
-W_MIN, W_MAX = 7.0, 30.0   # 잉크 폭 범위 (font units, upm 1000)
-MASK_RATIO = 1.6           # 마스크 stroke 폭 = W_MAX × 1.6 (PRD §5.E-5)
+W_MIN, W_MAX = 7.0, 30.0   # 잉크 폭 범위 기본값 (font units, upm 1000) — --wmin/--wmax
+MASK_RATIO = 2.0           # 마스크 stroke 폭 = W_MAX × 2.0 (PRD §5.E-5,
+                           # 런타임 inkBoost 로 굵어진 잉크까지 덮도록 여유)
 SAMPLES = 200              # 획당 호길이 등간격 샘플 수
 SMOOTH_WIN = 15            # 폭 이동평균 반경(샘플) (PRD §5.E-3)
 SPEED_P = 0.5              # §5.C 와 동일한 곡률 지수
@@ -86,6 +87,22 @@ def arclen(poly):
     return sum(math.dist(a, b) for a, b in zip(poly, poly[1:]))
 
 
+def order_strokes(strokes):
+    """글리프 내 필기 순서. 기본은 긴 획(줄기) 먼저.
+    예외: 'i'/'j'의 점 — 줄기 꼭대기보다 완전히 위에 있는 짧은 획은 먼저 찍는다.
+    이 폰트는 줄기를 아래→위로 긋므로 점을 나중에 찍으면 부자연스럽다.
+    't' 가로획은 줄기 중간 높이라 이 규칙에 안 걸리고 줄기 뒤에 온다."""
+    strokes = sorted(strokes, key=arclen, reverse=True)
+    if len(strokes) < 2:
+        return strokes
+    ys = [y for s in strokes for _, y in s]
+    eps = 0.08 * (max(ys) - min(ys))
+    top = max(y for _, y in strokes[0])  # 주 획(가장 긴 획)의 꼭대기 (font y-up)
+    dots = [s for s in strokes[1:] if min(y for _, y in s) > top - eps]
+    rest = [s for s in strokes[1:] if not any(s is d for d in dots)]
+    return dots + [strokes[0]] + rest
+
+
 def resample(poly, n):
     """호길이 등간격 n+1 점으로 리샘플."""
     total = arclen(poly)
@@ -116,7 +133,7 @@ def curvature(p0, p1, p2):
     return 2 * cross / (a * b * c)
 
 
-def widths(pts, alpha):
+def widths(pts, alpha, wmin=W_MIN, wmax=W_MAX):
     """샘플별 잉크 폭: 방향 규칙 × 속도 연동(α) → 이동평균 스무딩."""
     n = len(pts)
     # 단위 탄젠트 (중앙차분)
@@ -126,7 +143,7 @@ def widths(pts, alpha):
         dx, dy = b[0] - a[0], b[1] - a[1]
         d = math.hypot(dx, dy) or 1.0
         tans.append((dx / d, dy / d))
-    w_dir = [W_MIN + (W_MAX - W_MIN) * min(max(-ty, 0.0), 1.0) ** 1.2 for _, ty in tans]
+    w_dir = [wmin + (wmax - wmin) * min(max(-ty, 0.0), 1.0) ** 1.2 for _, ty in tans]
 
     if alpha > 0:
         raw_v = []
@@ -143,7 +160,7 @@ def widths(pts, alpha):
     for i in range(n):
         lo, hi = max(0, i - SMOOTH_WIN), min(n, i + SMOOTH_WIN + 1)
         sm.append(sum(w[lo:hi]) / (hi - lo))
-    return [min(max(x, W_MIN * 0.6), W_MAX * 1.2) for x in sm]
+    return [min(max(x, wmin * 0.6), wmax * 1.2) for x in sm]
 
 
 def ink_polygon(pts, w):
@@ -186,9 +203,18 @@ def pen_to_d(pts, tx, fy, s):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--alpha", type=float, default=0.0, help="속도-폭 연동 지수 (0=방향 규칙만)")
+    ap.add_argument("--wmin", type=float, default=W_MIN, help="최소 잉크 폭 (font units)")
+    ap.add_argument("--wmax", type=float, default=W_MAX, help="최대 잉크 폭 (font units)")
+    ap.add_argument("--contrast", type=float, default=1.0,
+                    help="폭 대비 배율: 평균 폭을 유지한 채 굵음↔가늚 진폭을 키움/줄임")
     ap.add_argument("--text", default=TEXT)
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
+
+    # --contrast: 평균 폭(중점)을 고정한 채 진폭만 스케일 (PRD §5.E "폭 대비")
+    mid, half = (args.wmin + args.wmax) / 2, (args.wmax - args.wmin) / 2
+    args.wmin = max(2.0, mid - half * args.contrast)  # 헤어라인 하한 2 font units
+    args.wmax = mid + half * args.contrast
 
     f = TTFont(FONT)
     upm = f["head"].unitsPerEm
@@ -211,21 +237,20 @@ def main():
         gs[cmap[ord(ch)]].draw(pen)
         glyph_strokes = [resample(p, SAMPLES) for p in flatten_commands(pen.value)]
         glyph_strokes = [g for g in glyph_strokes if g]
-        # 필기 순서 근사: 긴 획(줄기) 먼저 (런타임 휴리스틱을 생성 단계로 이동)
-        glyph_strokes.sort(key=arclen, reverse=True)
-        strokes += [(x, g) for g in glyph_strokes]
+        # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
+        strokes += [(x, g) for g in order_strokes(glyph_strokes)]
         x += hmtx[cmap[ord(ch)]][0]
 
     vb_w, vb_h = (x + 2 * pad) * s, TARGET_H
     inks, pens = [], []
     for i, (tx, pts) in enumerate(strokes):
-        w = widths(pts, args.alpha)
+        w = widths(pts, args.alpha, args.wmin, args.wmax)
         geom = ink_polygon(pts, w)
         assert geom.is_valid, f"stroke {i}: invalid geometry"
         inks.append(f"<path id='ink-{i}' d='{geom_to_d(geom, tx + pad, fy, s)}'/>")
         pens.append(f"<path id='pen-{i}' d='{pen_to_d(pts, tx + pad, fy, s)}'/>")
 
-    mask_w = W_MAX * MASK_RATIO * s
+    mask_w = args.wmax * MASK_RATIO * s
     svg = (
         f"<svg viewBox='0 0 {vb_w:.1f} {vb_h:.1f}' xmlns='http://www.w3.org/2000/svg' "
         f"data-mask-width='{mask_w:.2f}' data-alpha='{args.alpha}'>\n"

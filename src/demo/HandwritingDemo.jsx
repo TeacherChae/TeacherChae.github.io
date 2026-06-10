@@ -11,7 +11,9 @@ export default function HandwritingDemo() {
   const [replayKey, setReplayKey] = useState(0);
   const [forceMotion, setForceMotion] = useState(true); // 데모에선 기본 강제 재생
   const [speedModel, setSpeedModel] = useState('curvature'); // PRD §5.C 비교 토글
-  const [drama, setDrama] = useState(1.0); // 곡률 효과 과장 정도
+  const [curveDrama, setCurveDrama] = useState(1.0); // 커브 감속 과장
+  const [liftDrama, setLiftDrama] = useState(1.0); // 획 간 휴지 배율
+  const [inkContrast, setInkContrast] = useState(1); // 획 안 폭 대비 단계 (1|1.5|2)
   const [variant, setVariant] = useState('centerline'); // PRD §5.E 가변 폭 잉크
   const [texture, setTexture] = useState(false); // 거친 잉크 가장자리 필터
   const [systemReduced, setSystemReduced] = useState(false);
@@ -66,9 +68,21 @@ export default function HandwritingDemo() {
             }} />
           <span style={styles.fieldLabel}>곡률 기반 속도 — 2/3 power law (끄면 easeInOut)</span>
         </label>
-        <Field label={`곡률 과장 drama: ${drama.toFixed(1)} (커브 감속·획 간 휴지 배율)`}>
-          <input type="range" min="0.4" max="2" step="0.1" value={drama}
-            onChange={(e) => setDrama(+e.target.value)} />
+        <Field label={`커브 감속: ${curveDrama.toFixed(1)} (직선 빠르게·커브 느리게)`}>
+          <input type="range" min="0.4" max="2" step="0.1" value={curveDrama}
+            onChange={(e) => setCurveDrama(+e.target.value)} />
+        </Field>
+        <Field label={`획 간 휴지: ${liftDrama.toFixed(1)} (0=없음, 펜 떼는 멈춤 배율)`}>
+          <input type="range" min="0" max="3" step="0.1" value={liftDrama}
+            onChange={(e) => setLiftDrama(+e.target.value)} />
+        </Field>
+        <Field label="폭 대비 (획 안 굵음↔가늚 진폭, 가변 폭 모드 전용)">
+          <select value={inkContrast} disabled={variant !== 'inked'}
+            onChange={(e) => { setInkContrast(+e.target.value); replay(); }}>
+            <option value={1}>기본 (7~30)</option>
+            <option value={1.5}>강하게 (×1.5)</option>
+            <option value={2}>아주 강하게 (×2)</option>
+          </select>
         </Field>
         <label style={{ ...styles.field, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <input type="checkbox" checked={variant === 'inked'}
@@ -107,9 +121,11 @@ export default function HandwritingDemo() {
           replayKey={replayKey}
           forceMotion={forceMotion}
           speedModel={speedModel}
-          drama={drama}
+          curveDrama={curveDrama}
+          liftDrama={liftDrama}
           variant={variant}
           texture={texture}
+          inkContrast={inkContrast}
           className="hw-preview"
         />
       </section>
@@ -119,7 +135,7 @@ export default function HandwritingDemo() {
       </p>
       <div style={{ height: '90vh' }} aria-hidden />
       <section style={styles.stage}>
-        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} drama={drama} variant={variant} texture={texture} />
+        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} curveDrama={curveDrama} liftDrama={liftDrama} variant={variant} texture={texture} inkContrast={inkContrast} />
         <p style={styles.note}>↑ 스크롤로 처음 진입할 때 한 번만 그려진다.</p>
       </section>
     </div>

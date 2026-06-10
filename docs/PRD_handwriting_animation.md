@@ -110,9 +110,11 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
   | `replayKey` | 0 | 변경 시 처음부터 재생(데모용) |
   | `forceMotion` | false | reduced-motion 무시(데모용) |
   | `speedModel` | `'curvature'` | `'curvature'`=2/3 power law(§5.C), `'uniform'`=easeInOut |
-  | `drama` | 1 | 곡률 효과 과장 배율(0.4~2 권장) — 커브 감속·획 간 휴지를 함께 키움 |
+  | `curveDrama` | 1 | 커브 감속 과장(0.4~2 권장) — 직선 빠르게, 커브 느리게 |
+  | `liftDrama` | 1 | 획 간 휴지 배율(0~3) — 0이면 휴지 없음 |
   | `variant` | `'centerline'` | `'inked'`=가변 폭 잉크 + 마스크 reveal(§5.E) |
   | `texture` | false | inked 전용 — feTurbulence 거친 잉크 가장자리 |
+  | `inkContrast` | 1 | inked 전용 — 획 안 폭 대비 단계(1·1.5·2, 사전 생성 에셋 전환) |
   | `onComplete` | — | 전체 완료 1회 콜백 |
 
 ## 5. 구현
@@ -132,8 +134,10 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
    글자를 코드에 박지 않으므로 **SVG 파일만 교체하면 문구/폰트 변경 반영**.
    글리프 안에 서브패스가 여러 개면('t'의 가로획, 'i'의 점) **'M' 경계에서
    펜 획 단위로 분리**해 획마다 자기 duration/ease/펜 리프트 휴지를 받는다.
-   분리 시 긴 획(줄기) 먼저, 짧은 획(가로획·점) 나중 순으로 정렬해 실제
-   필기 순서를 근사한다(폰트 파일은 't' 가로획이 줄기보다 앞에 있음).
+   필기 순서 규칙: 기본은 긴 획(줄기) 먼저, 짧은 획('t' 가로획)은 나중.
+   단 **'i'/'j'의 점처럼 줄기 꼭대기보다 완전히 위에 있는 짧은 획은 먼저**
+   찍는다 — 이 폰트는 줄기를 아래→위로 긋므로 점이 나중이면 부자연스럽다.
+   (inked 에셋은 생성기가, centerline 에셋은 런타임 파서가 같은 규칙 적용)
 2. `useLayoutEffect`에서 각 path의 `getTotalLength()` 실측 →
    `duration = max(0.12, len / pxPerSec)`, delay는 `duration × (1 − overlap)` 누적.
 3. 각 글자는 `motion.path`의 `pathLength` 0→1 + `ease: 'easeInOut'`.
@@ -172,8 +176,8 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
    viewBox 스케일/폰트 크기와 무관하게 같은 리듬) 후 클램프
    (직선에서 κ→0이면 속도가 발산하므로 상한 필수).
    **지수 p**: 생리학적 값은 1/3이지만 화면에서는 차이가 미묘해
-   **기본 p = 0.5 × `drama`** 로 과장한다(drama 1 → p 0.5).
-   클램프 범위는 [0.18, 5.0]^(drama) — drama와 함께 지수적으로 넓혀야
+   **기본 p = 0.5 × `curveDrama`** 로 과장한다(curveDrama 1 → p 0.5).
+   클램프 범위는 [0.18, 5.0]^(curveDrama) — 함께 지수적으로 넓혀야
    대비 증가가 클램프에 막히지 않는다.
 4. **획 시작/끝 ramp**: 양끝 8% 구간에 추가 감속(펜이 닿고 떨어지는 순간).
 5. 누적 시간 테이블 tᵢ = Σ(Δs / vᵢ) → `easeFromTimeMap()`이 이진탐색+선형보간으로
@@ -182,14 +186,17 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
 6. **획 간 시간차 — 펜 리프트 휴지** (`liftPause()`): 곡률 모드에서는
    **overlap을 적용하지 않고 순차 진행**한다 — 펜은 두 획을 동시에 못 긋고,
    overlap이 있으면 휴지가 겹침에 상쇄되어 화면에 보이지 않기 때문.
-   대신 획이 끊길 때마다 `drama × (최소 휴지 0.05s + 공중 이동 거리 /
+   대신 획이 끊길 때마다 `liftDrama × (최소 휴지 0.05s + 공중 이동 거리 /
    (펜 속도 × 1.5))` 를 delay에 추가한다. 가까운 글자 사이는 짧고 단어
    사이처럼 먼 이동은 길어져, 획 내부뿐 아니라 **획과 획 사이에도** 리듬이
    생긴다. (`overlap` prop은 `'uniform'` 모드에서만 의미 있음)
 
+커브 감속(`curveDrama`)과 획 간 휴지(`liftDrama`)는 **독립 prop으로 분리**되어
+따로 조절한다(데모에 슬라이더 각각). 데모 페이지에서 speedModel 토글과 함께
+즉시 비교 가능.
+
 `HandwritingMarried`의 `speedModel` prop으로 제어: `'curvature'`(기본 — Hero도
-이걸 사용) / `'uniform'`(easeInOut). `drama` prop(기본 1)이 커브 감속과 획 간
-휴지를 함께 키운다. 데모 페이지에 토글과 drama 슬라이더가 있어 즉시 비교 가능.
+이걸 사용) / `'uniform'`(easeInOut).
 
 - 외곽선(reveal) 트랙은 곡률 개념이 없으므로 적용 제외. reveal duration은
   글자 bbox 너비 비례 + ease-in-out 유지.
@@ -232,6 +239,12 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
 `data-mask-width`)에 기존 `pathLength` 애니메이션을 그대로 적용 —
 타이밍·곡률 ease·펜 리프트 코드가 두 variant에서 완전히 공유된다.
 `texture` prop(inked 전용)은 feTurbulence 거친 잉크 가장자리 필터.
+**폭 대비 조절**: 획 안 굵음↔가늚 진폭은 폴리곤에 구워지므로 런타임 무단계
+조절이 불가능하다. 생성기 `--contrast`(평균 폭을 고정한 채 진폭만 스케일,
+헤어라인 하한 2 font units)로 단계별 에셋을 미리 생성하고(기본·×1.5·×2 커밋됨),
+`inkContrast` prop으로 전환한다. 절대 폭 범위는 `--wmin/--wmax`.
+대비를 키울수록 가로획('t' 크로스바)은 헤어라인에 수렴한다 — 방향 규칙의
+의도된 결과. 마스크 폭은 W_MAX×2.0.
 **Hero는 아직 `centerline`(기본값) — 데모 비교 후 채택 결정.**
 
 아래는 설계 근거와 프로토타입 검증 기록.
@@ -345,8 +358,10 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 폰트는 글자를 path로 "구워" 넣으므로 문구를 바꾸면 SVG를 다시 생성해야 한다.
 
 - **가변 폭(inked) 에셋**: `python3 scripts/generate_handwriting_svg.py
-  [--text "..."] [--alpha 0.3]` (의존성: fonttools, shapely — 오프라인 전용).
-  centerline 에셋과 inked 에셋 둘 다 바꿔야 두 variant가 같은 문구가 된다.
+  [--text "..."] [--alpha 0.3] [--wmin 7 --wmax 30] [--contrast 1.5]`
+  (의존성: fonttools, shapely — 오프라인 전용).
+  `inkContrast` 단계용으로 기본·`--contrast 1.5`·`--contrast 2.0` 세 에셋을
+  모두 재생성할 것. centerline 에셋까지 바꿔야 두 variant가 같은 문구가 된다.
 - **centerline 에셋**: 아래 스크립트의 `TEXT`만 바꿔 실행(`pip install fonttools`):
 
 ```python

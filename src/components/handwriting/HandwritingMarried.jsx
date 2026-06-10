@@ -5,8 +5,13 @@ import { buildTimeMap, easeFromTimeMap, liftPause } from './strokeTiming.js';
 // SVG를 raw 텍스트로 가져와 런타임 파싱한다. 글자를 코드에 박지 않으므로
 // 문구/폰트를 바꿔 SVG를 재생성하면 그대로 반영된다(PRD §6).
 import svgRaw from '../../../docs/fonts/svg/Wearegettingmarried-578431.svg?raw';
-// 가변 폭 잉크 + 센터라인 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물)
+// 가변 폭 잉크 + 센터라인 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물).
+// 폭 대비(--contrast)는 폴리곤에 구워지므로 단계별 에셋을 미리 생성해 전환한다.
 import inkedRaw from '../../../docs/fonts/svg/wearegettingmarried_inked.svg?raw';
+import inkedRawC15 from '../../../docs/fonts/svg/wearegettingmarried_inked_c15.svg?raw';
+import inkedRawC20 from '../../../docs/fonts/svg/wearegettingmarried_inked_c20.svg?raw';
+
+const INKED_RAWS = { 1: inkedRaw, 1.5: inkedRawC15, 2: inkedRawC20 };
 
 // --- SVG 파싱: viewBox + 글자별 path(d, transform) 추출 -----------------
 function parseSvg(raw) {
@@ -20,10 +25,24 @@ function parseSvg(raw) {
     // 쪼개 획마다 자기 duration/ease/펜 리프트 휴지를 받게 한다.
     // (이 SVG 는 절대좌표 M/C 만 쓰므로 'M' 경계 분리가 안전하다)
     const subs = d.match(/M[^M]+/g) || [d];
-    // 실제 필기 순서 근사: 긴 획(줄기)을 먼저, 짧은 획(가로획·점)을 나중에.
-    // 폰트 파일은 't'의 가로획을 줄기보다 앞에 두는데 그대로 그리면 거꾸로 쓰는 듯 보인다.
-    if (subs.length > 1) subs.sort((a, b) => b.length - a.length);
-    return subs.map((sd) => ({ d: sd.trim(), transform }));
+    // 필기 순서: 기본은 긴 획(줄기) 먼저. 단 'i'/'j'의 점처럼 줄기 꼭대기보다
+    // 완전히 위에 있는 짧은 획은 먼저 찍는다(줄기를 아래→위로 긋는 폰트라
+    // 점이 나중이면 부자연스럽다). 't' 가로획은 줄기 중간 높이라 줄기 뒤.
+    let parts = subs.map((sd) => {
+      const nums = (sd.match(/-?\d*\.?\d+/g) || []).map(Number);
+      const ys = nums.filter((_, k) => k % 2 === 1);
+      return { d: sd.trim(), len: sd.length, yMin: Math.min(...ys), yMax: Math.max(...ys) };
+    });
+    if (parts.length > 1) {
+      parts.sort((a, b) => b.len - a.len);
+      const eps =
+        0.08 * (Math.max(...parts.map((p) => p.yMax)) - Math.min(...parts.map((p) => p.yMin)));
+      // 화면 좌표는 y-down: "위에 있다" = yMax 가 주 획의 yMin(꼭대기)보다 작다
+      const dots = parts.slice(1).filter((p) => p.yMax < parts[0].yMin + eps);
+      const rest = parts.slice(1).filter((p) => !dots.includes(p));
+      parts = [...dots, parts[0], ...rest];
+    }
+    return parts.map((p) => ({ d: p.d, transform }));
   });
   return { viewBox, paths };
 }
@@ -52,12 +71,17 @@ function parseInked(raw) {
  * @param replayKey  값이 바뀌면 처음부터 다시 그린다(데모 리플레이용).
  * @param speedModel 'curvature'(기본) = 곡률 기반 속도(PRD §5.C)
  *                   + 펜 리프트 휴지(획 간 시간차). 'uniform' = easeInOut.
- * @param drama      곡률 효과 과장 정도(0.4~2 권장). 클수록 커브 감속과
- *                   획 간 휴지가 커진다. 'curvature' 모드에서만 의미 있음.
+ * @param curveDrama 커브 감속 과장(0.4~2 권장). 클수록 직선은 빨라지고
+ *                   커브에서 더 기어간다. 'curvature' 모드 전용.
+ * @param liftDrama  획 간 휴지 배율(0~3). 0이면 휴지 없음, 클수록 펜을
+ *                   떼는 멈춤이 길어진다. 'curvature' 모드 전용.
  * @param variant    'centerline'(기본) = 균일 폭 stroke 드로잉.
  *                   'inked' = 가변 폭 잉크 폴리곤 + 센터라인 마스크 reveal(PRD §5.E).
  *                   타이밍·ease·휴지 로직은 두 모드가 완전히 공유한다.
  * @param texture    'inked' 전용. true면 feTurbulence 거친 잉크 가장자리 필터.
+ * @param inkContrast 'inked' 전용. 획 안 굵음↔가늚 진폭(폭 대비) 단계: 1 | 1.5 | 2.
+ *                   폭은 생성 단계에 폴리곤으로 구워지므로 단계별 에셋을 전환한다.
+ *                   다른 값이 필요하면 생성기 --contrast 로 추가 생성.
  */
 export default function HandwritingMarried({
   pxPerSec = 700,
@@ -67,9 +91,11 @@ export default function HandwritingMarried({
   startDelay = 0.2,
   replayKey = 0,
   speedModel = 'curvature',
-  drama = 1,
+  curveDrama = 1,
+  liftDrama = 1,
   variant = 'centerline',
   texture = false,
+  inkContrast = 1,
   forceMotion = false, // true면 prefers-reduced-motion 을 무시하고 강제로 애니메이션(데모 미리보기용)
   onComplete, // 마지막 획까지 다 그려졌을 때 1회 호출(부제/이름 등장 타이밍용)
   className,
@@ -78,8 +104,8 @@ export default function HandwritingMarried({
   const reduce = forceMotion ? false : systemReduce;
   const inked = variant === 'inked';
   const { viewBox, paths, inks, maskWidth } = useMemo(
-    () => (inked ? parseInked(inkedRaw) : parseSvg(svgRaw)),
-    [inked],
+    () => (inked ? parseInked(INKED_RAWS[inkContrast] || inkedRaw) : parseSvg(svgRaw)),
+    [inked, inkContrast],
   );
   // 마스크/필터 id — 한 페이지에 인스턴스가 여러 개여도 충돌하지 않게
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
@@ -102,15 +128,15 @@ export default function HandwritingMarried({
     const next = els.map((el, i) => {
       const len = el ? el.getTotalLength() : 0;
       const duration = Math.max(0.12, len / pxPerSec);
-      const map = curvy && el ? buildTimeMap(el, { power: 0.5 * drama }) : null;
+      const map = curvy && el ? buildTimeMap(el, { power: 0.5 * curveDrama }) : null;
       const entry = { delay: cursor, duration, ease: map ? easeFromTimeMap(map) : undefined };
       if (curvy) {
         // 펜은 두 획을 동시에 못 긋는다: overlap 없이 순차 진행하고,
-        // 획 사이에 진짜 휴지(최소 휴지 + 공중 이동 시간 × drama)를 둔다.
+        // 획 사이에 진짜 휴지(최소 휴지 + 공중 이동 시간 × liftDrama)를 둔다.
         // overlap 을 빼면 휴지가 겹침에 상쇄되어 화면에 보이지 않는다.
         cursor += duration;
         if (el && els[i + 1]) {
-          cursor += liftPause(el, els[i + 1], paths[i]?.transform, paths[i + 1]?.transform, pxPerSec, drama);
+          cursor += liftPause(el, els[i + 1], paths[i]?.transform, paths[i + 1]?.transform, pxPerSec, liftDrama);
         }
       } else {
         cursor += duration * (1 - overlap);
@@ -118,7 +144,7 @@ export default function HandwritingMarried({
       return entry;
     });
     setTimings(next);
-  }, [pxPerSec, overlap, startDelay, replayKey, speedModel, drama, paths]);
+  }, [pxPerSec, overlap, startDelay, replayKey, speedModel, curveDrama, liftDrama, paths]);
 
   const shouldDraw = inView && !reduce;
 
