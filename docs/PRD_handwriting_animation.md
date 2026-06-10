@@ -111,6 +111,8 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
   | `forceMotion` | false | reduced-motion 무시(데모용) |
   | `speedModel` | `'curvature'` | `'curvature'`=2/3 power law(§5.C), `'uniform'`=easeInOut |
   | `drama` | 1 | 곡률 효과 과장 배율(0.4~2 권장) — 커브 감속·획 간 휴지를 함께 키움 |
+  | `variant` | `'centerline'` | `'inked'`=가변 폭 잉크 + 마스크 reveal(§5.E) |
+  | `texture` | false | inked 전용 — feTurbulence 거친 잉크 가장자리 |
   | `onComplete` | — | 전체 완료 1회 콜백 |
 
 ## 5. 구현
@@ -215,7 +217,24 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
 엔진과 무관하게 계산은 우리 몫이며, framer-motion에서는 ease로, GSAP에서는
 `onUpdate`로 재생부만 달라진다.
 
-### E. (확장 과제) 획 폭·텍스처 ⬜ 프로토타입 검증 완료 (2026-06), 제품 미구현
+### E. 획 폭·텍스처 ✅ 구현 완료 (`variant='inked'`, 기본은 centerline)
+
+**구현**: `scripts/generate_handwriting_svg.py`(오프라인, fonttools+shapely)가
+가변 폭 잉크 폴리곤(`#ink`)과 센터라인(`#pen`)을 획 단위 `ink-N`/`pen-N` 페어로
+담은 2레이어 SVG(`docs/fonts/svg/wearegettingmarried_inked.svg`)를 생성한다.
+획 분리·필기 순서 정렬도 생성 단계에서 확정(런타임 휴리스틱 불필요).
+코너 spike는 shapely `buffer(0)` + 끝점 원형 캡 union으로 생성 단계에서 제거.
+속도-폭 연동은 `--alpha` 파라미터(기본 0 = 방향 규칙만, §5.C 모델과 혼합).
+생성 의존성은 오프라인 전용이라 §4 "신규 외부 의존성 0"과 충돌하지 않는다.
+
+런타임은 `HandwritingMarried`의 `variant='inked'`: 획마다 잉크 폴리곤에
+`<mask>`를 걸고, 마스크 속 굵은 흰 센터라인 stroke(폭은 에셋의
+`data-mask-width`)에 기존 `pathLength` 애니메이션을 그대로 적용 —
+타이밍·곡률 ease·펜 리프트 코드가 두 variant에서 완전히 공유된다.
+`texture` prop(inked 전용)은 feTurbulence 거친 잉크 가장자리 필터.
+**Hero는 아직 `centerline`(기본값) — 데모 비교 후 채택 결정.**
+
+아래는 설계 근거와 프로토타입 검증 기록.
 
 전제: **SVG stroke는 한 path 안에서 폭이 균일하다** (가변 폭 stroke는 SVG 2에서
 제안만 되고 구현 브라우저 없음). 그래서 목표별로 방법이 갈린다.
@@ -294,8 +313,10 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 - [x] 파라미터 튜닝 데모 (`handwriting-demo.html`, dev 서버에서 `/handwriting-demo.html`)
 - [x] Hero 섹션 통합 (손글씨 완료 → 이름·날짜 등장)
 - [x] 곡률 기반 속도 모듈 + 데모 토글 (§5.C, `strokeTiming.js`)
+- [x] 가변 폭 잉크 생성기 + `variant='inked'` + 텍스처 옵션 + 데모 토글
+      (§5.E, `scripts/generate_handwriting_svg.py`)
 - [ ] (보류) 외곽선 폰트 포함 다중 폰트 비교 데모
-- [ ] (확장) 획 폭·텍스처 (§5.E)
+- [ ] (결정 대기) Hero에 inked variant 채택 여부 — 데모 비교 후
 
 ## 7. 인수 기준 (acceptance criteria)
 
@@ -314,15 +335,19 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 ### 남은 항목 (채택 시)
 - [ ] (외곽선 폰트 채택 시) reveal로 좌→우로 자연스럽게 나타남(테두리만 그려지는 현상 없음).
 - [ ] (5.E 채택 시) 텍스처/가변 폭이 모바일 실기기에서 프레임 드랍 없이 동작.
-- [ ] (5.E 채택 시) 가변 폭 outline에 코너 spike(자기교차 가시)가 없음 —
-      't' 가로획·'i' 등 급코너 글자에서 육안 확인.
+- [x] 가변 폭 outline에 코너 spike(자기교차 가시)가 없음 — 생성 단계
+      `buffer(0)`+원형 캡 union으로 해결, 래스터 렌더로 육안 확인(2026-06).
 - [ ] (GSAP 채택 시) 도입 사유가 5.D 기준(pin/snap급 스크롤 연출 또는 타임라인
       제어 필요)에 부합하고, §4의 의존성 조항에 예외가 명시됨.
 
 ## 8. 문구/폰트 변경 시 SVG 재생성 방법
 
 폰트는 글자를 path로 "구워" 넣으므로 문구를 바꾸면 SVG를 다시 생성해야 한다.
-아래 스크립트의 `TEXT`만 바꿔 실행(`pip install fonttools cairosvg`):
+
+- **가변 폭(inked) 에셋**: `python3 scripts/generate_handwriting_svg.py
+  [--text "..."] [--alpha 0.3]` (의존성: fonttools, shapely — 오프라인 전용).
+  centerline 에셋과 inked 에셋 둘 다 바꿔야 두 variant가 같은 문구가 된다.
+- **centerline 에셋**: 아래 스크립트의 `TEXT`만 바꿔 실행(`pip install fonttools`):
 
 ```python
 from fontTools.ttLib import TTFont

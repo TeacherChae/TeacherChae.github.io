@@ -12,6 +12,8 @@ export default function HandwritingDemo() {
   const [forceMotion, setForceMotion] = useState(true); // 데모에선 기본 강제 재생
   const [speedModel, setSpeedModel] = useState('curvature'); // PRD §5.C 비교 토글
   const [drama, setDrama] = useState(1.0); // 곡률 효과 과장 정도
+  const [variant, setVariant] = useState('centerline'); // PRD §5.E 가변 폭 잉크
+  const [texture, setTexture] = useState(false); // 거친 잉크 가장자리 필터
   const [systemReduced, setSystemReduced] = useState(false);
 
   // 브라우저의 prefers-reduced-motion 실제 상태를 읽어 표시(진단용)
@@ -68,6 +70,19 @@ export default function HandwritingDemo() {
           <input type="range" min="0.4" max="2" step="0.1" value={drama}
             onChange={(e) => setDrama(+e.target.value)} />
         </Field>
+        <label style={{ ...styles.field, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={variant === 'inked'}
+            onChange={(e) => {
+              setVariant(e.target.checked ? 'inked' : 'centerline');
+              replay();
+            }} />
+          <span style={styles.fieldLabel}>가변 폭 잉크 — 내리긋기 굵게 (PRD §5.E)</span>
+        </label>
+        <label style={{ ...styles.field, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <input type="checkbox" checked={texture} disabled={variant !== 'inked'}
+            onChange={(e) => { setTexture(e.target.checked); replay(); }} />
+          <span style={styles.fieldLabel}>잉크 텍스처 (가변 폭 모드 전용)</span>
+        </label>
         <button style={styles.button} onClick={replay}>↻ 다시 재생</button>
       </div>
 
@@ -93,6 +108,8 @@ export default function HandwritingDemo() {
           forceMotion={forceMotion}
           speedModel={speedModel}
           drama={drama}
+          variant={variant}
+          texture={texture}
           className="hw-preview"
         />
       </section>
@@ -102,7 +119,7 @@ export default function HandwritingDemo() {
       </p>
       <div style={{ height: '90vh' }} aria-hidden />
       <section style={styles.stage}>
-        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} drama={drama} />
+        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} drama={drama} variant={variant} texture={texture} />
         <p style={styles.note}>↑ 스크롤로 처음 진입할 때 한 번만 그려진다.</p>
       </section>
     </div>
