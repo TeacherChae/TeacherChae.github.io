@@ -1,0 +1,12 @@
+{
+  "name": "Local Write Bridge",
+  "id": "wedding-local-write-bridge",
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "main": "code.js",
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Local WebSocket bridge so the agent can drive the Plugin API (write) using locally-installed fonts."
+  }
+}

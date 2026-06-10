@@ -18,3 +18,9 @@ dist-ssr
 .omc
 .claude/settings.local.json
 __pycache__/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

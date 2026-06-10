@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <body style="font:12px -apple-system,sans-serif;margin:8px;color:#222">
+    <div id="s">connecting…</div>
+    <div style="margin-top:6px;color:#888">manual test (optional):</div>
+    <textarea id="t" style="width:100%;height:54px;box-sizing:border-box" placeholder='{"command":"ping"}'></textarea>
+    <button id="run" style="margin-top:4px">Run manual</button>
+    <pre id="out" style="white-space:pre-wrap;max-height:64px;overflow:auto;background:#f5f5f5;padding:4px"></pre>
+    <script>
+      const S = document.getElementById('s');
+      const OUT = document.getElementById('out');
+      let ws;
+      function connect() {
+        try {
+          ws = new WebSocket('ws://localhost:8787');
+          ws.onopen = () => { S.textContent = '● connected to bridge (localhost:8787)'; S.style.color = '#0a0'; };
+          ws.onclose = () => { S.textContent = '○ disconnected — retrying…'; S.style.color = '#c60'; setTimeout(connect, 1500); };
+          ws.onerror = () => { S.textContent = '⚠ ws error'; S.style.color = '#c00'; };
+          ws.onmessage = (ev) => {
+            const m = JSON.parse(ev.data);
+            parent.postMessage({ pluginMessage: { type: 'exec', id: m.id, command: m.command, args: m.args } }, '*');
+          };
+        } catch (e) { S.textContent = '⚠ ' + e; setTimeout(connect, 1500); }
+      }
+      connect();
+      // Results from the plugin main thread → relay back over the socket.
+      onmessage = (e) => {
+        const m = e.data.pluginMessage;
+        if (!m || m.type !== 'result') return;
+        OUT.textContent = JSON.stringify(m).slice(0, 600);
+        if (ws && ws.readyState === 1) ws.send(JSON.stringify(m));
+      };
+      document.getElementById('run').onclick = () => {
+        try {
+          const c = JSON.parse(document.getElementById('t').value);
+          parent.postMessage({ pluginMessage: { type: 'exec', id: 'manual', command: c.command, args: c.args } }, '*');
+        } catch (e) { OUT.textContent = 'bad json'; }
+      };
+    </script>
+  </body>
+</html>

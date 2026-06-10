@@ -1,0 +1,9 @@
+{
+  "name": "figma-bridge",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Local Figma Desktop write bridge (Plugin API over WebSocket) for syncing local-font text from code.",
+  "scripts": { "start": "node server.mjs" },
+  "dependencies": { "ws": "^8.18.0" }
+}
