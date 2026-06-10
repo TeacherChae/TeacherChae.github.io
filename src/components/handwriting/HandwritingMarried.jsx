@@ -36,17 +36,14 @@ function parseInked(raw) {
  * 싱글라인 SVG의 각 path를 pathLength 0→1로 그려 펜으로 쓰는 느낌을 낸다.
  *
  * @param pxPerSec   펜 속도(px/sec). 클수록 빠르게 그려진다.
- * @param overlap    글자 간 겹침(0~1). 클수록 이어쓰는 느낌, 전체는 빨라진다.
  * @param strokeWidth 선 두께(viewBox 단위).
  * @param ink        잉크 색.
  * @param startDelay 진입 후 첫 획까지 지연(sec).
  * @param replayKey  값이 바뀌면 처음부터 다시 그린다(데모 리플레이용).
- * @param speedModel 'curvature'(기본) = 곡률 기반 속도(PRD §5.C)
- *                   + 펜 리프트 휴지(획 간 시간차). 'uniform' = easeInOut.
  * @param curveDrama 커브 감속 과장(0.4~2 권장). 클수록 직선은 빨라지고
- *                   커브에서 더 기어간다. 'curvature' 모드 전용.
+ *                   커브에서 더 기어간다(2/3 power law, PRD §5.C).
  * @param liftDrama  획 간 휴지 배율(0~3). 0이면 휴지 없음, 클수록 펜을
- *                   떼는 멈춤이 길어진다. 'curvature' 모드 전용.
+ *                   떼는 멈춤이 길어진다. 이어지는 필기체 글자는 휴지 없음.
  * @param variant    'centerline'(기본) = 균일 폭 stroke 드로잉.
  *                   'inked' = 가변 폭 잉크 폴리곤 + 센터라인 마스크 reveal(PRD §5.E).
  *                   타이밍·ease·휴지 로직은 두 모드가 완전히 공유한다.
@@ -57,12 +54,10 @@ function parseInked(raw) {
  */
 export default function HandwritingMarried({
   pxPerSec = 700,
-  overlap = 0.35,
   strokeWidth = 5,
   ink = '#2b2b2b',
   startDelay = 0.2,
   replayKey = 0,
-  speedModel = 'curvature',
   curveDrama = 1,
   liftDrama = 1,
   variant = 'centerline',
@@ -91,41 +86,33 @@ export default function HandwritingMarried({
   const [timings, setTimings] = useState(null);
 
   // 마운트(및 파라미터/리플레이 변경) 후 각 path 실제 길이를 측정해
-  // 길이 비례 duration + overlap 누적 delay 를 계산한다. (transform 무시한 로컬 길이)
-  // speedModel='curvature' 면 추가로 곡률 기반 ease(획 내 속도 재분배)와
-  // 펜 리프트 휴지(다음 획까지 공중 거리 비례)를 얹는다.
+  // 길이 비례 duration + 곡률 기반 ease(획 내 속도 재분배, §5.C) +
+  // 획 간 휴지/이어쓰기 delay 를 계산한다.
   useLayoutEffect(() => {
     doneRef.current = false;
     const els = pathRefs.current;
-    const curvy = speedModel === 'curvature';
     let cursor = startDelay;
     const next = els.map((el, i) => {
       const len = el ? el.getTotalLength() : 0;
       const duration = Math.max(0.12, len / pxPerSec);
-      const map = curvy && el ? buildTimeMap(el, { power: 0.5 * curveDrama }) : null;
+      const map = el ? buildTimeMap(el, { power: 0.5 * curveDrama }) : null;
       const entry = { delay: cursor, duration, ease: map ? easeFromTimeMap(map) : undefined };
-      if (curvy) {
-        // 펜은 두 획을 동시에 못 긋는다: overlap 없이 순차 진행하고,
-        // 획 사이에 진짜 휴지(최소 휴지 + 공중 이동 시간 × liftDrama)를 둔다.
-        // overlap 을 빼면 휴지가 겹침에 상쇄되어 화면에 보이지 않는다.
-        cursor += duration;
-        if (el && els[i + 1]) {
-          // 이어쓰기 판별: 끝점↔시작점 간격이 CONNECT_EPS 미만이면 필기체가
-          // 이어지는 글자 — 휴지 없이 한 호흡으로 계속 긋는다.
-          // 단 점('i' 윗점)으로 드나드는 전이는 거리와 무관하게 펜을 든다.
-          const gap = airDistance(el, els[i + 1]);
-          const dotInvolved = len < DOT_LEN || els[i + 1].getTotalLength() < DOT_LEN;
-          if (gap >= CONNECT_EPS || dotInvolved) {
-            cursor += liftPause(gap, pxPerSec, liftDrama);
-          }
+      // 펜은 두 획을 동시에 못 긋는다: 순차 진행 + 획 사이 진짜 휴지.
+      cursor += duration;
+      if (el && els[i + 1]) {
+        // 이어쓰기 판별: 끝점↔시작점 간격이 CONNECT_EPS 미만이면 필기체가
+        // 이어지는 글자 — 휴지 없이 한 호흡으로 계속 긋는다.
+        // 단 점('i' 윗점)으로 드나드는 전이는 거리와 무관하게 펜을 든다.
+        const gap = airDistance(el, els[i + 1]);
+        const dotInvolved = len < DOT_LEN || els[i + 1].getTotalLength() < DOT_LEN;
+        if (gap >= CONNECT_EPS || dotInvolved) {
+          cursor += liftPause(gap, pxPerSec, liftDrama);
         }
-      } else {
-        cursor += duration * (1 - overlap);
       }
       return entry;
     });
     setTimings(next);
-  }, [pxPerSec, overlap, startDelay, replayKey, speedModel, curveDrama, liftDrama, paths]);
+  }, [pxPerSec, startDelay, replayKey, curveDrama, liftDrama, paths]);
 
   const shouldDraw = inView && !reduce;
 

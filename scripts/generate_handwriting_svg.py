@@ -233,6 +233,9 @@ def main():
     ap.add_argument("--wmax", type=float, default=W_MAX, help="최대 잉크 폭 (font units)")
     ap.add_argument("--contrast", type=float, default=1.0,
                     help="폭 대비 배율: 평균 폭을 유지한 채 굵음↔가늚 진폭을 키움/줄임")
+    ap.add_argument("--sizes", default="",
+                    help="글자별 크기 배율, 예: 'W=1.3,d=0.9' — 해당 글자의 모든 인스턴스에"
+                         " 적용. 골격만 스케일하고 잉크 폭은 유지(같은 펜으로 쓴 느낌).")
     ap.add_argument("--text", default=TEXT)
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
@@ -250,22 +253,36 @@ def main():
     asc, desc = f["hhea"].ascent, f["hhea"].descent
     space = hmtx["space"][0] if "space" in hmtx.metrics else int(upm * 0.3)
 
-    pad = upm * 0.12
-    s = TARGET_H / (asc - desc + 2 * pad)  # 폰트 단위 → 출력 단위
-    fy = lambda y: (asc + pad - y)  # y-flip + 상단 패딩 (font units)
+    # 글자별 크기 배율 파싱 ('W=1.3,d=0.9')
+    sizes = {}
+    for part in args.sizes.split(","):
+        if "=" in part:
+            k, v = part.split("=")
+            sizes[k.strip()] = float(v)
 
-    x, strokes = 0.0, []  # strokes: (tx, 리샘플된 센터라인 점들)
+    x, strokes = 0.0, []  # strokes: (tx, 리샘플된 센터라인 점들, font units)
     for ch in args.text:
         if ch == " ":
             x += space
             continue
         pen = RecordingPen()
         gs[cmap[ord(ch)]].draw(pen)
-        glyph_strokes = [cut_retrace(resample(p, SAMPLES)) for p in flatten_commands(pen.value)]
+        sc = sizes.get(ch, 1.0)  # 베이스라인(y=0) 기준 골격 스케일 — 잉크 폭은 그대로
+        glyph_strokes = [
+            cut_retrace(resample([(px * sc, py * sc) for px, py in p], SAMPLES))
+            for p in flatten_commands(pen.value)
+        ]
         glyph_strokes = [g for g in glyph_strokes if g]
         # 필기 순서: 점 먼저(i/j) → 긴 획 → 나머지(t 가로획 등)
         strokes += [(x, g) for g in order_strokes(glyph_strokes)]
-        x += hmtx[cmap[ord(ch)]][0]
+        x += hmtx[cmap[ord(ch)]][0] * sc
+
+    pad = upm * 0.12
+    # 세로 범위: 기본은 폰트 메트릭, 스케일된 글자가 넘치면 실제 외곽까지 확장
+    all_y = [y for _, g in strokes for _, y in g]
+    y_top, y_bot = max(asc, max(all_y)), min(desc, min(all_y))
+    s = TARGET_H / (y_top - y_bot + 2 * pad)  # 폰트 단위 → 출력 단위
+    fy = lambda y: (y_top + pad - y)  # y-flip + 상단 패딩 (font units)
 
     vb_w, vb_h = (x + 2 * pad) * s, TARGET_H
     inks, pens = [], []
@@ -279,7 +296,7 @@ def main():
     mask_w = args.wmax * MASK_RATIO * s
     svg = (
         f"<svg viewBox='0 0 {vb_w:.1f} {vb_h:.1f}' xmlns='http://www.w3.org/2000/svg' "
-        f"data-mask-width='{mask_w:.2f}' data-alpha='{args.alpha}'>\n"
+        f"data-mask-width='{mask_w:.2f}' data-alpha='{args.alpha}' data-sizes='{args.sizes}'>\n"
         f"<g id='ink' fill='#2b2b2b'>\n" + "\n".join(inks) + "\n</g>\n"
         f"<g id='pen' fill='none' stroke='#2b2b2b' stroke-linecap='round' stroke-linejoin='round'>\n"
         + "\n".join(pens) + "\n</g>\n</svg>\n"

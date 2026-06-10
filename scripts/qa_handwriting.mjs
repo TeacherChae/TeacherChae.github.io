@@ -59,15 +59,21 @@ async function measureRun(mode, timeoutMs = 30000) {
     if (!anyVisible) break;
     await new Promise((r) => setTimeout(r, 30));
   }
-  const t0 = Date.now();
+  // WSL2 의 Date.now() 는 시계 보정으로 뒤로 점프할 수 있다 →
+  // 브라우저의 단조 시계(performance.now())로만 측정한다.
+  const t0 = await page.evaluate(() => performance.now());
   const first = {};
-  while (Date.now() - t0 < timeoutMs) {
-    const vis = await page.evaluate((mode) => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const { vis, now } = await page.evaluate((mode) => {
       const svg = document.querySelectorAll('section svg')[0];
       const sel = mode === 'inked' ? 'mask path' : 'g > g > path';
-      return [...svg.querySelectorAll(sel)].map((p) => parseFloat(getComputedStyle(p).opacity) > 0.5);
+      return {
+        vis: [...svg.querySelectorAll(sel)].map((p) => parseFloat(getComputedStyle(p).opacity) > 0.5),
+        now: performance.now(),
+      };
     }, mode);
-    const t = Date.now() - t0;
+    const t = Math.round(now - t0);
     vis.forEach((v, i) => { if (v && first[i] === undefined) first[i] = t; });
     if (vis.length > 0 && vis.every(Boolean)) break;
     await new Promise((r) => setTimeout(r, 50));
@@ -102,17 +108,17 @@ ok("'i' 줄기 위→아래로 긋기 (centerline)",
    (await stemDownward('centerline', 12)) && (await stemDownward('centerline', 20)));
 
 // B. 획간 휴지 liftDrama 0 vs 3
-await setRange(4, 0);
-await new Promise((r) => setTimeout(r, 400)); // React 상태/타이밍 재계산 반영 대기
+await setRange(3, 0);
+await measureRun('centerline'); // 워밍업 런 — 프로그래매틱 입력의 상태 커밋을 보증
 const span0 = (await measureRun('centerline'))[N - 1];
-await setRange(4, 3);
-await new Promise((r) => setTimeout(r, 400));
+await setRange(3, 3);
+await measureRun('centerline');
 const span3 = (await measureRun('centerline'))[N - 1];
 ok('liftDrama 0→3 에서 전체 시간 증가', span3 > span0 + 1000, `${span0}ms → ${span3}ms`);
-await setRange(4, 1);
+await setRange(3, 1);
 
 // C. inked variant
-await clickCheckbox(2);
+await clickCheckbox(1); // 가변 폭 잉크 (자동 리플레이)
 await page.waitForSelector('section svg mask path');
 const counts = await page.evaluate((N) => {
   const svg = document.querySelectorAll('section svg')[0];
@@ -143,7 +149,7 @@ await measureRun('inked');
 await page.screenshot({ path: '/tmp/qa_inked_c2.png', clip: { x: 150, y: 420, width: 800, height: 280 } });
 
 // E. 텍스처
-await clickCheckbox(3);
+await clickCheckbox(2);
 await new Promise((r) => setTimeout(r, 300));
 const tex = await page.evaluate(() => {
   const svg = document.querySelectorAll('section svg')[0];

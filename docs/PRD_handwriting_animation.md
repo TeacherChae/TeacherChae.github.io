@@ -63,17 +63,13 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 폰트 선정 과정에서 생성했으나 Astutely 채택 후 리포에 넣지 않았다.
 비교가 다시 필요하면 §8 스크립트로 재생성한다(외곽선 모드).
 
-### SVG 구조
-- **글자마다 개별 `<path>`**, 각 path에 `transform="translate(glyphX, baseline)"`로 배치.
-  (글자 단위 순차 애니메이션을 위해 의도적으로 분리)
-- 커밋된 파일은 글리프 좌표에 y-flip이 **베이크**되어 있고(베이스라인 위가 음수 y),
-  path별 `translate(x, 75)`로 배치한다. §8 스크립트는 대신 최상위 `<g>`에
-  `translate(0, ascent) scale(1,-1)` 플립을 쓰는데, **컴포넌트는 path의
-  `d`/`transform`만 읽으므로 두 구조 모두 그대로 동작**한다.
-- 일부 글리프는 서브패스 여러 개를 가진다('t'=줄기+가로획, 'i'=줄기+점) —
-  컴포넌트가 런타임에 획 단위로 분리한다(§5.A).
-- 싱글라인 SVG: `fill="none" stroke=... stroke-linecap="round"`
-- 외곽선 SVG: `fill="#2b2b2b"` (stroke 없음)
+### SVG 구조 (2레이어 에셋)
+- `<g id="ink">` 가변 폭 잉크 폴리곤(fill) + `<g id="pen">` 센터라인(stroke),
+  **펜 획 단위 `ink-N`/`pen-N` 1:1 페어**가 필기 순서대로 수록됨.
+- 좌표는 y-flip·배치·스케일이 전부 **절대좌표로 베이크**됨(transform 없음,
+  높이 150 viewBox). 루트에 `data-mask-width`(마스크 stroke 폭) 등 메타 포함.
+- 획 분리('t'=줄기+가로획, 'i'=점+줄기)·필기 순서·방향·retrace 절단은
+  생성기가 확정(§5.A) — 런타임은 파싱만 한다.
 
 ## 4. 요구사항
 
@@ -81,7 +77,8 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 1. ✅ 싱글라인 폰트에 `pathLength` 드로잉으로 "써지는" 애니메이션.
 2. ✅ **글자 길이에 비례한 타이밍** — `getTotalLength()` 실측 → 긴 글자는 오래,
    짧은 글자는 짧게. (균일 속도 금지)
-3. ✅ 글자 간 **약간의 overlap**으로 이어쓰는 느낌. (`overlap` prop, 기본 0.35)
+3. ✅ **이어쓰기**: 이어지는 필기체 글자는 휴지 없이 한 호흡으로, 끊기는 곳은
+   펜 리프트 휴지(§5.C 이어쓰기 자동 판별).
 4. ✅ 뷰포트 진입 시 **1회만** 재생 (`useInView({ once: true, amount: 0.4 })`).
 5. ✅ **완료 콜백**: 마지막 획이 끝나면 `onComplete` 호출 → Hero에서 신랑·신부
    이름과 날짜가 손글씨 완료 후 등장. 콜백 누락 대비 **7초 안전 타이머** 병행.
@@ -104,13 +101,11 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
   | prop | 기본값 | 의미 |
   |---|---|---|
   | `pxPerSec` | 700 | 펜 속도 (Hero는 기본값 사용) |
-  | `overlap` | 0.35 | 글자 간 겹침 0~1 — `'uniform'` 모드 전용 (곡률 모드는 순차+휴지) |
   | `strokeWidth` | 5 (Hero 4) | 선 두께, viewBox 단위 |
   | `ink` | `#2b2b2b` (Hero `currentColor`) | 잉크 색 |
   | `startDelay` | 0.2 (Hero 0.6) | 진입 후 첫 획 지연(sec) |
   | `replayKey` | 0 | 변경 시 처음부터 재생(데모용) |
   | `forceMotion` | false | reduced-motion 무시(데모용) |
-  | `speedModel` | `'curvature'` | `'curvature'`=2/3 power law(§5.C), `'uniform'`=easeInOut |
   | `curveDrama` | 1 | 커브 감속 과장(0.4~2 권장) — 직선 빠르게, 커브 느리게 |
   | `liftDrama` | 1 | 획 간 휴지 배율(0~3) — 0이면 휴지 없음 |
   | `variant` | `'centerline'` | `'inked'`=가변 폭 잉크 + 마스크 reveal(§5.E) |
@@ -126,7 +121,7 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 
 - `src/components/handwriting/HandwritingMarried.jsx` — 본체.
 - `src/demo/HandwritingDemo.jsx` + `handwriting-demo.html` — 튜닝 데모
-  (속도/overlap/두께/색 슬라이더, 리플레이, reduced-motion 진단 배너).
+  (속도/두께/색/감속/휴지 슬라이더, variant·텍스처 토글, 리플레이, reduced-motion 진단 배너).
 - `src/components/editorial/Hero.jsx` — 청첩장 통합.
 
 동작 방식과 주의점(코드에 주석으로도 기록됨):
@@ -145,8 +140,8 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
      줄기는 retrace 절단 후 꼭대기에서 끝나므로 **통째로 뒤집어 위→아래**로
      긋는다.
 2. `useLayoutEffect`에서 각 path의 `getTotalLength()` 실측 →
-   `duration = max(0.12, len / pxPerSec)`, delay는 `duration × (1 − overlap)` 누적.
-3. 각 글자는 `motion.path`의 `pathLength` 0→1 + `ease: 'easeInOut'`.
+   `duration = max(0.12, len / pxPerSec)`, delay는 순차 누적 + 휴지(§5.C).
+3. 각 획은 `motion.path`의 `pathLength` 0→1 + 곡률 기반 커스텀 ease(§5.C).
 4. **round line-cap 점 문제**: `stroke-linecap: round`는 pathLength 0에서도
    시작점에 점을 찍는다 → 자기 차례 전까지 `opacity: 0`으로 숨겼다가 그릴 때 켠다.
 5. **transform 충돌**: 글자 가로 배치 `translate`를 `motion.path`에 직접 주면
@@ -190,12 +185,12 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
    ease 함수화. `pathLength`는 전체 길이 대비 비율이라 ease 출력이 곧 그려진 비율.
    기존 `duration`(길이 비례)은 그대로 두고 ease가 **획 안에서 속도만 재분배**한다.
 6. **획 간 시간차 — 펜 리프트 휴지** (`liftPause()`): 곡률 모드에서는
-   **overlap을 적용하지 않고 순차 진행**한다 — 펜은 두 획을 동시에 못 긋고,
-   overlap이 있으면 휴지가 겹침에 상쇄되어 화면에 보이지 않기 때문.
+   **순차 진행**한다 — 펜은 두 획을 동시에 못 긋기 때문(겹침이 있으면
+   휴지가 상쇄되어 화면에 보이지 않는다).
    대신 획이 끊길 때마다 `liftDrama × (최소 휴지 0.05s + 공중 이동 거리 /
    (펜 속도 × 1.5))` 를 delay에 추가한다. 가까운 글자 사이는 짧고 단어
    사이처럼 먼 이동은 길어져, 획 내부뿐 아니라 **획과 획 사이에도** 리듬이
-   생긴다. (`overlap` prop은 `'uniform'` 모드에서만 의미 있음)
+   생긴다.
 
    **이어쓰기 자동 판별**: 필기체에서 이어지는 글자는 한 호흡으로 그려야
    한다. 이전 획 끝점↔다음 획 시작점 간격이 `CONNECT_EPS`(20 viewBox 단위)
@@ -205,17 +200,15 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
    펜을 든다.
 
 커브 감속(`curveDrama`)과 획 간 휴지(`liftDrama`)는 **독립 prop으로 분리**되어
-따로 조절한다(데모에 슬라이더 각각). 데모 페이지에서 speedModel 토글과 함께
-즉시 비교 가능.
+따로 조절한다(데모에 슬라이더 각각).
 
-`HandwritingMarried`의 `speedModel` prop으로 제어: `'curvature'`(기본 — Hero도
-이걸 사용) / `'uniform'`(easeInOut).
+곡률 모드가 유일한 속도 모델이다 — 비교용 uniform(easeInOut) 모드와 `overlap`
+prop은 곡률 모드 확정 채택 후 제거했다(2026-06).
 
 - 외곽선(reveal) 트랙은 곡률 개념이 없으므로 적용 제외. reveal duration은
   글자 bbox 너비 비례 + ease-in-out 유지.
 
-수용 기준: 데모 토글로 easeInOut vs 곡률 기반을 비교했을 때 'e'·'o' 같은
-루프 글자에서 감속이 눈에 보여야 한다.
+수용 기준: 'e'·'o' 같은 루프 글자에서 감속이 눈에 보여야 한다(충족 — QA로 자동 검증).
 
 ### D. 구현 엔진 — framer-motion(채택) vs GSAP
 
@@ -279,7 +272,7 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
    법선 방향으로 오프셋해 생성하거나 디자인 툴에서 제작.
 2. 마스크 레이어: 현재의 centerline path를 글자 최대 폭보다 **굵은 흰색
    stroke**로 `<mask>` 안에 배치.
-3. 마스크 path에 기존과 동일한 `pathLength` 드로잉(타이밍·overlap·곡률 ease·
+3. 마스크 path에 기존과 동일한 `pathLength` 드로잉(타이밍·곡률 ease·
    `onComplete` 전부 재사용) → 펜이 지나간 경로를 따라 가변 폭 글자가 드러난다.
 
 **§5.C와의 연동(권장)**: 오프셋 폭을 속도 프로파일과 연결 — 실제 펜은 느린
@@ -349,15 +342,15 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 
 ### 완료
 - [x] Astutely가 펜으로 긋는 stroke 드로잉으로 자연스럽게 써진다.
-- [x] 글자 길이에 비례한 타이밍 + overlap으로 손글씨 리듬이 느껴진다.
+- [x] 길이 비례 타이밍 + 이어쓰기/펜 리프트 휴지로 손글씨 리듬이 느껴진다.
 - [x] 스크롤로 진입 시 1회 재생, 재진입 시 중복 재생 안 함.
 - [x] `prefers-reduced-motion`에서 애니메이션 없이 완성 글씨 표시
       (dev/`?motion=force` 오버라이드는 §4에 명시된 의도적 예외).
 - [x] 신규 외부 의존성 0, GitHub Pages에서 그대로 동작.
 - [x] 모바일 폭에서 깨지지 않음.
 - [x] 손글씨 완료 후 부제(이름·날짜) 등장, 콜백 실패 시 7초 안전 타이머.
-- [x] easeInOut vs 곡률 기반 속도를 토글 비교하는 데모가 있고,
-      루프 글자('e','o')에서 감속이 시각적으로 확인됨 (§5.C).
+- [x] 루프 글자('e','o')에서 곡률 기반 감속이 시각적으로 확인됨 (§5.C —
+      비교용 easeInOut 토글은 곡률 모드 확정 채택 후 제거).
 
 ### 남은 항목 (채택 시)
 - [ ] (외곽선 폰트 채택 시) reveal로 좌→우로 자연스럽게 나타남(테두리만 그려지는 현상 없음).
@@ -372,7 +365,11 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
 폰트는 글자를 path로 "구워" 넣으므로 문구를 바꾸면 SVG를 다시 생성해야 한다.
 
 - **가변 폭(inked) 에셋**: `python3 scripts/generate_handwriting_svg.py
-  [--text "..."] [--alpha 0.3] [--wmin 7 --wmax 30] [--contrast 1.5]`
+  [--text "..."] [--alpha 0.3] [--wmin 7 --wmax 30] [--contrast 1.5]
+  [--sizes "W=1.3,d=0.9"]  ← 글자별 크기 배율(해당 글자 전 인스턴스).
+  골격만 스케일하고 잉크 폭은 유지(같은 펜으로 쓴 느낌), 어드밴스도 함께
+  스케일되어 간격이 따라온다. 스케일된 글자가 폰트 메트릭을 벗어나면
+  viewBox 세로 범위가 자동 확장된다.`
   (의존성: fonttools, shapely — 오프라인 전용).
   `inkContrast` 단계용으로 기본·`--contrast 1.5`·`--contrast 2.0` 세 에셋을
   모두 재생성할 것. **centerline variant도 같은 에셋의 pen 레이어를 쓰므로

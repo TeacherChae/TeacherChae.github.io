@@ -5,12 +5,10 @@ import HandwritingMarried from '../components/handwriting/HandwritingMarried.jsx
 // 최종 채택 파라미터를 눈으로 고른 뒤 청첩장 섹션에 그대로 이식한다.
 export default function HandwritingDemo() {
   const [pxPerSec, setPxPerSec] = useState(700);
-  const [overlap, setOverlap] = useState(0.35);
   const [strokeWidth, setStrokeWidth] = useState(5);
   const [ink, setInk] = useState('#2b2b2b');
   const [replayKey, setReplayKey] = useState(0);
   const [forceMotion, setForceMotion] = useState(true); // 데모에선 기본 강제 재생
-  const [speedModel, setSpeedModel] = useState('curvature'); // PRD §5.C 비교 토글
   const [curveDrama, setCurveDrama] = useState(1.0); // 커브 감속 과장
   const [liftDrama, setLiftDrama] = useState(1.0); // 획 간 휴지 배율
   const [inkContrast, setInkContrast] = useState(1); // 획 안 폭 대비 단계 (1|1.5|2)
@@ -44,10 +42,6 @@ export default function HandwritingDemo() {
           <input type="range" min="200" max="1600" step="50" value={pxPerSec}
             onChange={(e) => setPxPerSec(+e.target.value)} />
         </Field>
-        <Field label={`글자 overlap: ${overlap.toFixed(2)} (easeInOut 모드 전용)`}>
-          <input type="range" min="0" max="0.8" step="0.05" value={overlap}
-            onChange={(e) => setOverlap(+e.target.value)} />
-        </Field>
         <Field label={`선 두께: ${strokeWidth}`}>
           <input type="range" min="1" max="14" step="0.5" value={strokeWidth}
             onChange={(e) => setStrokeWidth(+e.target.value)} />
@@ -59,14 +53,6 @@ export default function HandwritingDemo() {
           <input type="checkbox" checked={forceMotion}
             onChange={(e) => setForceMotion(e.target.checked)} />
           <span style={styles.fieldLabel}>감속 설정 무시하고 강제 재생</span>
-        </label>
-        <label style={{ ...styles.field, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <input type="checkbox" checked={speedModel === 'curvature'}
-            onChange={(e) => {
-              setSpeedModel(e.target.checked ? 'curvature' : 'uniform');
-              replay(); // 토글 즉시 다시 그려 차이를 비교('e'·'o' 루프에서 감속 확인)
-            }} />
-          <span style={styles.fieldLabel}>곡률 기반 속도 — 2/3 power law (끄면 easeInOut)</span>
         </label>
         <Field label={`커브 감속: ${curveDrama.toFixed(1)} (직선 빠르게·커브 느리게)`}>
           <input type="range" min="0.4" max="2" step="0.1" value={curveDrama}
@@ -115,12 +101,10 @@ export default function HandwritingDemo() {
       <section style={styles.stage}>
         <HandwritingMarried
           pxPerSec={pxPerSec}
-          overlap={overlap}
           strokeWidth={strokeWidth}
           ink={ink}
           replayKey={replayKey}
           forceMotion={forceMotion}
-          speedModel={speedModel}
           curveDrama={curveDrama}
           liftDrama={liftDrama}
           variant={variant}
@@ -135,7 +119,7 @@ export default function HandwritingDemo() {
       </p>
       <div style={{ height: '90vh' }} aria-hidden />
       <section style={styles.stage}>
-        <HandwritingMarried pxPerSec={pxPerSec} overlap={overlap} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} speedModel={speedModel} curveDrama={curveDrama} liftDrama={liftDrama} variant={variant} texture={texture} inkContrast={inkContrast} />
+        <HandwritingMarried pxPerSec={pxPerSec} strokeWidth={strokeWidth} ink={ink} forceMotion={forceMotion} curveDrama={curveDrama} liftDrama={liftDrama} variant={variant} texture={texture} inkContrast={inkContrast} />
         <p style={styles.note}>↑ 스크롤로 처음 진입할 때 한 번만 그려진다.</p>
       </section>
     </div>
