@@ -2,10 +2,9 @@ import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReduceMotion } from '../../lib/reduceMotion.js';
 import { buildTimeMap, easeFromTimeMap, liftPause } from './strokeTiming.js';
-// SVG를 raw 텍스트로 가져와 런타임 파싱한다. 글자를 코드에 박지 않으므로
-// 문구/폰트를 바꿔 SVG를 재생성하면 그대로 반영된다(PRD §6).
-import svgRaw from '../../../docs/fonts/svg/Wearegettingmarried-578431.svg?raw';
-// 가변 폭 잉크 + 센터라인 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물).
+// 2레이어 에셋 (scripts/generate_handwriting_svg.py 산출물) — 두 variant 의
+// 단일 소스. 획 분리·필기 순서·방향(i/j 점 먼저, 줄기 위→아래 분할)이
+// 전부 생성 단계에서 확정된다. 문구/폰트 변경은 SVG 재생성으로 반영(PRD §8).
 // 폭 대비(--contrast)는 폴리곤에 구워지므로 단계별 에셋을 미리 생성해 전환한다.
 import inkedRaw from '../../../docs/fonts/svg/wearegettingmarried_inked.svg?raw';
 import inkedRawC15 from '../../../docs/fonts/svg/wearegettingmarried_inked_c15.svg?raw';
@@ -13,41 +12,7 @@ import inkedRawC20 from '../../../docs/fonts/svg/wearegettingmarried_inked_c20.s
 
 const INKED_RAWS = { 1: inkedRaw, 1.5: inkedRawC15, 2: inkedRawC20 };
 
-// --- SVG 파싱: viewBox + 글자별 path(d, transform) 추출 -----------------
-function parseSvg(raw) {
-  const doc = new DOMParser().parseFromString(raw, 'image/svg+xml');
-  const svg = doc.querySelector('svg');
-  const viewBox = svg.getAttribute('viewBox') || '0 0 648.1 150';
-  const paths = [...svg.querySelectorAll('path')].flatMap((p) => {
-    const transform = p.getAttribute('transform') || undefined;
-    const d = p.getAttribute('d') || '';
-    // 글리프 하나에 서브패스가 여러 개면('t'의 가로획, 'i'의 점) 펜 획 단위로
-    // 쪼개 획마다 자기 duration/ease/펜 리프트 휴지를 받게 한다.
-    // (이 SVG 는 절대좌표 M/C 만 쓰므로 'M' 경계 분리가 안전하다)
-    const subs = d.match(/M[^M]+/g) || [d];
-    // 필기 순서: 기본은 긴 획(줄기) 먼저. 단 'i'/'j'의 점처럼 줄기 꼭대기보다
-    // 완전히 위에 있는 짧은 획은 먼저 찍는다(줄기를 아래→위로 긋는 폰트라
-    // 점이 나중이면 부자연스럽다). 't' 가로획은 줄기 중간 높이라 줄기 뒤.
-    let parts = subs.map((sd) => {
-      const nums = (sd.match(/-?\d*\.?\d+/g) || []).map(Number);
-      const ys = nums.filter((_, k) => k % 2 === 1);
-      return { d: sd.trim(), len: sd.length, yMin: Math.min(...ys), yMax: Math.max(...ys) };
-    });
-    if (parts.length > 1) {
-      parts.sort((a, b) => b.len - a.len);
-      const eps =
-        0.08 * (Math.max(...parts.map((p) => p.yMax)) - Math.min(...parts.map((p) => p.yMin)));
-      // 화면 좌표는 y-down: "위에 있다" = yMax 가 주 획의 yMin(꼭대기)보다 작다
-      const dots = parts.slice(1).filter((p) => p.yMax < parts[0].yMin + eps);
-      const rest = parts.slice(1).filter((p) => !dots.includes(p));
-      parts = [...dots, parts[0], ...rest];
-    }
-    return parts.map((p) => ({ d: p.d, transform }));
-  });
-  return { viewBox, paths };
-}
-
-// --- 2레이어(inked) SVG 파싱: pen(센터라인, 타이밍/마스크용) + ink(가변 폭 폴리곤) --
+// --- 2레이어 SVG 파싱: pen(센터라인, 타이밍/마스크/centerline 가시 선) + ink(가변 폭 폴리곤) --
 // 생성기가 획 분리·필기 순서 정렬을 끝낸 상태로 ink-N/pen-N 을 같은 순서로 내보낸다.
 function parseInked(raw) {
   const doc = new DOMParser().parseFromString(raw, 'image/svg+xml');
@@ -103,8 +68,10 @@ export default function HandwritingMarried({
   const systemReduce = useReduceMotion();
   const reduce = forceMotion ? false : systemReduce;
   const inked = variant === 'inked';
+  // centerline 도 같은 에셋의 pen 레이어를 가시 선으로 사용한다(단일 소스).
+  // 폭 대비는 ink 폴리곤에만 의미 있으므로 centerline 은 기본 에셋 고정.
   const { viewBox, paths, inks, maskWidth } = useMemo(
-    () => (inked ? parseInked(INKED_RAWS[inkContrast] || inkedRaw) : parseSvg(svgRaw)),
+    () => parseInked(inked ? INKED_RAWS[inkContrast] || inkedRaw : inkedRaw),
     [inked, inkContrast],
   );
   // 마스크/필터 id — 한 페이지에 인스턴스가 여러 개여도 충돌하지 않게
@@ -245,11 +212,7 @@ export default function HandwritingMarried({
         ) : (
           <g key={replayKey} fill="none" stroke={ink} strokeLinecap="round" strokeLinejoin="round">
             {paths.map((p, i) => (
-              // 글자 가로 배치(translate)는 일반 <g>에 둔다. motion.path 에 transform 을
-              // 직접 주면 framer-motion 이 style transform 으로 덮어써 배치가 깨질 수 있다.
-              <g key={i} transform={p.transform}>
-                {renderPen(p, i, { strokeWidth })}
-              </g>
+              <g key={i}>{renderPen(p, i, { strokeWidth })}</g>
             ))}
           </g>
         )}

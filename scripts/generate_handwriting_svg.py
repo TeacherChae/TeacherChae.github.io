@@ -37,7 +37,7 @@ SAMPLES = 200              # 획당 호길이 등간격 샘플 수
 SMOOTH_WIN = 15            # 폭 이동평균 반경(샘플) (PRD §5.E-3)
 SPEED_P = 0.5              # §5.C 와 동일한 곡률 지수
 TARGET_H = 150.0           # 출력 viewBox 높이 (기존 에셋과 동일 규모)
-PEN_EVERY = 3              # pen 폴리라인 데시메이션 간격
+PEN_EVERY = 2              # pen 폴리라인 데시메이션 간격 (centerline variant 의 가시 선)
 
 
 def flatten_commands(commands, steps=24):
@@ -100,7 +100,19 @@ def order_strokes(strokes):
     top = max(y for _, y in strokes[0])  # 주 획(가장 긴 획)의 꼭대기 (font y-up)
     dots = [s for s in strokes[1:] if min(y for _, y in s) > top - eps]
     rest = [s for s in strokes[1:] if not any(s is d for d in dots)]
-    return dots + [strokes[0]] + rest
+    main = strokes[0]
+    # 점을 먼저 찍었으면 줄기는 위→아래로 그어야 한다. 커시브 줄기는
+    # 진입 꼬리→상승→꼭대기→하강이 한 획이라(상승·하강이 같은 선을 왕복)
+    # 방향을 통째로 뒤집어도 상승 구간이 남는다 → **꼭대기에서 둘로 쪼개**
+    # 앞 토막은 역방향(꼭대기→진입), 뒤 토막은 정방향(꼭대기→탈출)으로
+    # 두 토막 모두 위에서 아래로 긋는다.
+    if dots:
+        i_top = max(range(len(main)), key=lambda i: main[i][1])  # font y-up: 꼭대기 = max y
+        if 0.1 * len(main) < i_top < 0.9 * len(main):
+            return dots + [main[: i_top + 1][::-1], main[i_top:]] + rest
+        if i_top > len(main) // 2:  # 꼭대기가 끝쪽이면 통째로 뒤집으면 충분
+            main = main[::-1]
+    return dots + [main] + rest
 
 
 def resample(poly, n):
@@ -143,7 +155,13 @@ def widths(pts, alpha, wmin=W_MIN, wmax=W_MAX):
         dx, dy = b[0] - a[0], b[1] - a[1]
         d = math.hypot(dx, dy) or 1.0
         tans.append((dx / d, dy / d))
-    w_dir = [wmin + (wmax - wmin) * min(max(-ty, 0.0), 1.0) ** 1.2 for _, ty in tans]
+    # 압력 모델: 내리긋기(down)는 최대, 수평획(horiz)은 중간 압력 바닥값 —
+    # 순수 -t̂_y 규칙은 't' 가로획 같은 수평획을 보이지 않는 헤어라인으로 만든다.
+    w_dir = []
+    for _, ty in tans:
+        down = min(max(-ty, 0.0), 1.0) ** 1.2
+        horiz = 1.0 - abs(ty)
+        w_dir.append(wmin + (wmax - wmin) * max(down, 0.3 * horiz))
 
     if alpha > 0:
         raw_v = []
@@ -213,7 +231,7 @@ def main():
 
     # --contrast: 평균 폭(중점)을 고정한 채 진폭만 스케일 (PRD §5.E "폭 대비")
     mid, half = (args.wmin + args.wmax) / 2, (args.wmax - args.wmin) / 2
-    args.wmin = max(2.0, mid - half * args.contrast)  # 헤어라인 하한 2 font units
+    args.wmin = max(4.0, mid - half * args.contrast)  # 헤어라인 하한 4 font units (가시성)
     args.wmax = mid + half * args.contrast
 
     f = TTFont(FONT)

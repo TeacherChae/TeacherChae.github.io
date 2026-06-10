@@ -17,3 +17,4 @@ dist-ssr
 
 .omc
 .claude/settings.local.json
+__pycache__/

@@ -51,8 +51,9 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 
 | 파일 | 용도 |
 |---|---|
-| `docs/fonts/svg/Wearegettingmarried-578431.svg` | Astutely Single Line, **싱글라인**. Hero에서 사용 중 |
+| `docs/fonts/svg/wearegettingmarried_inked{,_c15,_c20}.svg` | 2레이어(pen+ink) 에셋 3종 — **두 variant 공용 단일 소스**, 폭 대비 단계별 |
 | `docs/fonts/ttf/AstutelySingleLine-VGj3l.ttf` | 원본 폰트 (문구 변경 시 §8로 재생성) |
+| `docs/fonts/svg/Wearegettingmarried-578431.svg` | 구형 centerline 에셋 — 코드에서 더 이상 사용하지 않음(참고용) |
 
 문구 **"We are getting married"**, 색 `#2b2b2b`, 좌표계 변환 처리 완료.
 
@@ -130,14 +131,16 @@ SVG `pathLength` 속성 정규화를 쓰므로 `getTotalLength()` 브라우저 �
 
 동작 방식과 주의점(코드에 주석으로도 기록됨):
 
-1. SVG를 `?raw` import → `DOMParser`로 파싱해 viewBox와 글자별 path 추출.
+1. 2레이어 에셋(§3)을 `?raw` import → `DOMParser`로 pen/ink 레이어 파싱.
    글자를 코드에 박지 않으므로 **SVG 파일만 교체하면 문구/폰트 변경 반영**.
-   글리프 안에 서브패스가 여러 개면('t'의 가로획, 'i'의 점) **'M' 경계에서
-   펜 획 단위로 분리**해 획마다 자기 duration/ease/펜 리프트 휴지를 받는다.
-   필기 순서 규칙: 기본은 긴 획(줄기) 먼저, 짧은 획('t' 가로획)은 나중.
-   단 **'i'/'j'의 점처럼 줄기 꼭대기보다 완전히 위에 있는 짧은 획은 먼저**
-   찍는다 — 이 폰트는 줄기를 아래→위로 긋므로 점이 나중이면 부자연스럽다.
-   (inked 에셋은 생성기가, centerline 에셋은 런타임 파서가 같은 규칙 적용)
+   centerline variant는 pen 레이어를 가시 stroke로 직접 그리고, inked는
+   같은 pen을 마스크로 쓴다 — **획 분리·필기 순서·방향은 전부 생성기가
+   확정**하므로 런타임 휴리스틱이 없다. 생성기의 필기 순서 규칙:
+   - 기본: 긴 획(줄기) 먼저, 짧은 획('t' 가로획)은 줄기 뒤.
+   - **'i'/'j'**: 줄기 꼭대기보다 완전히 위에 있는 짧은 획(점)을 **먼저** 찍고,
+     줄기는 **꼭대기에서 두 토막으로 분할**해 둘 다 **위→아래**로 긋는다.
+     커시브 줄기는 진입→상승→꼭대기→하강이 한 획이라(같은 선 왕복) 방향을
+     통째로 뒤집어도 상승 구간이 남기 때문에 분할이 필요하다.
 2. `useLayoutEffect`에서 각 path의 `getTotalLength()` 실측 →
    `duration = max(0.12, len / pxPerSec)`, delay는 `duration × (1 − overlap)` 누적.
 3. 각 글자는 `motion.path`의 `pathLength` 0→1 + `ease: 'easeInOut'`.
@@ -243,8 +246,9 @@ framer-motion의 `transition.ease`가 임의의 JS 함수 `(t: 0→1) => progres
 조절이 불가능하다. 생성기 `--contrast`(평균 폭을 고정한 채 진폭만 스케일,
 헤어라인 하한 2 font units)로 단계별 에셋을 미리 생성하고(기본·×1.5·×2 커밋됨),
 `inkContrast` prop으로 전환한다. 절대 폭 범위는 `--wmin/--wmax`.
-대비를 키울수록 가로획('t' 크로스바)은 헤어라인에 수렴한다 — 방향 규칙의
-의도된 결과. 마스크 폭은 W_MAX×2.0.
+폭 규칙은 내리긋기 압력 + **수평획 중간 압력 바닥값**(0.3) — 순수 `-t̂_y`
+규칙은 't' 가로획을 보이지 않는 헤어라인으로 만들기 때문. 같은 이유로
+contrast 스케일 시 최소 폭 하한은 4 font units. 마스크 폭은 W_MAX×2.0.
 **Hero는 아직 `centerline`(기본값) — 데모 비교 후 채택 결정.**
 
 아래는 설계 근거와 프로토타입 검증 기록.
@@ -361,8 +365,12 @@ reveal보다 자연스러움 — 펜 경로를 정확히 따라감):
   [--text "..."] [--alpha 0.3] [--wmin 7 --wmax 30] [--contrast 1.5]`
   (의존성: fonttools, shapely — 오프라인 전용).
   `inkContrast` 단계용으로 기본·`--contrast 1.5`·`--contrast 2.0` 세 에셋을
-  모두 재생성할 것. centerline 에셋까지 바꿔야 두 variant가 같은 문구가 된다.
-- **centerline 에셋**: 아래 스크립트의 `TEXT`만 바꿔 실행(`pip install fonttools`):
+  모두 재생성할 것. **centerline variant도 같은 에셋의 pen 레이어를 쓰므로
+  이것만 재생성하면 끝**이다.
+- QA: `node scripts/qa_handwriting.mjs` (dev 서버 + puppeteer 필요) —
+  획 수/필기 순서/줄기 방향/휴지/variant 전환을 실브라우저로 검증.
+- (참고, 구형) 단일 레이어 centerline SVG가 따로 필요할 때만 아래 스크립트
+  사용(`pip install fonttools`) — 현재 코드는 사용하지 않음:
 
 ```python
 from fontTools.ttLib import TTFont
