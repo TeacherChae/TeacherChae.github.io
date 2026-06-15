@@ -68,6 +68,32 @@ export const wedding = {
     googleMapUrl: 'https://maps.app.goo.gl/Bwii6TsPW3YResi97',
     lat: 37.541488,
     lng: 126.997052,
+    access: [
+      {
+        title: '셔틀 버스 안내',
+        items: [
+          '한강진역 2번 출구 앞 임시 승차장에서 셔틀버스가 운행됩니다.',
+          '예식 1시간 전부터 10분 간격으로 출발합니다.',
+          '예식 후에는 식장 정문 앞에서 한강진역 방향으로 순환 운행됩니다.',
+        ],
+      },
+      {
+        title: '대중 교통 안내',
+        items: [
+          '지하철 6호선 한강진역 2번 출구에서 도보 약 12분 거리입니다.',
+          '버스 이용 시 한남동 주민센터 정류장 하차 후 도보로 이동해 주세요.',
+          '언덕길이 있어 어르신께서는 택시 또는 셔틀 이용을 권장드립니다.',
+        ],
+      },
+      {
+        title: '공영 주차장 안내',
+        items: [
+          '한남동 공영주차장을 이용하실 수 있습니다.',
+          '주차장에서 식장까지 도보 약 7분 소요됩니다.',
+          '주차 공간이 제한적이니 가급적 대중교통과 셔틀을 이용해 주세요.',
+        ],
+      },
+    ],
   },
   scripture: {
     ref: 'MARK 10:7-9',
@@ -106,6 +132,9 @@ export const wedding = {
     title: `${brideNameKo} & ${groomNameKo} 결혼합니다`,
     description: `${weddingShort} · 토요일 오전 11시 · ${venueName}`,
     image: '/images/share-thumb.jpg',
+  },
+  rsvp: {
+    notice: '식장이 협소하여 화환은 정중히 사양하오니 양해 부탁드립니다.',
   },
   motif: {
     footer: ['Arise My Love,', 'My Fair One,', 'and Come Away'],

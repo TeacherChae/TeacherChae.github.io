@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { wedding } from '../../config/wedding.js';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase.js';
 import { FieldLabel, PrimaryButton, Section } from './_shared.jsx';
 
@@ -80,6 +81,16 @@ function PhoneInput({ value, onChange }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function RsvpNotice() {
+  const notice = wedding.rsvp?.notice;
+  if (!notice) return null;
+  return (
+    <p className="mx-auto mt-5 max-w-content text-center text-micro leading-relaxed text-ink/70">
+      * {notice}
+    </p>
   );
 }
 
@@ -218,6 +229,7 @@ export default function RSVP() {
         <div className="mx-auto max-w-content border border-dashed border-ink/25 px-5 py-10 text-center text-small text-ink/45">
           RSVP 준비 중
         </div>
+        <RsvpNotice />
       </Section>
     );
   }
@@ -228,6 +240,7 @@ export default function RSVP() {
         <div className="mx-auto max-w-content py-8 text-center text-body leading-loose text-ink/75">
           소중한 응답 감사합니다.
         </div>
+        <RsvpNotice />
       </Section>
     );
   }
@@ -292,6 +305,8 @@ export default function RSVP() {
           {status === 'submitting' ? 'SENDING' : 'SEND RSVP'}
         </PrimaryButton>
       </form>
+
+      <RsvpNotice />
 
       {existing && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/35 px-6">

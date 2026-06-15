@@ -14,6 +14,23 @@ function buildMapLinks(venue) {
   };
 }
 
+
+function AccessGroup({ title, items }) {
+  return (
+    <div className="border-t border-ink/12 py-6 first:border-t-0">
+      <p className="eyebrow text-ink/55">{title}</p>
+      <ul className="mt-3 space-y-2 text-left type-body text-ink/72">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 leading-loose">
+            <span className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-ink/35" aria-hidden="true" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function Location() {
   const { venue } = wedding;
   const maps = buildMapLinks(venue);
@@ -39,6 +56,14 @@ export default function Location() {
             <GoogleMapIcon className="h-[18px] w-[13px] shrink-0" /><span>GOOGLE MAP</span>
           </SecondaryButton>
         </div>
+
+        {venue.access?.length > 0 && (
+          <div className="mt-12 border-y border-ink/15">
+            {venue.access.map((group) => (
+              <AccessGroup key={group.title} title={group.title} items={group.items} />
+            ))}
+          </div>
+        )}
 
         <div className="mt-12">
           <p className="eyebrow mb-4">CALENDAR</p>

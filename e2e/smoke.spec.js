@@ -30,7 +30,11 @@ test.describe('청첩장 스모크', () => {
     await expectVisible('남산 한남 웨딩가든');         // venue
     await expectVisible('MARK 10:7-9');             // Invitation 성구
     await expectVisible('오시는 길');                 // Location
+    await expectVisible('셔틀 버스 안내');             // Location 교통 안내
+    await expectVisible('대중 교통 안내');             // Location 대중교통
+    await expectVisible('공영 주차장 안내');           // Location 주차
     await expectVisible('참석 여부');                 // RSVP 섹션
+    await expectVisible('식장이 협소하여 화환은 정중히 사양하오니 양해 부탁드립니다.');
     await expectVisible('방명록');                    // Guestbook
     await expectVisible('마음 전하실 곳');             // Account
     await expect(page.getByText('신랑 측').first()).toBeVisible();
