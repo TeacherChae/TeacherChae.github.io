@@ -50,6 +50,24 @@ test.describe('청첩장 스모크', () => {
     await expect(page.getByRole('link', { name: /KAKAO MAP/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /GOOGLE MAP/ })).toBeVisible();
     await expect(page.getByText('ADD TO CALENDAR')).toBeVisible();
+
+    const calendarTop = await page.getByText('ADD TO CALENDAR').evaluate((el) => el.getBoundingClientRect().top);
+    const accessTop = await page.getByRole('button', { name: /셔틀 버스 안내/ }).evaluate((el) => el.getBoundingClientRect().top);
+    expect(calendarTop).toBeLessThan(accessTop);
+  });
+
+  test('교통 안내를 선택해서 펼쳐 볼 수 있다', async ({ page }) => {
+    await enter(page);
+    const shuttle = page.getByRole('button', { name: /셔틀 버스 안내/ });
+    const detail = page.getByText('예식 1시간 전부터 10분 간격으로 출발합니다.');
+
+    await expect(shuttle).toBeVisible();
+    await expect(shuttle).toHaveAttribute('aria-expanded', 'false');
+    await expect(detail).toBeHidden();
+
+    await shuttle.click();
+    await expect(shuttle).toHaveAttribute('aria-expanded', 'true');
+    await expect(detail).toBeVisible();
   });
 
   test('갤러리 라이트박스 열고 닫기', async ({ page }) => {

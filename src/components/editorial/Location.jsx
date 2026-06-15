@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { wedding } from '../../config/wedding.js';
 import CalendarAdd from '../CalendarAdd.jsx';
 import { SecondaryButton, Section } from './_shared.jsx';
@@ -16,17 +17,34 @@ function buildMapLinks(venue) {
 
 
 function AccessGroup({ title, items }) {
+  const [open, setOpen] = useState(false);
+  const panelId = `access-${title.replace(/\s+/g, '-')}`;
+
   return (
-    <div className="border-t border-ink/12 py-6 first:border-t-0">
-      <p className="eyebrow text-ink/55">{title}</p>
-      <ul className="mt-3 space-y-2 text-left type-body text-ink/72">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2 leading-loose">
-            <span className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-ink/35" aria-hidden="true" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="border-t border-ink/12 first:border-t-0">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-4 py-6 text-left"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="eyebrow text-ink/65">{title}</span>
+        <span className="font-titleKo text-small text-ink/45" aria-hidden="true">
+          {open ? '−' : '+'}
+        </span>
+      </button>
+
+      {open && (
+        <ul id={panelId} className="space-y-2 pb-6 text-left type-body text-ink/72">
+          {items.map((item) => (
+            <li key={item} className="flex gap-2 leading-loose">
+              <span className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-ink/35" aria-hidden="true" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -57,6 +75,11 @@ export default function Location() {
           </SecondaryButton>
         </div>
 
+        <div className="mt-12">
+          <p className="eyebrow mb-4">CALENDAR</p>
+          <CalendarAdd label="ADD TO CALENDAR" />
+        </div>
+
         {venue.access?.length > 0 && (
           <div className="mt-12 border-y border-ink/15">
             {venue.access.map((group) => (
@@ -64,11 +87,6 @@ export default function Location() {
             ))}
           </div>
         )}
-
-        <div className="mt-12">
-          <p className="eyebrow mb-4">CALENDAR</p>
-          <CalendarAdd label="ADD TO CALENDAR" />
-        </div>
       </Reveal>
     </Section>
   );
