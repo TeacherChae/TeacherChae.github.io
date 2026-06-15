@@ -93,8 +93,9 @@ export default function Guestbook() {
       <div className="mx-auto max-w-content">
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <div>
-            <label className="eyebrow block">성함</label>
+            <label htmlFor="guestbook-name" className="eyebrow block">성함</label>
             <input
+              id="guestbook-name"
               className="editorial-input"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -103,8 +104,9 @@ export default function Guestbook() {
             />
           </div>
           <div>
-            <label className="eyebrow block">축하 메시지</label>
+            <label htmlFor="guestbook-message" className="eyebrow block">축하 메시지</label>
             <textarea
+              id="guestbook-message"
               rows={4}
               className="editorial-input resize-none leading-relaxed"
               value={form.message}

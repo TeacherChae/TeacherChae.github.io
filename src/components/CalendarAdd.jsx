@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { wedding } from '../config/wedding.js';
 
 function splitIso(iso) {
@@ -98,6 +98,9 @@ const styles = {
 
 export default function CalendarAdd({ label = '내 캘린더에 추가' }) {
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+  const buttonRef = useRef(null);
+  const firstItemRef = useRef(null);
   const event = useMemo(() => makeCalendarEvent(), []);
   const links = useMemo(() => {
     const ics = buildIcs(event);
@@ -109,10 +112,33 @@ export default function CalendarAdd({ label = '내 캘린더에 추가' }) {
     };
   }, [event]);
 
+  useEffect(() => {
+    if (!open) return undefined;
+    firstItemRef.current?.focus();
+
+    function handlePointerDown(event) {
+      if (!wrapperRef.current?.contains(event.target)) setOpen(false);
+    }
+
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
   return (
     <div className={styles.wrapper}>
-      <div className="relative inline-block">
+      <div ref={wrapperRef} className="relative inline-block">
         <button
+          ref={buttonRef}
           type="button"
           className={styles.button}
           aria-expanded={open}
@@ -127,7 +153,7 @@ export default function CalendarAdd({ label = '내 캘린더에 추가' }) {
             role="menu"
             className={`absolute left-1/2 z-20 mt-2 w-full min-w-[190px] -translate-x-1/2 overflow-hidden border ${styles.menu}`}
           >
-            <a className={`block px-4 py-3 ${styles.item}`} href={links.apple} download="wedding.ics" role="menuitem">
+            <a ref={firstItemRef} className={`block px-4 py-3 ${styles.item}`} href={links.apple} download="wedding.ics" role="menuitem">
               Apple Calendar
             </a>
             <a className={`block px-4 py-3 ${styles.item}`} href={links.google} target="_blank" rel="noreferrer" role="menuitem">

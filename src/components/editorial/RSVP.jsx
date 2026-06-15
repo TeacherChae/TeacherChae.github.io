@@ -19,6 +19,7 @@ function ChoiceButton({ active, children, ...props }) {
   return (
     <button
       type="button"
+      aria-pressed={active}
       className={`border py-3 font-sans text-small tracking-widest transition ${
         active ? 'border-ink bg-ink text-paper' : 'border-ink/35 bg-transparent text-ink hover:border-ink'
       }`}
@@ -249,8 +250,9 @@ export default function RSVP() {
     <Section title="참석 여부">
       <form onSubmit={handleSubmit} className="mx-auto max-w-content space-y-8 text-left">
         <div>
-          <FieldLabel>성함</FieldLabel>
+          <FieldLabel htmlFor="rsvp-name">성함</FieldLabel>
           <input
+            id="rsvp-name"
             className="editorial-input"
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
@@ -261,7 +263,7 @@ export default function RSVP() {
 
         <div>
           <FieldLabel>신랑 측 / 신부 측</FieldLabel>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="신랑 측 또는 신부 측 선택">
             <ChoiceButton active={form.side === 'groom'} onClick={() => update('side', 'groom')}>신랑 측</ChoiceButton>
             <ChoiceButton active={form.side === 'bride'} onClick={() => update('side', 'bride')}>신부 측</ChoiceButton>
           </div>
@@ -275,7 +277,7 @@ export default function RSVP() {
 
         <div>
           <FieldLabel>참석 여부</FieldLabel>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="참석 여부 선택">
             <ChoiceButton active={form.attending === true} onClick={() => update('attending', true)}>O</ChoiceButton>
             <ChoiceButton active={form.attending === false} onClick={() => update('attending', false)}>X</ChoiceButton>
           </div>
@@ -285,7 +287,7 @@ export default function RSVP() {
           <>
             <div>
               <FieldLabel>식사 여부</FieldLabel>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="식사 여부 선택">
                 <ChoiceButton active={form.meal === true} onClick={() => update('meal', true)}>O</ChoiceButton>
                 <ChoiceButton active={form.meal === false} onClick={() => update('meal', false)}>X</ChoiceButton>
               </div>

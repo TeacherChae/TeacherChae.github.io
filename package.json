@@ -4,15 +4,16 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "predev": "npm run tokens:build",
+    "predev": "npm run meta:sync && npm run tokens:build",
     "dev": "vite",
-    "prebuild": "npm run tokens:build",
+    "prebuild": "npm run meta:sync && npm run tokens:build",
     "build": "vite build",
     "preview": "vite preview",
     "optimize:images": "node scripts/optimize-images.mjs",
     "tokens:build": "node scripts/figma-tokens-to-css.mjs",
     "test:e2e": "playwright test",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "meta:sync": "node scripts/sync-index-meta.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",

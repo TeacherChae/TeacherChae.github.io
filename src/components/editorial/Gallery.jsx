@@ -13,6 +13,8 @@ export default function Gallery() {
   const [open, setOpen] = useState(false);
   const [touchStart, setTouchStart] = useState(null); // 라이트박스 스와이프용
   const scrollerRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const lastFocusedRef = useRef(null);
   const total = gallery.length;
   const current = gallery[index];
 
@@ -50,8 +52,12 @@ export default function Gallery() {
   // 라이트박스 열림 동안: 바디 스크롤 잠금 + 키보드(←/→/Esc) 조작.
   useEffect(() => {
     if (!open) return;
+    closeButtonRef.current?.focus();
     const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        setOpen(false);
+        lastFocusedRef.current?.focus();
+      }
       else if (e.key === 'ArrowRight') move(1);
       else if (e.key === 'ArrowLeft') move(-1);
     };
@@ -88,6 +94,7 @@ export default function Gallery() {
             type="button"
             onClick={() => {
               setIndex(i);
+              lastFocusedRef.current = document.activeElement;
               setOpen(true);
             }}
             aria-label={`사진 크게 보기 (${i + 1}/${total})`}
@@ -114,7 +121,13 @@ export default function Gallery() {
             animate={{ opacity: 1 }}
             exit={reduce ? undefined : { opacity: 0 }}
             transition={{ duration: 0.3 }}
-            onClick={() => setOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="갤러리 사진 크게 보기"
+            onClick={() => {
+              setOpen(false);
+              lastFocusedRef.current?.focus();
+            }}
             onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
             onTouchEnd={handleTouchEnd}
           >
@@ -123,10 +136,12 @@ export default function Gallery() {
                 {padded} / {totalPadded}
               </span>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setOpen(false);
+                  lastFocusedRef.current?.focus();
                 }}
                 aria-label="닫기"
                 className="px-2 py-1 tracking-ultra"

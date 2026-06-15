@@ -14,8 +14,8 @@ export function Section({ id, title, divider = false, children, className = '' }
   );
 }
 
-export function FieldLabel({ children }) {
-  return <label className="eyebrow block">{children}</label>;
+export function FieldLabel({ children, htmlFor }) {
+  return <label htmlFor={htmlFor} className="eyebrow block">{children}</label>;
 }
 
 export function PrimaryButton({ children, className = '', ...props }) {
