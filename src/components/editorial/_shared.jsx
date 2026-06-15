@@ -20,7 +20,7 @@ export function FieldLabel({ children, htmlFor }) {
 
 export function PrimaryButton({ children, className = '', ...props }) {
   return (
-    <button type="button" className={`editorial-button-primary ${className}`} {...props}>
+    <button type="button" className={`editorial-button-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 ${className}`} {...props}>
       {children}
     </button>
   );
@@ -28,7 +28,7 @@ export function PrimaryButton({ children, className = '', ...props }) {
 
 export function SecondaryButton({ children, className = '', as: Comp = 'button', ...props }) {
   return (
-    <Comp className={`editorial-button-secondary ${className}`} {...props}>
+    <Comp className={`editorial-button-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 ${className}`} {...props}>
       {children}
     </Comp>
   );

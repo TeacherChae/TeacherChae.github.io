@@ -13,6 +13,7 @@ export default function Gallery() {
   const [open, setOpen] = useState(false);
   const [touchStart, setTouchStart] = useState(null); // 라이트박스 스와이프용
   const scrollerRef = useRef(null);
+  const dialogRef = useRef(null);
   const closeButtonRef = useRef(null);
   const lastFocusedRef = useRef(null);
   const total = gallery.length;
@@ -57,9 +58,23 @@ export default function Gallery() {
       if (e.key === 'Escape') {
         setOpen(false);
         lastFocusedRef.current?.focus();
+      } else if (e.key === 'ArrowRight') {
+        move(1);
+      } else if (e.key === 'ArrowLeft') {
+        move(-1);
+      } else if (e.key === 'Tab') {
+        const focusables = dialogRef.current?.querySelectorAll('button, a, [tabindex]:not([tabindex="-1"])');
+        if (!focusables?.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
-      else if (e.key === 'ArrowRight') move(1);
-      else if (e.key === 'ArrowLeft') move(-1);
     };
     window.addEventListener('keydown', onKey);
     const prevOverflow = document.body.style.overflow;
@@ -98,7 +113,7 @@ export default function Gallery() {
               setOpen(true);
             }}
             aria-label={`사진 크게 보기 (${i + 1}/${total})`}
-            className="h-full w-full shrink-0 snap-center overflow-hidden"
+            className="h-full w-full shrink-0 snap-center overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-paper"
           >
             <SmartImage
               src={item.src}
@@ -116,6 +131,7 @@ export default function Gallery() {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={dialogRef}
             className="fixed inset-0 z-[120] flex flex-col bg-ink/95"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -144,7 +160,7 @@ export default function Gallery() {
                   lastFocusedRef.current?.focus();
                 }}
                 aria-label="닫기"
-                className="px-2 py-1 tracking-ultra"
+                className="px-2 py-1 tracking-ultra focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-paper/70"
               >
                 CLOSE
               </button>
@@ -164,14 +180,14 @@ export default function Gallery() {
               <button
                 type="button"
                 onClick={() => move(-1)}
-                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-paper/70"
               >
                 PREV
               </button>
               <button
                 type="button"
                 onClick={() => move(1)}
-                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink"
+                className="border border-paper/40 py-3 font-titleKo text-label uppercase tracking-widest text-paper transition hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-paper/70"
               >
                 NEXT
               </button>

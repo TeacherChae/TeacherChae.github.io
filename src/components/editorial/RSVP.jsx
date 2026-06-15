@@ -22,7 +22,7 @@ function ChoiceButton({ active, children, ...props }) {
       aria-pressed={active}
       className={`border py-3 font-sans text-small tracking-widest transition ${
         active ? 'border-ink bg-ink text-paper' : 'border-ink/35 bg-transparent text-ink hover:border-ink'
-      }`}
+      } focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60`}
       {...props}
     >
       {children}

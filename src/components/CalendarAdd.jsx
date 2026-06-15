@@ -84,8 +84,9 @@ function makeDownloadUrl(ics) {
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
 }
 
+const focusClass = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60';
 const baseButtonClass =
-  'inline-flex min-w-[11.6em] items-center justify-center border px-4 py-3 text-center text-body transition';
+  `inline-flex min-w-[11.6em] items-center justify-center border px-4 py-3 text-center text-body transition ${focusClass}`;
 
 // 청첩장은 모노톤 에디토리얼 단일 스타일. (이전 'soft' 변형은 팔레트 밖 색이라 제거됨)
 const styles = {
@@ -93,7 +94,7 @@ const styles = {
   button:
     `${baseButtonClass} rounded-none border-ink bg-transparent font-titleKo text-label uppercase tracking-widest text-ink hover:bg-ink hover:text-paper`,
   menu: 'border-ink/40 bg-paper/95 font-titleKo text-label uppercase tracking-widest text-ink shadow-lg',
-  item: 'hover:bg-ink hover:text-paper',
+  item: `hover:bg-ink hover:text-paper ${focusClass}`,
 };
 
 export default function CalendarAdd({ label = '내 캘린더에 추가' }) {
