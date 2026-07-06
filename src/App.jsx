@@ -1,17 +1,17 @@
 import { useRef, useState } from 'react';
-import Opening from './components/editorial/Opening.jsx';
-import Hero from './components/editorial/Hero.jsx';
-import DateVenue from './components/editorial/DateVenue.jsx';
-import Dday from './components/editorial/Dday.jsx';
-import Invitation from './components/editorial/Invitation.jsx';
-import Gallery from './components/editorial/Gallery.jsx';
-import Location from './components/editorial/Location.jsx';
-import RSVP from './components/editorial/RSVP.jsx';
-import Account from './components/editorial/Account.jsx';
-import Guestbook from './components/editorial/Guestbook.jsx';
-import Footer from './components/editorial/Footer.jsx';
-import ScrollProgress from './components/editorial/ScrollProgress.jsx';
-import Bgm from './components/editorial/Bgm.jsx';
+import Opening from './components/editorial/sections/Opening.jsx';
+import Hero from './components/editorial/sections/Hero.jsx';
+import DateVenue from './components/editorial/sections/DateVenue.jsx';
+import Dday from './components/editorial/sections/Dday.jsx';
+import Invitation from './components/editorial/sections/Invitation.jsx';
+import Gallery from './components/editorial/sections/Gallery.jsx';
+import Location from './components/editorial/sections/Location.jsx';
+import RSVP from './components/editorial/sections/RSVP.jsx';
+import Account from './components/editorial/sections/Account.jsx';
+import Guestbook from './components/editorial/sections/Guestbook.jsx';
+import Footer from './components/editorial/sections/Footer.jsx';
+import ScrollProgress from './components/editorial/ui/ScrollProgress.jsx';
+import Bgm from './components/editorial/ui/Bgm.jsx';
 
 // BGM 음원은 Supabase Storage('assets' 공개 버킷)에 둔다. ref 하드코딩 없이 env 에서 조립.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

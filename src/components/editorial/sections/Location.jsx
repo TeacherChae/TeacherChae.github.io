@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { wedding } from '../../config/wedding.js';
-import CalendarAdd from '../CalendarAdd.jsx';
-import { SecondaryButton, Section } from './_shared.jsx';
-import { Reveal } from './motion.jsx';
-import VenueMap from './VenueMap.jsx';
-import { NaverIcon, KakaoIcon, GoogleMapIcon } from './MapIcons.jsx';
+import { wedding } from '../../../config/wedding.js';
+import CalendarAdd from '../../CalendarAdd.jsx';
+import { SecondaryButton, Section } from '../ui/_shared.jsx';
+import { Reveal } from '../ui/motion.jsx';
+import VenueMap from '../map/VenueMap.jsx';
+import { NaverIcon, KakaoIcon, GoogleMapIcon } from '../map/MapIcons.jsx';
 
 function buildMapLinks(venue) {
   const q = encodeURIComponent(`${venue.name} ${venue.address}`);

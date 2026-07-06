@@ -1,6 +1,6 @@
-import { wedding } from '../../config/wedding.js';
-import { Section } from './_shared.jsx';
-import { Reveal, Stagger, StaggerItem } from './motion.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { Section } from '../ui/_shared.jsx';
+import { Reveal, Stagger, StaggerItem } from '../ui/motion.jsx';
 
 export default function Invitation() {
   const { scripture, greeting } = wedding;

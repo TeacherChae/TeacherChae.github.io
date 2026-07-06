@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useReduceMotion } from '../../lib/reduceMotion.js';
+import { useReduceMotion } from '../../../lib/reduceMotion.js';
 
 // 에디토리얼 톤에 맞춘 "은은한" 진입 모션 프리미티브.
 // - 스크롤로 화면에 들어올 때 한 번만 재생 (once: true)

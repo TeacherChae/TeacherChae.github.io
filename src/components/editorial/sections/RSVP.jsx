@@ -1,10 +1,19 @@
 import { useRef, useState } from 'react';
-import { wedding } from '../../config/wedding.js';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase.js';
-import { FieldLabel, PrimaryButton, Section } from './_shared.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase.js';
+import { FieldLabel, PrimaryButton, Section } from '../ui/_shared.jsx';
 
 const emptyPhone = ['', '', ''];
 const PHONE_LIMITS = [3, 4, 4];
+const PHONE_LABELS = ['휴대폰 번호 앞자리', '휴대폰 번호 가운데 자리', '휴대폰 번호 마지막 자리'];
+const SIDE_OPTIONS = [
+  { value: 'groom', label: '신랑 측' },
+  { value: 'bride', label: '신부 측' },
+];
+const YES_NO_OPTIONS = [
+  { value: true, label: 'O' },
+  { value: false, label: 'X' },
+];
 
 function cleanDigits(value) {
   return value.replace(/\D/g, '');
@@ -27,6 +36,22 @@ function ChoiceButton({ active, children, ...props }) {
     >
       {children}
     </button>
+  );
+}
+
+function ChoiceGroup({ ariaLabel, options, value, onChange }) {
+  return (
+    <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label={ariaLabel}>
+      {options.map((option) => (
+        <ChoiceButton
+          key={String(option.value)}
+          active={value === option.value}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </ChoiceButton>
+      ))}
+    </div>
   );
 }
 
@@ -70,7 +95,7 @@ function PhoneInput({ value, onChange }) {
             type="tel"
             inputMode="numeric"
             autoComplete={index === 0 ? 'tel' : undefined}
-            aria-label={['휴대폰 번호 앞자리', '휴대폰 번호 가운데 자리', '휴대폰 번호 마지막 자리'][index]}
+            aria-label={PHONE_LABELS[index]}
             value={part}
             maxLength={PHONE_LIMITS[index]}
             placeholder={index === 0 ? '010' : '0000'}
@@ -263,10 +288,12 @@ export default function RSVP() {
 
         <div>
           <FieldLabel>신랑 측 / 신부 측</FieldLabel>
-          <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="신랑 측 또는 신부 측 선택">
-            <ChoiceButton active={form.side === 'groom'} onClick={() => update('side', 'groom')}>신랑 측</ChoiceButton>
-            <ChoiceButton active={form.side === 'bride'} onClick={() => update('side', 'bride')}>신부 측</ChoiceButton>
-          </div>
+          <ChoiceGroup
+            ariaLabel="신랑 측 또는 신부 측 선택"
+            value={form.side}
+            onChange={(value) => update('side', value)}
+            options={SIDE_OPTIONS}
+          />
         </div>
 
         <div>
@@ -277,20 +304,24 @@ export default function RSVP() {
 
         <div>
           <FieldLabel>참석 여부</FieldLabel>
-          <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="참석 여부 선택">
-            <ChoiceButton active={form.attending === true} onClick={() => update('attending', true)}>O</ChoiceButton>
-            <ChoiceButton active={form.attending === false} onClick={() => update('attending', false)}>X</ChoiceButton>
-          </div>
+          <ChoiceGroup
+            ariaLabel="참석 여부 선택"
+            value={form.attending}
+            onChange={(value) => update('attending', value)}
+            options={YES_NO_OPTIONS}
+          />
         </div>
 
         {attending && (
           <>
             <div>
               <FieldLabel>식사 여부</FieldLabel>
-              <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="식사 여부 선택">
-                <ChoiceButton active={form.meal === true} onClick={() => update('meal', true)}>O</ChoiceButton>
-                <ChoiceButton active={form.meal === false} onClick={() => update('meal', false)}>X</ChoiceButton>
-              </div>
+              <ChoiceGroup
+                ariaLabel="식사 여부 선택"
+                value={form.meal}
+                onChange={(value) => update('meal', value)}
+                options={YES_NO_OPTIONS}
+              />
             </div>
 
             <div>

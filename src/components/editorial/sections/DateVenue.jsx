@@ -1,5 +1,5 @@
-import { wedding } from '../../config/wedding.js';
-import { Stagger, StaggerItem } from './motion.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { Stagger, StaggerItem } from '../ui/motion.jsx';
 
 export default function DateVenue() {
   const { groom, bride, date, venue } = wedding;

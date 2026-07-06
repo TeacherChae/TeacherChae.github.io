@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { wedding } from '../../config/wedding.js';
-import { useReduceMotion } from '../../lib/reduceMotion.js';
-import HandwritingMarried from '../handwriting/HandwritingMarried.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { useReduceMotion } from '../../../lib/reduceMotion.js';
+import HandwritingMarried from '../../handwriting/HandwritingMarried.jsx';
 
 export default function Hero() {
   const { groom, bride, date, images } = wedding;

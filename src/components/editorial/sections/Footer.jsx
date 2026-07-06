@@ -1,5 +1,5 @@
-import { wedding } from '../../config/wedding.js';
-import { Reveal } from './motion.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { Reveal } from '../ui/motion.jsx';
 
 export default function Footer() {
   const { motif } = wedding;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { wedding } from '../../config/wedding.js';
-import { useReduceMotion } from '../../lib/reduceMotion.js';
-import { Reveal } from './motion.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { useReduceMotion } from '../../../lib/reduceMotion.js';
+import { Reveal } from '../ui/motion.jsx';
 
 const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
 

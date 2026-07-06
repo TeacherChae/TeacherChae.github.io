@@ -1,14 +1,8 @@
 import { useEffect, useState } from 'react';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase.js';
-import { PrimaryButton, SecondaryButton, Section } from './_shared.jsx';
+import { supabase, isSupabaseConfigured } from '../../../lib/supabase.js';
+import { FieldLabel, PrimaryButton, SecondaryButton, Section, formatDate } from '../ui/_shared.jsx';
 
 const PAGE_SIZE = 5;
-
-function formatDate(iso) {
-  const d = new Date(iso);
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
-}
 
 export default function Guestbook() {
   const [entries, setEntries] = useState([]);
@@ -93,7 +87,7 @@ export default function Guestbook() {
       <div className="mx-auto max-w-content">
         <form onSubmit={handleSubmit} className="space-y-5 text-left">
           <div>
-            <label htmlFor="guestbook-name" className="eyebrow block">성함</label>
+            <FieldLabel htmlFor="guestbook-name">성함</FieldLabel>
             <input
               id="guestbook-name"
               className="editorial-input"
@@ -104,7 +98,7 @@ export default function Guestbook() {
             />
           </div>
           <div>
-            <label htmlFor="guestbook-message" className="eyebrow block">축하 메시지</label>
+            <FieldLabel htmlFor="guestbook-message">축하 메시지</FieldLabel>
             <textarea
               id="guestbook-message"
               rows={4}

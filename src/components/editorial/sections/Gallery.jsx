@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { wedding } from '../../config/wedding.js';
-import { useReduceMotion } from '../../lib/reduceMotion.js';
-import { Section } from './_shared.jsx';
-import { Reveal } from './motion.jsx';
-import SmartImage from './SmartImage.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { useReduceMotion } from '../../../lib/reduceMotion.js';
+import { Section } from '../ui/_shared.jsx';
+import { Reveal } from '../ui/motion.jsx';
+import SmartImage from '../ui/SmartImage.jsx';
 
 export default function Gallery() {
   const { gallery } = wedding;
@@ -19,13 +19,17 @@ export default function Gallery() {
   const total = gallery.length;
   const current = gallery[index];
 
-  const padded = useMemo(() => String(index + 1).padStart(2, '0'), [index]);
-  const totalPadded = useMemo(() => String(total).padStart(2, '0'), [total]);
+  const padded = String(index + 1).padStart(2, '0');
+  const totalPadded = String(total).padStart(2, '0');
 
   const move = useCallback(
     (delta) => setIndex((i) => (i + delta + total) % total),
     [total],
   );
+  const closeLightbox = useCallback(() => {
+    setOpen(false);
+    lastFocusedRef.current?.focus();
+  }, []);
 
   function handleTouchEnd(e) {
     if (touchStart == null) return;
@@ -56,8 +60,7 @@ export default function Gallery() {
     closeButtonRef.current?.focus();
     const onKey = (e) => {
       if (e.key === 'Escape') {
-        setOpen(false);
-        lastFocusedRef.current?.focus();
+        closeLightbox();
       } else if (e.key === 'ArrowRight') {
         move(1);
       } else if (e.key === 'ArrowLeft') {
@@ -83,7 +86,7 @@ export default function Gallery() {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [open, move]);
+  }, [open, closeLightbox, move]);
 
   if (!current) return null;
 
@@ -140,10 +143,7 @@ export default function Gallery() {
             role="dialog"
             aria-modal="true"
             aria-label="갤러리 사진 크게 보기"
-            onClick={() => {
-              setOpen(false);
-              lastFocusedRef.current?.focus();
-            }}
+            onClick={closeLightbox}
             onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
             onTouchEnd={handleTouchEnd}
           >
@@ -156,8 +156,7 @@ export default function Gallery() {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setOpen(false);
-                  lastFocusedRef.current?.focus();
+                  closeLightbox();
                 }}
                 aria-label="닫기"
                 className="px-2 py-1 tracking-ultra focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-paper/70"

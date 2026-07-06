@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { wedding } from '../../config/wedding.js';
-import { SecondaryButton, Section } from './_shared.jsx';
-import { Reveal } from './motion.jsx';
+import { wedding } from '../../../config/wedding.js';
+import { SecondaryButton, Section } from '../ui/_shared.jsx';
+import { Reveal } from '../ui/motion.jsx';
 
 function AccountRow({ account }) {
   const [copied, setCopied] = useState(false);
