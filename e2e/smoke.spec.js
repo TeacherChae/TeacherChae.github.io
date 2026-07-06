@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { wedding } from '../src/config/wedding.js';
 
 // 입장 오버레이를 통과해 본문(Hero)까지 진입시키는 헬퍼.
 async function enter(page) {
@@ -72,7 +73,7 @@ test.describe('청첩장 스모크', () => {
 
   test('갤러리 라이트박스 열고 닫기', async ({ page }) => {
     await enter(page);
-    const firstSlide = page.getByRole('button', { name: /사진 크게 보기 \(1\/30\)/ });
+    const firstSlide = page.getByRole('button', { name: new RegExp(`사진 크게 보기 \\(1\\/${wedding.gallery.length}\\)`) });
     await firstSlide.scrollIntoViewIfNeeded();
     await firstSlide.click();
     await expect(page.getByRole('button', { name: '닫기' })).toBeVisible();
