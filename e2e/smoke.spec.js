@@ -72,7 +72,7 @@ test.describe('청첩장 스모크', () => {
 
   test('갤러리 라이트박스 열고 닫기', async ({ page }) => {
     await enter(page);
-    const firstSlide = page.getByRole('button', { name: /사진 크게 보기 \(1\/7\)/ });
+    const firstSlide = page.getByRole('button', { name: /사진 크게 보기 \(1\/30\)/ });
     await firstSlide.scrollIntoViewIfNeeded();
     await firstSlide.click();
     await expect(page.getByRole('button', { name: '닫기' })).toBeVisible();
