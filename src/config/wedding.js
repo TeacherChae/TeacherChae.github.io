@@ -9,9 +9,8 @@ const groomFather = '채문식';
 const groomMother = '박미용';
 // 한 측에 여러 계좌 — role(신랑/혼주 등)로 구분. 실제 은행/번호/예금주는 여기서 채운다.
 const groomBankAccounts = [
-  { role: '혼주', bank: '은행명', number: '000000000000', holder: groomFather },
-  { role: '혼주', bank: '은행명', number: '000000000000', holder: groomMother },
-  // { role: '신랑', bank: '은행명', number: '000000000000', holder: groomNameKo },
+  { role: '혼주', bank: '우리은행', number: '460-111911-02-001', holder: groomFather },
+  { role: '신랑', bank: '신한은행', number: '110-583-666692', holder: groomNameKo },
 ];
 
 const brideNameKo = '이주경';
@@ -20,9 +19,9 @@ const brideFullNameEn = 'JuGyeong Lee';
 const brideFather = '이병연';
 const brideMother = '문숙희';
 const brideBankAccounts = [
-  { role: '혼주', bank: '은행명', number: '000000000000', holder: brideFather },
-  { role: '혼주', bank: '은행명', number: '000000000000', holder: brideMother },
-  // { role: '신부', bank: '은행명', number: '000000000000', holder: brideNameKo },
+  { role: '혼주', bank: '농협은행', number: '683-02-210051', holder: brideFather },
+  { role: '혼주', bank: '우체국', number: '500306-02-355271', holder: brideMother },
+  { role: '신부', bank: '우체국', number: '110015-23-1862', holder: brideNameKo },
 ];
 
 const weddingDateIso = '2026-09-05T11:00';
