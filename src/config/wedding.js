@@ -142,7 +142,6 @@ export const wedding = {
     { src: '/images/day-noeul-park/gallery-21.jpg', alt: '노을공원에서 촬영한 낮 웨딩 사진 21' },
     { src: '/images/day-noeul-park/gallery-22.jpg', alt: '노을공원에서 촬영한 낮 웨딩 사진 22' },
     { src: '/images/day-noeul-park/gallery-23.jpg', alt: '노을공원에서 촬영한 낮 웨딩 사진 23' },
-    { src: '/images/day-noeul-park/gallery-24.jpg', alt: '노을공원에서 촬영한 낮 웨딩 사진 24' },
     { src: '/images/night-nodeul-island/gallery-01.jpg', alt: '노들섬에서 촬영한 야간 웨딩 사진 1' },
     { src: '/images/night-nodeul-island/gallery-02.jpg', alt: '노들섬에서 촬영한 야간 웨딩 사진 2' },
     { src: '/images/night-nodeul-island/gallery-03.jpg', alt: '노들섬에서 촬영한 야간 웨딩 사진 3' },
