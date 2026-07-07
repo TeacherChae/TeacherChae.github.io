@@ -37,26 +37,64 @@ function AccountRow({ account }) {
   );
 }
 
-function AccountGroup({ title, accounts }) {
+function AccountGroup({ id, title, accounts, isOpen, onToggle }) {
+  const panelId = `account-panel-${id}`;
+
   return (
-    <div className="mb-10 last:mb-0">
-      <p className="eyebrow text-ink/55">{title}</p>
-      <div className="mt-3 border-t border-ink/15">
-        {accounts.map((account, i) => (
-          <AccountRow key={i} account={account} />
-        ))}
-      </div>
+    <div className="border-t border-ink/15 first:border-t-0">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={onToggle}
+      >
+        <span>
+          <span className="eyebrow block text-ink/55">{title}</span>
+          <span className="mt-2 block type-body text-ink/62">계좌 정보 보기</span>
+        </span>
+        <span className="font-titleKo text-small tracking-editorial text-ink/45" aria-hidden="true">
+          {isOpen ? 'CLOSE' : 'OPEN'}
+        </span>
+      </button>
+      {isOpen && (
+        <div id={panelId} role="region" aria-label={`${title} 계좌 목록`} className="border-t border-ink/12">
+          {accounts.map((account, i) => (
+            <AccountRow key={i} account={account} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export default function Account() {
   const { groom, bride } = wedding;
+  const [openSide, setOpenSide] = useState(null);
+  const toggleSide = (side) => setOpenSide((current) => (current === side ? null : side));
+
   return (
     <Section title="마음 전하실 곳">
       <Reveal className="mx-auto max-w-content">
-        <AccountGroup title="신랑 측" accounts={groom.bankAccounts} />
-        <AccountGroup title="신부 측" accounts={bride.bankAccounts} />
+        <p className="mb-4 text-center type-body text-ink/60">
+          계좌 정보는 아래 항목을 눌러 확인하실 수 있습니다.
+        </p>
+        <div className="border-y border-ink/15">
+          <AccountGroup
+            id="groom"
+            title="신랑 측"
+            accounts={groom.bankAccounts}
+            isOpen={openSide === 'groom'}
+            onToggle={() => toggleSide('groom')}
+          />
+          <AccountGroup
+            id="bride"
+            title="신부 측"
+            accounts={bride.bankAccounts}
+            isOpen={openSide === 'bride'}
+            onToggle={() => toggleSide('bride')}
+          />
+        </div>
       </Reveal>
     </Section>
   );
