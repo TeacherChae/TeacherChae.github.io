@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { wedding } from '../../../config/wedding.js';
+import { useReduceMotion } from '../../../lib/reduceMotion.js';
 import { SecondaryButton, Section } from '../ui/_shared.jsx';
 import { Reveal } from '../ui/motion.jsx';
 
@@ -37,48 +39,59 @@ function AccountRow({ account }) {
   );
 }
 
-function AccountGroup({ id, title, accounts, isOpen, onToggle }) {
+function AccountGroup({ id, title, accounts, isOpen, onToggle, reduceMotion }) {
   const panelId = `account-panel-${id}`;
 
   return (
     <div className="border-t border-ink/15 first:border-t-0">
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-4 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60"
+        className="flex w-full items-center gap-3 py-5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60"
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={onToggle}
       >
-        <span>
-          <span className="eyebrow block text-ink/55">{title}</span>
-          <span className="mt-2 block type-body text-ink/62">계좌 정보 보기</span>
-        </span>
-        <span className="font-titleKo text-small tracking-editorial text-ink/45" aria-hidden="true">
-          {isOpen ? 'CLOSE' : 'OPEN'}
-        </span>
+        <motion.span
+          className="font-titleKo text-small leading-none text-ink/45"
+          aria-hidden="true"
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' }}
+        >
+          ▸
+        </motion.span>
+        <span className="eyebrow block text-ink/55">{title}</span>
       </button>
-      {isOpen && (
-        <div id={panelId} role="region" aria-label={`${title} 계좌 목록`} className="border-t border-ink/12">
-          {accounts.map((account, i) => (
-            <AccountRow key={i} account={account} />
-          ))}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            id={panelId}
+            role="region"
+            aria-label={`${title} 계좌 목록`}
+            className="overflow-hidden border-t border-ink/12"
+            initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.26, ease: 'easeOut' }}
+          >
+            {accounts.map((account, i) => (
+              <AccountRow key={i} account={account} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 export default function Account() {
   const { groom, bride } = wedding;
+  const reduceMotion = useReduceMotion();
   const [openSide, setOpenSide] = useState(null);
   const toggleSide = (side) => setOpenSide((current) => (current === side ? null : side));
 
   return (
-    <Section title="마음 전하실 곳">
+    <Section id="account" title="마음 전하실 곳">
       <Reveal className="mx-auto max-w-content">
-        <p className="mb-4 text-center type-body text-ink/60">
-          계좌 정보는 아래 항목을 눌러 확인하실 수 있습니다.
-        </p>
         <div className="border-y border-ink/15">
           <AccountGroup
             id="groom"
@@ -86,6 +99,7 @@ export default function Account() {
             accounts={groom.bankAccounts}
             isOpen={openSide === 'groom'}
             onToggle={() => toggleSide('groom')}
+            reduceMotion={reduceMotion}
           />
           <AccountGroup
             id="bride"
@@ -93,6 +107,7 @@ export default function Account() {
             accounts={bride.bankAccounts}
             isOpen={openSide === 'bride'}
             onToggle={() => toggleSide('bride')}
+            reduceMotion={reduceMotion}
           />
         </div>
       </Reveal>

@@ -38,8 +38,9 @@ test.describe('청첩장 스모크', () => {
     await expectVisible('식장이 협소하여 화환은 정중히 사양하오니 양해 부탁드립니다.');
     await expectVisible('방명록');                    // Guestbook
     await expectVisible('마음 전하실 곳');             // Account
-    const groomAccount = page.getByRole('button', { name: /신랑 측\s*계좌 정보 보기/ });
-    const brideAccount = page.getByRole('button', { name: /신부 측\s*계좌 정보 보기/ });
+    const accountSection = page.locator('#account');
+    const groomAccount = accountSection.getByRole('button', { name: '신랑 측', exact: true });
+    const brideAccount = accountSection.getByRole('button', { name: '신부 측', exact: true });
     await expect(groomAccount).toBeVisible();
     await expect(brideAccount).toBeVisible();
     await expect(page.getByText('460-111911-02-001')).toBeHidden();
