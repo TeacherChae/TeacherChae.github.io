@@ -9,7 +9,7 @@ export default function Footer() {
         {motif.footer.map((line) => <span key={line} className="block">{line}</span>)}
       </p>
       <div className="hairline" />
-      <p className="type-overline text-ink/40">J & K · 2026</p>
+      {/* <p className="type-overline text-ink/40">J & K · 2026</p> */}
     </Reveal>
   );
 }
