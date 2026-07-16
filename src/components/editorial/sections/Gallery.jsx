@@ -121,7 +121,7 @@ export default function Gallery() {
             <SmartImage
               src={item.src}
               alt={item.alt}
-              className="h-full w-full object-cover"
+              className={`h-full w-full ${item.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
               eager={i === 0}
             />
           </button>
