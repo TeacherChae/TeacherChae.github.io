@@ -22,7 +22,7 @@ function makeCalendarEvent() {
   const { date, venue, groom, bride, share } = wedding;
   return {
     title: share.title,
-    description: `${bride.nameKo} & ${groom.nameKo} 결혼식`,
+    description: `${groom.nameKo} & ${bride.nameKo} 결혼식`,
     startIso: date.iso,
     endIso: date.endIso,
     timeZone: 'Asia/Seoul',

@@ -7,7 +7,7 @@ export default function DateVenue() {
     <Stagger as="section" className="px-6 py-16 text-center">
       <StaggerItem as="p" className="eyebrow">THE WEDDING OF</StaggerItem>
       <StaggerItem as="h2" className="mt-5 type-title text-ink">
-        {bride.nameKo} & {groom.nameKo}
+        {groom.nameKo} & {bride.nameKo}
       </StaggerItem>
       <StaggerItem className="hairline" />
       <StaggerItem className="space-y-2 type-body text-ink/78">

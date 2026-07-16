@@ -46,7 +46,7 @@ export default function Hero() {
             <source srcSet={heroAvif} type="image/avif" />
             <img
               src={images.hero}
-              alt={`${bride.nameKo}와 ${groom.nameKo}`}
+              alt={`${groom.nameKo}와 ${bride.nameKo}`}
               className="absolute inset-0 h-full w-full object-cover object-center"
               fetchpriority="high"
               decoding="async"
@@ -64,7 +64,7 @@ export default function Hero() {
         transition={{ delay: 0.4, duration: 0.9, ease: 'easeOut' }}
       >
         <h1 className="sr-only">
-          {bride.nameKo} & {groom.nameKo}
+          {groom.nameKo} & {bride.nameKo}
         </h1>
 
         {/* "We are getting married" 손글씨 — 데모에서 확정한 값 (2026-06):
@@ -90,7 +90,7 @@ export default function Hero() {
           animate={writeDone ? { opacity: 1, y: 0 } : undefined}
           transition={reduce ? { duration: 0 } : { duration: 0.8, ease: 'easeOut' }}
         >
-          {bride.fullNameEn} &nbsp;&amp;&nbsp; {groom.fullNameEn}
+          {groom.fullNameEn} &nbsp;&amp;&nbsp; {bride.fullNameEn}
         </motion.p>
 
         <motion.p
