@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { wedding } from '../../../config/wedding.js';
 import CalendarAdd from '../../CalendarAdd.jsx';
 import { SecondaryButton, Section } from '../ui/_shared.jsx';
@@ -17,34 +16,18 @@ function buildMapLinks(venue) {
 
 
 function AccessGroup({ title, items }) {
-  const [open, setOpen] = useState(false);
-  const panelId = `access-${title.replace(/\s+/g, '-')}`;
-
   return (
     <div className="border-t border-ink/12 first:border-t-0">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-4 py-6 text-left"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="eyebrow text-ink/65">{title}</span>
-        <span className="font-titleKo text-small text-ink/45" aria-hidden="true">
-          {open ? '−' : '+'}
-        </span>
-      </button>
+      <h3 className="py-6 text-left eyebrow text-ink/65">{title}</h3>
 
-      {open && (
-        <ul id={panelId} className="space-y-2 pb-6 text-left type-body text-ink/72">
-          {items.map((item) => (
-            <li key={item} className="flex gap-2 leading-loose">
-              <span className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-ink/35" aria-hidden="true" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="space-y-2 pb-6 text-left type-body text-ink/72">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 leading-loose">
+            <span className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-ink/35" aria-hidden="true" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
