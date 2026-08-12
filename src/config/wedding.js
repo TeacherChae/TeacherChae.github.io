@@ -67,6 +67,32 @@ export const wedding = {
     googleMapUrl: 'https://maps.app.goo.gl/Bwii6TsPW3YResi97',
     lat: 37.541488,
     lng: 126.997052,
+    transport: {
+      shuttle: [
+        { route: '한강진역 2번 출구 → 예식장', detail: '오전 10:10부터 20분 간격 운행' },
+        { route: '예식장 → 한강진역', detail: '예식 후 현장 상황에 따라 유동적으로 운행' },
+      ],
+      charter: [
+        { route: '명선교회 → 예식장', detail: '오전 9:00 출발' },
+        { route: '예식장 → 명선교회', detail: '오후 1:00 출발' },
+        { route: '광주 성안교회 → 예식장', detail: '오전 5:30 출발' },
+      ],
+      publicTransit: [
+        '지하철 6호선 한강진역 2번 출구에서 도보 약 20분 거리입니다.',
+        '한강진역에서 402번 또는 405번 버스를 이용하면 약 10~15분 소요됩니다.',
+        '언덕길이 있어 어르신께서는 셔틀버스 또는 택시 이용을 권장드립니다.',
+      ],
+      parkingNotice:
+        '주차 대수는 전체 수용 규모이며, 예식장에서 하객분들을 위해 별도로 확보해 드릴 수 없는 점 양해 부탁드립니다.',
+      parking: [
+        { name: '한강진역 공영주차장', spaces: 174, distance: '1.1km', group: 'public' },
+        { name: '이태원2동 공영주차장', spaces: 110, distance: '0.53km', group: 'public' },
+        { name: '용산2가동 기계식 공영주차장', spaces: 54, distance: '1.1km', group: 'public' },
+        { name: '남산야외식물원 주차장', spaces: 30, distance: '1.2km', group: 'other' },
+        { name: '삼호 민영주차장', spaces: 20, distance: '0.24km', group: 'other' },
+        { name: '그랜드 하얏트 서울 주차장', spaces: 740, distance: '0.36km', group: 'other' },
+      ],
+    },
     access: [
       {
         title: '셔틀 버스 안내',

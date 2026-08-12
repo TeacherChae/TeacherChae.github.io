@@ -1,4 +1,5 @@
 import { Reveal } from './motion.jsx';
+import { forwardRef } from 'react';
 
 export function Section({ id, title, divider = false, children, className = '' }) {
   return (
@@ -18,13 +19,13 @@ export function FieldLabel({ children, htmlFor }) {
   return <label htmlFor={htmlFor} className="eyebrow block">{children}</label>;
 }
 
-export function PrimaryButton({ children, className = '', ...props }) {
+export const PrimaryButton = forwardRef(function PrimaryButton({ children, className = '', ...props }, ref) {
   return (
-    <button type="button" className={`editorial-button-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 ${className}`} {...props}>
+    <button ref={ref} type="button" className={`editorial-button-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink/60 ${className}`} {...props}>
       {children}
     </button>
   );
-}
+});
 
 export function SecondaryButton({ children, className = '', as: Comp = 'button', ...props }) {
   return (

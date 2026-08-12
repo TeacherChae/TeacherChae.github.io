@@ -31,9 +31,7 @@ test.describe('청첩장 스모크', () => {
     await expectVisible('남산 한남 웨딩가든');         // venue
     await expectVisible('MARK 10:7-9');             // Invitation 성구
     await expectVisible('오시는 길');                 // Location
-    await expectVisible('셔틀 버스 안내');             // Location 교통 안내
-    await expectVisible('대중 교통 안내');             // Location 대중교통
-    await expectVisible('공영 주차장 안내');           // Location 주차
+    await expectVisible('교통 · 주차 안내 보기');      // Location 상세 안내 버튼
     await expectVisible('참석 여부');                 // RSVP 섹션
     await expectVisible('식장이 협소하여 화환은 정중히 사양하오니 양해 부탁드립니다.');
     await expectVisible('방명록');                    // Guestbook
@@ -62,22 +60,48 @@ test.describe('청첩장 스모크', () => {
     await expect(page.getByText('ADD TO CALENDAR')).toBeVisible();
 
     const calendarTop = await page.getByText('ADD TO CALENDAR').evaluate((el) => el.getBoundingClientRect().top);
-    const accessTop = await page.getByRole('button', { name: /셔틀 버스 안내/ }).evaluate((el) => el.getBoundingClientRect().top);
-    expect(calendarTop).toBeLessThan(accessTop);
+    const transportTop = await page.getByRole('button', { name: /교통 · 주차 안내 보기/ }).evaluate((el) => el.getBoundingClientRect().top);
+    expect(transportTop).toBeLessThan(calendarTop);
   });
 
-  test('교통 안내를 선택해서 펼쳐 볼 수 있다', async ({ page }) => {
+  test('교통·주차 안내를 모달로 열고 닫을 수 있다', async ({ page }) => {
     await enter(page);
-    const shuttle = page.getByRole('button', { name: /셔틀 버스 안내/ });
-    const detail = page.getByText('예식 1시간 전부터 10분 간격으로 출발합니다.');
+    const trigger = page.getByRole('button', { name: /교통 · 주차 안내 보기/ });
+    await trigger.click();
 
-    await expect(shuttle).toBeVisible();
-    await expect(shuttle).toHaveAttribute('aria-expanded', 'false');
-    await expect(detail).toBeHidden();
+    const dialog = page.getByRole('dialog', { name: '교통 · 주차 안내' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('오전 10:10부터 20분 간격 운행')).toBeVisible();
+    await expect(dialog.getByText('광주 성안교회 → 예식장')).toBeVisible();
+    await expect(dialog.getByText('주차 대수는 전체 수용 규모이며, 예식장에서 하객분들을 위해 별도로 확보해 드릴 수 없는 점 양해 부탁드립니다.')).toBeVisible();
 
-    await shuttle.click();
-    await expect(shuttle).toHaveAttribute('aria-expanded', 'true');
-    await expect(detail).toBeVisible();
+    const parkingNames = [
+      '한강진역 공영주차장',
+      '이태원2동 공영주차장',
+      '용산2가동 기계식 공영주차장',
+      '남산야외식물원 주차장',
+      '삼호 민영주차장',
+      '그랜드 하얏트 서울 주차장',
+    ];
+    const positions = [];
+    for (const name of parkingNames) {
+      positions.push(await dialog.getByRole('link', { name: new RegExp(name) }).evaluate((el) => el.getBoundingClientRect().top));
+    }
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+
+    await page.getByRole('button', { name: '교통 안내 닫기' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
+  });
+
+  test('오시는 길에 도달하면 RSVP 안내가 나타나고 폼으로 이동한다', async ({ page }) => {
+    await enter(page);
+    await page.locator('#location').scrollIntoViewIfNeeded();
+    const prompt = page.getByRole('complementary', { name: '참석 여부 안내' });
+    await expect(prompt).toBeVisible();
+    await prompt.getByRole('button', { name: '작성하기' }).click();
+    await expect(prompt).toBeHidden();
+    await expect(page.locator('#rsvp')).toBeInViewport();
   });
 
   test('갤러리 라이트박스 열고 닫기', async ({ page }) => {

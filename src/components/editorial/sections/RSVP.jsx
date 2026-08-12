@@ -251,7 +251,7 @@ export default function RSVP() {
 
   if (!isSupabaseConfigured) {
     return (
-      <Section title="참석 여부">
+      <Section id="rsvp" title="참석 여부">
         <div className="mx-auto max-w-content border border-dashed border-ink/25 px-5 py-10 text-center text-small text-ink/45">
           RSVP 준비 중
         </div>
@@ -262,7 +262,7 @@ export default function RSVP() {
 
   if (status === 'success') {
     return (
-      <Section title="참석 여부">
+      <Section id="rsvp" title="참석 여부">
         <div className="mx-auto max-w-content py-8 text-center text-body leading-loose text-ink/75">
           소중한 응답 감사합니다.
         </div>
@@ -272,7 +272,7 @@ export default function RSVP() {
   }
 
   return (
-    <Section title="참석 여부">
+    <Section id="rsvp" title="참석 여부">
       <form onSubmit={handleSubmit} className="mx-auto max-w-content space-y-8 text-left">
         <div>
           <FieldLabel htmlFor="rsvp-name">성함</FieldLabel>

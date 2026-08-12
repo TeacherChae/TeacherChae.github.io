@@ -11,6 +11,7 @@ import Account from './components/editorial/sections/Account.jsx';
 import Guestbook from './components/editorial/sections/Guestbook.jsx';
 import Footer from './components/editorial/sections/Footer.jsx';
 import ScrollProgress from './components/editorial/ui/ScrollProgress.jsx';
+import RsvpPrompt from './components/editorial/ui/RsvpPrompt.jsx';
 import Bgm from './components/editorial/ui/Bgm.jsx';
 
 // BGM 음원은 Supabase Storage('assets' 공개 버킷)에 둔다. ref 하드코딩 없이 env 에서 조립.
@@ -35,6 +36,7 @@ export default function App() {
       ) : (
         <>
           <ScrollProgress />
+          <RsvpPrompt />
           <Hero />
           <DateVenue />
           <Invitation />
