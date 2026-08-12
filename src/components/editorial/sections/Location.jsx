@@ -37,7 +37,7 @@ function RouteList({ items }) {
 function ParkingList({ title, items }) {
   return (
     <div className="mt-7">
-      <h4 className="eyebrow mb-3 text-ink/55">{title}</h4>
+      <h4 className="mb-3 font-sans text-micro font-semibold tracking-wider text-ink/60">{title}</h4>
       <div className="divide-y divide-ink/10 border-y border-ink/15">
         {items.map((parking) => (
           <a
@@ -122,7 +122,7 @@ function TransportDialog({ open, onClose, triggerRef }) {
             transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="flex shrink-0 items-center justify-between border-b border-ink/15 px-6 py-5">
-              <h2 id="transport-dialog-title" className="type-kicker text-ink">교통 · 주차 안내</h2>
+              <h2 id="transport-dialog-title" className="font-sans text-body font-semibold tracking-wide text-ink">교통 · 주차 안내</h2>
               <button
                 ref={closeRef}
                 type="button"
@@ -136,25 +136,25 @@ function TransportDialog({ open, onClose, triggerRef }) {
 
             <div className="overscroll-contain overflow-y-auto px-6 pb-10">
               <section className="pt-8">
-                <h3 className="section-kicker">셔틀버스</h3>
+                <h3 className="font-sans text-small font-semibold tracking-wider text-ink">셔틀버스</h3>
                 <p className="mb-4 mt-2 text-micro text-ink/50">한강진역 2번 출구 앞에서 탑승해 주세요.</p>
                 <RouteList items={transport.shuttle} />
               </section>
 
               <section className="pt-10">
-                <h3 className="section-kicker">전세버스</h3>
+                <h3 className="font-sans text-small font-semibold tracking-wider text-ink">전세버스</h3>
                 <div className="mt-4"><RouteList items={transport.charter} /></div>
               </section>
 
               <section className="pt-10">
-                <h3 className="section-kicker">대중교통</h3>
+                <h3 className="font-sans text-small font-semibold tracking-wider text-ink">대중교통</h3>
                 <ul className="mt-4 space-y-2 text-left type-body leading-loose text-ink/70">
                   {transport.publicTransit.map((item) => <li key={item}>· {item}</li>)}
                 </ul>
               </section>
 
               <section className="pt-10">
-                <h3 className="section-kicker">주차장</h3>
+                <h3 className="font-sans text-small font-semibold tracking-wider text-ink">주차장</h3>
                 <p className="mt-4 border-l-2 border-ink/25 pl-4 text-small leading-loose text-ink/65">
                   {transport.parkingNotice}
                 </p>
